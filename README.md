@@ -1,15 +1,13 @@
-# Elm starter
+# Fancy Forms proof of concept
 
-## Starter template for Elm project
+This is a proof of concept for a form builder library that satisfies the following requirements:
 
-This is a little setup I use whenever I quickly want to get started with a new
-Elm project. 
+- a form can collect data into a proper custom type
+- only one msg/model field for the whole form
+- custom, reusable "3rd party" input widgets can be created without forking the lib
 
-The goal is to provide a minimal setup ~~without any~~ with minimal dependencies.
-Unlike many other setups you don't need Node/npm to get started.
+# Demo
 
-It **does come** with a [watch script](/bin/watch.sh) to continously compile the app.
-It **does not come** with a server. It **does not come** with a CSS preprocessor.
-It **does come** with [Pico.css](https://github.com/picocss/pico) to get started with some
-basic styling.
+Just clone and open `index.html`
 
+![](./fancy-forms.mov)
