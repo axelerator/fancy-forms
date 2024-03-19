@@ -47,8 +47,8 @@ type alias Field a =
     }
 
 
-mkField : FieldId -> Widget model msg value -> Field value
-mkField fieldId widget =
+mkField : (List Error -> Html Msg -> Html Msg) -> FieldId -> Widget model msg value -> Field value
+mkField fieldWithErrors fieldId widget =
     let
         deserializeModel : FormState -> model
         deserializeModel formState =
@@ -63,10 +63,16 @@ mkField fieldId widget =
                 toMsg msg =
                     FormMsg fieldId <|
                         widget.encodeMsg msg
+
+                fieldErrors =
+                    errors_ formState
+
+                inputHtml =
+                    deserializeModel formState
+                        |> widget.view (parentDomId ++ "f-" ++ fromInt fieldId)
+                        |> Html.map toMsg
             in
-            deserializeModel formState
-                |> widget.view (parentDomId ++ "f-" ++ fromInt fieldId)
-                |> Html.map toMsg
+            fieldWithErrors fieldErrors inputHtml
 
         value : FormState -> value
         value formState =
@@ -110,26 +116,29 @@ type alias FormInternal f =
     { fn : f
     , count : Int
     , updates : Dict FieldId (Value -> Value -> Value)
+    , fieldWithErrors : List Error -> Html Msg -> Html Msg
     }
 
 
-form : a -> FormInternal a
-form fn =
+form : (List Error -> Html Msg -> Html Msg) -> a -> FormInternal a
+form fieldWithErrors fn =
     { fn = fn
     , count = 0
     , updates = Dict.empty
+    , fieldWithErrors = fieldWithErrors
     }
 
 
 field : Widget widgetModel msg value -> FormInternal (Field value -> c) -> FormInternal c
-field widget { fn, count, updates } =
-    { fn = fn (mkField count widget)
+field widget { fn, count, updates, fieldWithErrors } =
+    { fn = fn (mkField fieldWithErrors count widget)
     , count = count + 1
     , updates =
         Dict.insert
             count
             (encodedUpdate widget)
             updates
+    , fieldWithErrors = fieldWithErrors
     }
 
 
@@ -223,11 +232,6 @@ type alias Validator a =
 alwaysValid : Validator a
 alwaysValid _ =
     []
-
-
-modelWithNoValidation : a -> ( a, Validator a )
-modelWithNoValidation model =
-    ( model, alwaysValid )
 
 
 extract : { form | fn : { b | combine : FormState -> ( data, Validator data ) } } -> FormState -> data

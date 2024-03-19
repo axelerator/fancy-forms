@@ -1,6 +1,6 @@
 module Widgets.Checkbox exposing (widget)
 
-import Form exposing (Msg, Widget, alwaysValid, modelWithNoValidation)
+import Form exposing (Msg, Widget, alwaysValid)
 import Html exposing (Attribute, input)
 import Html.Attributes exposing (checked, id, type_)
 import Html.Events exposing (onInput)
