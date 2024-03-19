@@ -8,12 +8,14 @@ import Json.Decode as D exposing (Decoder)
 import Json.Encode as E exposing (Value)
 import String exposing (toLower)
 import WebColor exposing (WebColor, asStr)
+import Form exposing (alwaysValid)
 
 
 widget : Widget Model Msg (List WebColor)
 widget =
     { init = init
     , value = .selected
+    , validate = alwaysValid
     , view = view
     , update = update
     , encodeMsg = encodeMsg

@@ -42,21 +42,16 @@ type FormState
 type alias Field a =
     { id : FieldId
     , value : FormState -> a
+    , errors : FormState -> List Error
     , view : FormState -> Html Msg
     }
 
 
-read : FieldId -> FormState -> Value
-read fieldId (FormState { values }) =
-    Dict.get fieldId values
-        |> withDefault (E.object [])
-
-
-mkField : FieldId -> Widget a msg value -> Field value
+mkField : FieldId -> Widget model msg value -> Field value
 mkField fieldId widget =
     let
-        convert : FormState -> a
-        convert formState =
+        deserializeModel : FormState -> model
+        deserializeModel formState =
             D.decodeValue widget.decoderModel (read fieldId formState)
                 |> Result.toMaybe
                 |> withDefault widget.init
@@ -69,18 +64,38 @@ mkField fieldId widget =
                     FormMsg fieldId <|
                         widget.encodeMsg msg
             in
-            convert formState
+            deserializeModel formState
                 |> widget.view (parentDomId ++ "f-" ++ fromInt fieldId)
                 |> Html.map toMsg
+
+        value : FormState -> value
+        value formState =
+            deserializeModel formState
+                |> widget.value
+
+        errors_ : FormState -> List Error
+        errors_ formState =
+            deserializeModel formState
+                |> widget.validate
     in
     { id = fieldId
-    , value = \formState -> widget.value <| convert formState
+    , value = value
+    , errors = errors_
     , view = viewField
     }
 
 
+read : FieldId -> FormState -> Value
+read fieldId (FormState { values }) =
+    Dict.get fieldId values
+        |> withDefault (E.object [])
+
+
 type alias Form data =
-    FormInternal { view : FormState -> Html Msg, combine : FormState -> data }
+    FormInternal
+        { view : FormState -> Html Msg
+        , combine : FormState -> ( data, Validator data )
+        }
 
 
 init : FormState
@@ -123,14 +138,8 @@ wrap :
     -> (DomId -> Html msg -> Html msg)
     -> Widget widgetModel msg value
 wrap widget container =
-    { init = widget.init
-    , value = widget.value
-    , view = \domId model -> container domId <| widget.view domId model
-    , update = widget.update
-    , encodeMsg = widget.encodeMsg
-    , decoderMsg = widget.decoderMsg
-    , encodeModel = widget.encodeModel
-    , decoderModel = widget.decoderModel
+    { widget
+        | view = \domId model -> container domId <| widget.view domId model
     }
 
 
@@ -158,6 +167,7 @@ type alias DomId =
 type alias Widget model msg value =
     { init : model
     , value : model -> value
+    , validate : Validator model
     , view : DomId -> model -> Html msg
     , update : msg -> model -> model
     , encodeMsg : msg -> Value
@@ -170,8 +180,15 @@ type alias Widget model msg value =
 toWidget : Form a -> Widget FormState Msg a
 toWidget f =
     { init = init
-    , value = f.fn.combine
-    , view = \domId (FormState model) -> f.fn.view (FormState { model | parentDomId = Debug.log "domId" domId })
+    , value = \formState -> f.fn.combine formState |> Tuple.first
+    , validate =
+        \formState ->
+            let
+                ( data, validator ) =
+                    f.fn.combine formState
+            in
+            validator data
+    , view = \domId (FormState model) -> f.fn.view (FormState { model | parentDomId = domId })
     , update = \(FormMsg fieldId value) model -> updateField f fieldId value model
     , encodeMsg =
         \(FormMsg fieldId value) ->
@@ -195,6 +212,33 @@ keysToInt d =
         |> Dict.fromList
 
 
-extract : { a | fn : { b | combine : c -> d } } -> c -> d
-extract { fn } formState =
-    fn.combine formState
+type Error
+    = MustNotBeBlank
+
+
+type alias Validator a =
+    a -> List Error
+
+
+alwaysValid : Validator a
+alwaysValid _ =
+    []
+
+
+modelWithNoValidation : a -> ( a, Validator a )
+modelWithNoValidation model =
+    ( model, alwaysValid )
+
+
+extract : { form | fn : { b | combine : FormState -> ( data, Validator data ) } } -> FormState -> data
+extract { fn } =
+    Tuple.first << fn.combine
+
+
+errors : { form | fn : { b | combine : FormState -> ( data, Validator data ) } } -> FormState -> List Error
+errors { fn } formState =
+    let
+        ( data, validator ) =
+            fn.combine formState
+    in
+    validator data
