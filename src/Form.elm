@@ -11,6 +11,11 @@ import String exposing (fromInt, toInt)
 type Msg
     = FormMsg FieldId Value
 
+render : (Msg -> msg) -> Form a -> FormState -> Html msg
+render toMsg f formState =
+    f.fn.view formState
+        |> Html.map toMsg  
+
 
 updateField : FormInternal a -> FieldId -> Value -> FormState -> FormState
 updateField { updates } fieldId msgValue ((FormState formState) as fs) =

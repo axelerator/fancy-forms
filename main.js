@@ -7231,6 +7231,13 @@ var $author$project$Main$displayFormData = function (_v0) {
 			]));
 };
 var $elm$html$Html$footer = _VirtualDom_node('footer');
+var $author$project$Form$render = F3(
+	function (toMsg, f, formState) {
+		return A2(
+			$elm$html$Html$map,
+			toMsg,
+			f.fn.view(formState));
+	});
 var $elm$virtual_dom$VirtualDom$node = function (tag) {
 	return _VirtualDom_node(
 		_VirtualDom_noScript(tag));
@@ -7258,10 +7265,7 @@ var $author$project$Main$view = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						A2(
-						$elm$html$Html$map,
-						$author$project$Main$ForForm,
-						$author$project$Main$currentForm.fn.view(model.formState)),
+						A3($author$project$Form$render, $author$project$Main$ForForm, $author$project$Main$currentForm, model.formState),
 						A2($elm$html$Html$footer, _List_Nil, _List_Nil)
 					])),
 				A2(
