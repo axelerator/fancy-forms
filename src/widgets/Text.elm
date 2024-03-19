@@ -1,32 +1,33 @@
-module Widgets.Text exposing (widget, notBlank)
+module Widgets.Text exposing (notBlank, widget)
 
-import Form exposing (Msg, Widget)
+import Form exposing (Error(..), Msg, Validator, Widget)
 import Html exposing (Attribute, input)
 import Html.Attributes exposing (id, value)
 import Html.Events exposing (onInput)
 import Json.Decode as D
 import Json.Encode as E
-import Form exposing (alwaysValid)
-import Form exposing (Error(..))
-import Form exposing (Validator)
 
 
 type alias Msg =
     String
 
-notBlank : Validator String
+
+notBlank : Validator String customError
 notBlank model =
     if model == "" then
-        [MustNotBeBlank]
+        [ MustNotBeBlank ]
+
     else
         []
 
-concatValidators : List (Validator model) -> Validator model
+
+concatValidators : List (Validator model customError) -> Validator model customError
 concatValidators validators model =
     List.map (\validator -> validator model) validators
-    |> List.concat
+        |> List.concat
 
-widget : List (Attribute Msg) -> (List (Validator String)) -> Widget String Msg String
+
+widget : List (Attribute Msg) -> List (Validator String customError) -> Widget String Msg String customError
 widget attrs validators =
     { init = ""
     , value = identity

@@ -11,6 +11,8 @@ import WebColor exposing (WebColor, asStr)
 import Widgets.Checkbox
 import Widgets.Int
 import Widgets.Text exposing (notBlank)
+import Html.Attributes exposing (classList)
+import Form exposing (Error(..))
 
 
 type alias Model =
@@ -64,8 +66,8 @@ update msg model =
 styles : Html Msg
 styles =
     """
-    .has-error input { border-color: red; }
-    .has-error .errors { color: red; }
+    .has-error > * > input { border-color: red; }
+    .errors { color: red; }
     """
         |> text
         |> List.singleton
@@ -117,7 +119,7 @@ fieldWithErrors errors html =
         ]
 
 
-viewErrors : List Error -> Html msg
+viewErrors : List (Error MyError) -> Html msg
 viewErrors errors =
     if List.isEmpty errors then
         text ""
@@ -126,35 +128,40 @@ viewErrors errors =
         div [ class "errors" ] [ text <| String.join " " <| List.map errorToString errors ]
 
 
-errorToString : Error -> String
+errorToString : (Error MyError) -> String
 errorToString e =
     case e of
         Form.MustNotBeBlank ->
             "must not be blank"
+        Form.CustomError FirstNameMustNotBeSameAsLastName ->
+            "first name must not be the same as last name"
 
 
-validateFullName : Fullname -> List Error
-validateFullName { first } =
-    if Debug.log "first" first == "" then
-        [ Form.MustNotBeBlank ]
+type MyError
+    = FirstNameMustNotBeSameAsLastName
+
+validateFullName : Fullname -> List (Error MyError)
+validateFullName { first, last } =
+    if first == last then
+        Debug.log "FirstNameMustNotBeSameAsLastName" [CustomError FirstNameMustNotBeSameAsLastName]
 
     else
         []
 
 
-nameForm : Form Fullname
+nameForm : Form Fullname MyError
 nameForm =
     Form.form
         fieldWithErrors
         (\first last ->
             { view =
-                \formState ->
+                \formState errors ->
                     div []
-                        [ div [] <| [ viewErrors (Form.errors myForm formState) ]
-                        , div [ class "grid" ]
+                        [ div [ class "grid" ]
                             [ div [] [ first.view formState ]
                             , div [] [ last.view formState ]
                             ]
+                        , div [] <| [ viewErrors errors ]
                         ]
             , combine =
                 \formState ->
@@ -169,12 +176,12 @@ nameForm =
         |> Form.field (withLabel "last name" <| Widgets.Text.widget [] [ notBlank ])
 
 
-fullnameWidget : Widget FormState Form.Msg Fullname
+fullnameWidget : Widget FormState Form.Msg Fullname MyError
 fullnameWidget =
     toWidget nameForm
 
 
-withLabel : String -> Widget widgetModel msg value -> Widget widgetModel msg value
+withLabel : String -> Widget widgetModel msg value customError -> Widget widgetModel msg value customError
 withLabel labelText wrapped =
     (\domId content ->
         div
@@ -186,19 +193,21 @@ withLabel labelText wrapped =
         |> Form.wrap wrapped
 
 
-myForm : Form MyFormData
+myForm : Form MyFormData MyError
 myForm =
     Form.form
         (\_ html -> html)
         (\int check wc name ->
             { view =
-                \formState ->
-                    div [ class "grid" ]
-                        [ div [] <| [ viewErrors (Form.errors myForm formState) ]
-                        , div [] [ int.view formState ]
-                        , div [] [ check.view formState ]
-                        , div [] [ wc.view formState ]
-                        , div [] [ name.view formState ]
+                \formState errors ->
+                    div [ classList [ ( "has-error", List.isEmpty errors ) ] ]
+                        [ div [ class "errors" ] <| [ viewErrors errors ]
+                        , div [ class "grid" ]
+                            [ div [] [ int.view formState ]
+                            , div [] [ check.view formState ]
+                            , div [] [ wc.view formState ]
+                            , div [] [ name.view formState ]
+                            ]
                         ]
             , combine =
                 \formState ->

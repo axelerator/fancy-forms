@@ -18,7 +18,7 @@ type alias Model =
     }
 
 
-widget : List (Attribute Msg) -> Widget Model Msg Int
+widget : List (Attribute Msg) -> Widget Model Msg Int customError
 widget attrs =
     { init = { value = "", parsedValue = 0 }
     , value = .parsedValue

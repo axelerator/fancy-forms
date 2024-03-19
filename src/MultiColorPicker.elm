@@ -11,7 +11,7 @@ import WebColor exposing (WebColor, asStr)
 import Form exposing (alwaysValid)
 
 
-widget : Widget Model Msg (List WebColor)
+widget : Widget Model Msg (List WebColor) customError
 widget =
     { init = init
     , value = .selected

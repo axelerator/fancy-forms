@@ -11,13 +11,22 @@ import String exposing (fromInt, toInt)
 type Msg
     = FormMsg FieldId Value
 
-render : (Msg -> msg) -> Form a -> FormState -> Html msg
+render : (Msg -> msg) -> Form a customError -> FormState -> Html msg
 render toMsg f formState =
-    f.fn.view formState
+    let
+        errors =
+            let
+                ( data, validator ) =
+                    f.fn.combine formState
+            in
+            validator data
+    in
+    
+    f.fn.view formState errors
         |> Html.map toMsg  
 
 
-updateField : FormInternal a -> FieldId -> Value -> FormState -> FormState
+updateField : FormInternal a customError -> FieldId -> Value -> FormState -> FormState
 updateField { updates } fieldId msgValue ((FormState formState) as fs) =
     let
         updateFn =
@@ -44,15 +53,15 @@ type FormState
         }
 
 
-type alias Field a =
+type alias Field a customError =
     { id : FieldId
     , value : FormState -> a
-    , errors : FormState -> List Error
+    , errors : FormState -> List (Error customError)
     , view : FormState -> Html Msg
     }
 
 
-mkField : (List Error -> Html Msg -> Html Msg) -> FieldId -> Widget model msg value -> Field value
+mkField : (List (Error customError) -> Html Msg -> Html Msg) -> FieldId -> Widget model msg value customError -> Field value customError
 mkField fieldWithErrors fieldId widget =
     let
         deserializeModel : FormState -> model
@@ -84,7 +93,7 @@ mkField fieldWithErrors fieldId widget =
             deserializeModel formState
                 |> widget.value
 
-        errors_ : FormState -> List Error
+        errors_ : FormState -> List (Error customError)
         errors_ formState =
             deserializeModel formState
                 |> widget.validate
@@ -102,11 +111,12 @@ read fieldId (FormState { values }) =
         |> withDefault (E.object [])
 
 
-type alias Form data =
+type alias Form data customError =
     FormInternal
-        { view : FormState -> Html Msg
-        , combine : FormState -> ( data, Validator data )
+        { view : FormState -> List (Error customError) -> Html Msg
+        , combine : FormState -> ( data, Validator data customError )
         }
+        customError
 
 
 init : FormState
@@ -117,15 +127,15 @@ init =
         }
 
 
-type alias FormInternal f =
+type alias FormInternal f customError =
     { fn : f
     , count : Int
     , updates : Dict FieldId (Value -> Value -> Value)
-    , fieldWithErrors : List Error -> Html Msg -> Html Msg
+    , fieldWithErrors : List (Error customError) -> Html Msg -> Html Msg
     }
 
 
-form : (List Error -> Html Msg -> Html Msg) -> a -> FormInternal a
+form : (List (Error customError) -> Html Msg -> Html Msg) -> a -> FormInternal a customError
 form fieldWithErrors fn =
     { fn = fn
     , count = 0
@@ -134,7 +144,7 @@ form fieldWithErrors fn =
     }
 
 
-field : Widget widgetModel msg value -> FormInternal (Field value -> c) -> FormInternal c
+field : Widget widgetModel msg value customError -> FormInternal (Field value customError -> c) customError -> FormInternal c customError
 field widget { fn, count, updates, fieldWithErrors } =
     { fn = fn (mkField fieldWithErrors count widget)
     , count = count + 1
@@ -148,9 +158,9 @@ field widget { fn, count, updates, fieldWithErrors } =
 
 
 wrap :
-    Widget widgetModel msg value
+    Widget widgetModel msg value customError
     -> (DomId -> Html msg -> Html msg)
-    -> Widget widgetModel msg value
+    -> Widget widgetModel msg value customError
 wrap widget container =
     { widget
         | view = \domId model -> container domId <| widget.view domId model
@@ -158,7 +168,7 @@ wrap widget container =
 
 
 encodedUpdate :
-    Widget model msg value
+    Widget model msg value customError
     -> Value
     -> Value
     -> Value
@@ -178,10 +188,10 @@ type alias DomId =
     String
 
 
-type alias Widget model msg value =
+type alias Widget model msg value customError =
     { init : model
     , value : model -> value
-    , validate : Validator model
+    , validate : Validator model customError
     , view : DomId -> model -> Html msg
     , update : msg -> model -> model
     , encodeMsg : msg -> Value
@@ -191,18 +201,24 @@ type alias Widget model msg value =
     }
 
 
-toWidget : Form a -> Widget FormState Msg a
+toWidget : Form a customError -> Widget FormState Msg a customError
 toWidget f =
-    { init = init
-    , value = \formState -> f.fn.combine formState |> Tuple.first
-    , validate =
-        \formState ->
+    let
+        widgetErrors formState =
             let
                 ( data, validator ) =
                     f.fn.combine formState
             in
             validator data
-    , view = \domId (FormState model) -> f.fn.view (FormState { model | parentDomId = domId })
+    in
+    
+    { init = init
+    , value = \formState -> f.fn.combine formState |> Tuple.first
+    , validate =
+        \formState -> widgetErrors formState
+    , view = 
+        \domId ((FormState model) as fs) -> 
+            f.fn.view (FormState { model | parentDomId = domId }) (widgetErrors fs)
     , update = \(FormMsg fieldId value) model -> updateField f fieldId value model
     , encodeMsg =
         \(FormMsg fieldId value) ->
@@ -226,28 +242,22 @@ keysToInt d =
         |> Dict.fromList
 
 
-type Error
+type Error customError
     = MustNotBeBlank
+    | CustomError customError
 
 
-type alias Validator a =
-    a -> List Error
+type alias Validator a e =
+    a -> List (Error e)
 
 
-alwaysValid : Validator a
+alwaysValid : Validator a e
 alwaysValid _ =
     []
 
 
-extract : { form | fn : { b | combine : FormState -> ( data, Validator data ) } } -> FormState -> data
+extract : { form | fn : { b | combine : FormState -> ( data, Validator data customError ) } } -> FormState -> data
 extract { fn } =
     Tuple.first << fn.combine
 
 
-errors : { form | fn : { b | combine : FormState -> ( data, Validator data ) } } -> FormState -> List Error
-errors { fn } formState =
-    let
-        ( data, validator ) =
-            fn.combine formState
-    in
-    validator data

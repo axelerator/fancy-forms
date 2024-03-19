@@ -12,7 +12,7 @@ type alias Msg =
     ()
 
 
-widget : List (Attribute Msg) -> Widget Bool Msg Bool
+widget : List (Attribute Msg) -> Widget Bool Msg Bool customError
 widget attrs =
     { init = False
     , value = identity
