@@ -155,11 +155,9 @@ nameForm =
                     ]
             , combine =
                 \formState ->
-                    ( { first = first.value formState
-                      , last = last.value formState
-                      }
-                    , validateFullName
-                    )
+                    { first = first.value formState
+                    , last = last.value formState
+                    }
             }
         )
         |> Form.field (withLabel "first name" <| Widgets.Text.widget [] [ notBlank ])
@@ -209,14 +207,12 @@ myForm =
                     ]
             , combine =
                 \formState ->
-                    ( FormData
+                    FormData
                         { counter = int.value formState
                         , webColors = wc.value formState
                         , check = check.value formState
                         , name = name.value formState
                         }
-                    , validateFormData
-                    )
             }
         )
         |> Form.field (Widgets.Int.widget [])

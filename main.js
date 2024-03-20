@@ -5467,6 +5467,7 @@ var $author$project$Form$field = F2(
 		var count = _v0.count;
 		var updates = _v0.updates;
 		var fieldWithErrors = _v0.fieldWithErrors;
+		var validator = _v0.validator;
 		return {
 			count: count + 1,
 			fieldWithErrors: fieldWithErrors,
@@ -5476,12 +5477,13 @@ var $author$project$Form$field = F2(
 				$elm$core$Dict$insert,
 				count,
 				$author$project$Form$encodedUpdate(widget),
-				updates)
+				updates),
+			validator: validator
 		};
 	});
 var $author$project$Form$form = F3(
 	function (validator, fieldWithErrors, fn) {
-		return {count: 0, fieldWithErrors: fieldWithErrors, fn: fn, updates: $elm$core$Dict$empty};
+		return {count: 0, fieldWithErrors: fieldWithErrors, fn: fn, updates: $elm$core$Dict$empty, validator: validator};
 	});
 var $elm$core$List$isEmpty = function (xs) {
 	if (!xs.b) {
@@ -5712,12 +5714,10 @@ var $author$project$Main$nameForm = A2(
 				function (first, last) {
 					return {
 						combine: function (formState) {
-							return _Utils_Tuple2(
-								{
-									first: first.value(formState),
-									last: last.value(formState)
-								},
-								$author$project$Main$validateFullName);
+							return {
+								first: first.value(formState),
+								last: last.value(formState)
+							};
 						},
 						view: F2(
 							function (formState, errors) {
@@ -5867,10 +5867,8 @@ var $author$project$Form$updateField = F4(
 	});
 var $author$project$Form$toWidget = function (f) {
 	var widgetErrors = function (formState) {
-		var _v3 = f.fn.combine(formState);
-		var data = _v3.a;
-		var validator = _v3.b;
-		return validator(data);
+		return f.validator(
+			f.fn.combine(formState));
 	};
 	return {
 		decoderModel: $author$project$Form$formStateDecoder,
@@ -5906,7 +5904,7 @@ var $author$project$Form$toWidget = function (f) {
 			return widgetErrors(formState);
 		},
 		value: function (formState) {
-			return f.fn.combine(formState).a;
+			return f.fn.combine(formState);
 		},
 		view: F2(
 			function (domId, fs) {
@@ -7090,15 +7088,13 @@ var $author$project$Main$myForm = A2(
 						function (_int, check, wc, name) {
 							return {
 								combine: function (formState) {
-									return _Utils_Tuple2(
-										$author$project$Main$FormData(
-											{
-												check: check.value(formState),
-												counter: _int.value(formState),
-												name: name.value(formState),
-												webColors: wc.value(formState)
-											}),
-										$author$project$Main$validateFormData);
+									return $author$project$Main$FormData(
+										{
+											check: check.value(formState),
+											counter: _int.value(formState),
+											name: name.value(formState),
+											webColors: wc.value(formState)
+										});
 								},
 								view: F2(
 									function (formState, errors) {
@@ -7237,17 +7233,15 @@ var $author$project$Main$displayFormData = function (_v0) {
 			]));
 };
 var $author$project$Form$render = F3(
-	function (toMsg, f, formState) {
-		var errors = function () {
-			var _v0 = f.fn.combine(formState);
-			var data = _v0.a;
-			var validator = _v0.b;
-			return validator(data);
-		}();
+	function (toMsg, form_, formState) {
 		return A2(
 			$elm$core$List$map,
 			$elm$html$Html$map(toMsg),
-			A2(f.fn.view, formState, errors));
+			A2(
+				form_.fn.view,
+				formState,
+				form_.validator(
+					form_.fn.combine(formState))));
 	});
 var $elm$virtual_dom$VirtualDom$node = function (tag) {
 	return _VirtualDom_node(
