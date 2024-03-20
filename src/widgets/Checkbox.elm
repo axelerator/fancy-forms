@@ -19,7 +19,7 @@ widget attrs =
     , validate = alwaysValid
     , view =
         \domId model ->
-            input (attrs ++ [ id domId, type_ "checkbox", onInput (\_ -> ()), checked model ]) []
+            [input (attrs ++ [ id domId, type_ "checkbox", onInput (\_ -> ()), checked model ]) []]
     , update = \_ model -> not model
     , encodeMsg = \_ -> E.object []
     , decoderMsg = D.succeed ()

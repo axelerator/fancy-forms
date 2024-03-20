@@ -34,7 +34,7 @@ widget attrs validators =
     , validate = concatValidators validators
     , view =
         \domId model ->
-            input (attrs ++ [ id domId, onInput identity, value model ]) []
+            [input (attrs ++ [ id domId, onInput identity, value model ]) []]
     , update = \msg _ -> msg
     , encodeMsg = E.string
     , decoderMsg = D.string

@@ -115,9 +115,8 @@ update msg model =
             }
 
 
-view : DomId -> Model -> Html Msg
+view : DomId -> Model -> List (Html Msg)
 view _ { prefix, selected } =
-    div []
         (input [ value prefix, onInput ChangePrefix ] []
             :: (viewOptions prefix ++ List.map viewSelectedColor selected)
         )

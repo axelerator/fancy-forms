@@ -25,7 +25,7 @@ widget attrs =
     , validate = alwaysValid
     , view =
         \domId model ->
-            input (attrs ++ [ id domId, type_ "number", onInput identity, value model.value ]) []
+            [input (attrs ++ [ id domId, type_ "number", onInput identity, value model.value ]) []]
     , update =
         \msg model ->
             String.toInt msg

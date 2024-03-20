@@ -11,7 +11,7 @@ import String exposing (fromInt, toInt)
 type Msg
     = FormMsg FieldId Value
 
-render : (Msg -> msg) -> Form a customError -> FormState -> Html msg
+render : (Msg -> msg) -> Form a customError -> FormState -> List (Html msg)
 render toMsg f formState =
     let
         errors =
@@ -23,7 +23,7 @@ render toMsg f formState =
     in
     
     f.fn.view formState errors
-        |> Html.map toMsg  
+        |> List.map (Html.map toMsg)
 
 
 updateField : FormInternal a customError -> FieldId -> Value -> FormState -> FormState
@@ -57,11 +57,11 @@ type alias Field a customError =
     { id : FieldId
     , value : FormState -> a
     , errors : FormState -> List (Error customError)
-    , view : FormState -> Html Msg
+    , view : FormState -> List (Html Msg)
     }
 
 
-mkField : (List (Error customError) -> Html Msg -> Html Msg) -> FieldId -> Widget model msg value customError -> Field value customError
+mkField : FieldWithErrors customError -> FieldId -> Widget model msg value customError -> Field value customError
 mkField fieldWithErrors fieldId widget =
     let
         deserializeModel : FormState -> model
@@ -70,7 +70,7 @@ mkField fieldWithErrors fieldId widget =
                 |> Result.toMaybe
                 |> withDefault widget.init
 
-        viewField : FormState -> Html Msg
+        viewField : FormState -> List (Html Msg)
         viewField ((FormState { parentDomId }) as formState) =
             let
                 toMsg : msg -> Msg
@@ -81,10 +81,11 @@ mkField fieldWithErrors fieldId widget =
                 fieldErrors =
                     errors_ formState
 
+                inputHtml : List (Html Msg)
                 inputHtml =
                     deserializeModel formState
                         |> widget.view (parentDomId ++ "f-" ++ fromInt fieldId)
-                        |> Html.map toMsg
+                        |> List.map (Html.map toMsg)
             in
             fieldWithErrors fieldErrors inputHtml
 
@@ -113,7 +114,7 @@ read fieldId (FormState { values }) =
 
 type alias Form data customError =
     FormInternal
-        { view : FormState -> List (Error customError) -> Html Msg
+        { view : FormState -> List (Error customError) -> List (Html Msg)
         , combine : FormState -> ( data, Validator data customError )
         }
         customError
@@ -131,12 +132,14 @@ type alias FormInternal f customError =
     { fn : f
     , count : Int
     , updates : Dict FieldId (Value -> Value -> Value)
-    , fieldWithErrors : List (Error customError) -> Html Msg -> Html Msg
+    , fieldWithErrors : FieldWithErrors customError
     }
 
+type alias FieldWithErrors customError =
+    List (Error customError) -> List (Html Msg) -> List (Html Msg)
 
-form : (List (Error customError) -> Html Msg -> Html Msg) -> a -> FormInternal a customError
-form fieldWithErrors fn =
+form : Validator data customError -> (FieldWithErrors customError) -> a -> FormInternal a customError
+form validator fieldWithErrors fn =
     { fn = fn
     , count = 0
     , updates = Dict.empty
@@ -144,7 +147,9 @@ form fieldWithErrors fn =
     }
 
 
-field : Widget widgetModel msg value customError -> FormInternal (Field value customError -> c) customError -> FormInternal c customError
+field : 
+   Widget widgetModel msg value customError 
+   -> FormInternal (Field value customError -> c) customError -> FormInternal c customError
 field widget { fn, count, updates, fieldWithErrors } =
     { fn = fn (mkField fieldWithErrors count widget)
     , count = count + 1
@@ -159,7 +164,7 @@ field widget { fn, count, updates, fieldWithErrors } =
 
 wrap :
     Widget widgetModel msg value customError
-    -> (DomId -> Html msg -> Html msg)
+    -> (DomId -> List (Html msg) -> List (Html msg))
     -> Widget widgetModel msg value customError
 wrap widget container =
     { widget
@@ -192,7 +197,7 @@ type alias Widget model msg value customError =
     { init : model
     , value : model -> value
     , validate : Validator model customError
-    , view : DomId -> model -> Html msg
+    , view : DomId -> model -> List (Html msg)
     , update : msg -> model -> model
     , encodeMsg : msg -> Value
     , decoderMsg : Decoder msg

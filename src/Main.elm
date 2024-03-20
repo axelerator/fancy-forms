@@ -1,9 +1,9 @@
 module Main exposing (main)
 
 import Browser
-import Form exposing (Error, Form, FormState, Widget, toWidget)
+import Form exposing (Error(..), FieldWithErrors, Form, FormState, Widget, toWidget)
 import Html exposing (Html, article, div, footer, label, text)
-import Html.Attributes exposing (class, for)
+import Html.Attributes exposing (class, classList, for)
 import Maybe exposing (withDefault)
 import MultiColorPicker
 import String exposing (fromInt)
@@ -11,8 +11,6 @@ import WebColor exposing (WebColor, asStr)
 import Widgets.Checkbox
 import Widgets.Int
 import Widgets.Text exposing (notBlank)
-import Html.Attributes exposing (classList)
-import Form exposing (Error(..))
 
 
 type alias Model =
@@ -45,15 +43,11 @@ init _ =
     )
 
 
-currentForm =
-    myForm
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ForForm (Form.FormMsg fieldId value) ->
-            ( { model | formState = Form.updateField currentForm fieldId value model.formState }
+            ( { model | formState = Form.updateField myForm fieldId value model.formState }
             , Cmd.none
             )
 
@@ -66,7 +60,7 @@ update msg model =
 styles : Html Msg
 styles =
     """
-    .has-error > * > input { border-color: red; }
+    .has-error > input { border-color: red; }
     .errors { color: red; }
     """
         |> text
@@ -78,13 +72,7 @@ view : Model -> Html Msg
 view model =
     div []
         [ styles
-        , article []
-            [ Form.render ForForm currentForm model.formState
-            , footer []
-                []
-
-            --[ button [ onClick (Submit <| Form.extract myForm model.formState) ] [ text "Submit" ] ]
-            ]
+        , article [] <| Form.render ForForm myForm model.formState
         , model.submitted
             |> Maybe.map displayFormData
             |> withDefault (text "")
@@ -106,17 +94,17 @@ type alias Fullname =
     }
 
 
+fieldWithErrors : FieldWithErrors MyError
 fieldWithErrors errors html =
-    div
+    [ div
         (if List.isEmpty errors then
             []
 
          else
             [ class "has-error" ]
         )
-        [ html
-        , viewErrors errors
-        ]
+        (html ++ [ viewErrors errors ])
+    ]
 
 
 viewErrors : List (Error MyError) -> Html msg
@@ -128,11 +116,12 @@ viewErrors errors =
         div [ class "errors" ] [ text <| String.join " " <| List.map errorToString errors ]
 
 
-errorToString : (Error MyError) -> String
+errorToString : Error MyError -> String
 errorToString e =
     case e of
         Form.MustNotBeBlank ->
             "must not be blank"
+
         Form.CustomError FirstNameMustNotBeSameAsLastName ->
             "first name must not be the same as last name"
 
@@ -140,10 +129,11 @@ errorToString e =
 type MyError
     = FirstNameMustNotBeSameAsLastName
 
+
 validateFullName : Fullname -> List (Error MyError)
 validateFullName { first, last } =
     if first == last then
-        Debug.log "FirstNameMustNotBeSameAsLastName" [CustomError FirstNameMustNotBeSameAsLastName]
+        Debug.log "FirstNameMustNotBeSameAsLastName" [ CustomError FirstNameMustNotBeSameAsLastName ]
 
     else
         []
@@ -152,17 +142,17 @@ validateFullName { first, last } =
 nameForm : Form Fullname MyError
 nameForm =
     Form.form
+        validateFullName
         fieldWithErrors
         (\first last ->
             { view =
                 \formState errors ->
-                    div []
-                        [ div [ class "grid" ]
-                            [ div [] [ first.view formState ]
-                            , div [] [ last.view formState ]
-                            ]
-                        , div [] <| [ viewErrors errors ]
+                    [ div [ class "grid" ]
+                        [ div [] <| first.view formState
+                        , div [] <| last.view formState
                         ]
+                    , div [] <| [ viewErrors errors ]
+                    ]
             , combine =
                 \formState ->
                     ( { first = first.value formState
@@ -184,31 +174,39 @@ fullnameWidget =
 withLabel : String -> Widget widgetModel msg value customError -> Widget widgetModel msg value customError
 withLabel labelText wrapped =
     (\domId content ->
-        div
-            []
-            [ label [ for domId ] [ text labelText ]
-            , content
-            ]
+        label [ for domId ] [ text labelText ]
+            :: content
     )
         |> Form.wrap wrapped
+
+
+validateFormData : MyFormData -> List (Error MyError)
+validateFormData (FormData { counter, webColors }) =
+    if counter /= List.length webColors then
+        [ Form.MustNotBeBlank ]
+
+    else
+        []
 
 
 myForm : Form MyFormData MyError
 myForm =
     Form.form
+        validateFormData
         (\_ html -> html)
         (\int check wc name ->
             { view =
                 \formState errors ->
-                    div [ classList [ ( "has-error", List.isEmpty errors ) ] ]
+                    [ div [ classList [ ( "has-error", List.isEmpty errors ) ] ]
                         [ div [ class "errors" ] <| [ viewErrors errors ]
                         , div [ class "grid" ]
-                            [ div [] [ int.view formState ]
-                            , div [] [ check.view formState ]
-                            , div [] [ wc.view formState ]
-                            , div [] [ name.view formState ]
+                            [ div [] (int.view formState)
+                            , div [] (check.view formState)
+                            , div [] (wc.view formState)
+                            , div [] (name.view formState)
                             ]
                         ]
+                    ]
             , combine =
                 \formState ->
                     ( FormData
@@ -217,12 +215,7 @@ myForm =
                         , check = check.value formState
                         , name = name.value formState
                         }
-                    , \(FormData { counter, webColors }) ->
-                        if counter /= List.length webColors then
-                            [ Form.MustNotBeBlank ]
-
-                        else
-                            []
+                    , validateFormData
                     )
             }
         )
