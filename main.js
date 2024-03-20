@@ -5178,6 +5178,19 @@ var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$FormData = function (a) {
 	return {$: 'FormData', a: a};
 };
+var $author$project$Form$alwaysValid = function (_v0) {
+	return _List_Nil;
+};
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -5186,6 +5199,91 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			key,
 			$elm$json$Json$Encode$string(string));
 	});
+var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$core$Basics$not = _Basics_not;
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $author$project$Widgets$Checkbox$checkbox = {
+	decoderModel: $elm$json$Json$Decode$bool,
+	decoderMsg: $elm$json$Json$Decode$succeed(_Utils_Tuple0),
+	encodeModel: $elm$json$Json$Encode$bool,
+	encodeMsg: function (_v0) {
+		return $elm$json$Json$Encode$object(_List_Nil);
+	},
+	init: false,
+	update: F2(
+		function (_v1, model) {
+			return !model;
+		}),
+	validate: $author$project$Form$alwaysValid,
+	value: $elm$core$Basics$identity,
+	view: F2(
+		function (domId, model) {
+			return _List_fromArray(
+				[
+					A2(
+					$elm$html$Html$input,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$id(domId),
+							$elm$html$Html$Attributes$type_('checkbox'),
+							$elm$html$Html$Events$onInput(
+							function (_v2) {
+								return _Utils_Tuple0;
+							}),
+							$elm$html$Html$Attributes$checked(model)
+						]),
+					_List_Nil)
+				]);
+		})
+};
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
@@ -5383,19 +5481,6 @@ var $elm$core$Dict$get = F2(
 			}
 		}
 	});
-var $elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v0, obj) {
-					var k = _v0.a;
-					var v = _v0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
 var $elm$core$Maybe$withDefault = F2(
 	function (_default, maybe) {
 		if (maybe.$ === 'Just') {
@@ -5496,8 +5581,12 @@ var $author$project$Main$errorToString = function (e) {
 	if (e.$ === 'MustNotBeBlank') {
 		return 'must not be blank';
 	} else {
-		var _v1 = e.a;
-		return 'first name must not be the same as last name';
+		var myError = e.a;
+		if (myError.$ === 'FirstNameMustNotBeSameAsLastName') {
+			return 'first name must not be the same as last name';
+		} else {
+			return 'amount of color must match counter';
+		}
 	}
 };
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
@@ -5541,21 +5630,38 @@ var $author$project$Widgets$Text$notBlank = function (model) {
 	return (model === '') ? _List_fromArray(
 		[$author$project$Form$MustNotBeBlank]) : _List_Nil;
 };
-var $author$project$Form$CustomError = function (a) {
-	return {$: 'CustomError', a: a};
-};
-var $author$project$Main$FirstNameMustNotBeSameAsLastName = {$: 'FirstNameMustNotBeSameAsLastName'};
-var $elm$core$Debug$log = _Debug_log;
-var $author$project$Main$validateFullName = function (_v0) {
-	var first = _v0.first;
-	var last = _v0.last;
-	return _Utils_eq(first, last) ? A2(
-		$elm$core$Debug$log,
-		'FirstNameMustNotBeSameAsLastName',
-		_List_fromArray(
-			[
-				$author$project$Form$CustomError($author$project$Main$FirstNameMustNotBeSameAsLastName)
-			])) : _List_Nil;
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $author$project$Widgets$Text$textInput = function (attrs) {
+	return {
+		decoderModel: $elm$json$Json$Decode$string,
+		decoderMsg: $elm$json$Json$Decode$string,
+		encodeModel: $elm$json$Json$Encode$string,
+		encodeMsg: $elm$json$Json$Encode$string,
+		init: '',
+		update: F2(
+			function (msg, _v0) {
+				return msg;
+			}),
+		validate: $author$project$Form$alwaysValid,
+		value: $elm$core$Basics$identity,
+		view: F2(
+			function (domId, model) {
+				return _List_fromArray(
+					[
+						A2(
+						$elm$html$Html$input,
+						_Utils_ap(
+							attrs,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$id(domId),
+									$elm$html$Html$Events$onInput($elm$core$Basics$identity),
+									$elm$html$Html$Attributes$value(model)
+								])),
+						_List_Nil)
+					]);
+			})
+	};
 };
 var $elm$core$List$append = F2(
 	function (xs, ys) {
@@ -5568,7 +5674,7 @@ var $elm$core$List$append = F2(
 var $elm$core$List$concat = function (lists) {
 	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
 };
-var $author$project$Widgets$Text$concatValidators = F2(
+var $author$project$Form$concatValidators = F2(
 	function (validators, model) {
 		return $elm$core$List$concat(
 			A2(
@@ -5578,76 +5684,26 @@ var $author$project$Widgets$Text$concatValidators = F2(
 				},
 				validators));
 	});
-var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
-var $elm$html$Html$input = _VirtualDom_node('input');
-var $elm$html$Html$Events$alwaysStop = function (x) {
-	return _Utils_Tuple2(x, true);
-};
-var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 'MayStopPropagation', a: a};
-};
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var $elm$html$Html$Events$stopPropagationOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+var $author$project$Form$validate = F2(
+	function (validators, widget) {
+		return _Utils_update(
+			widget,
+			{
+				validate: $author$project$Form$concatValidators(validators)
+			});
 	});
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
-	});
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $elm$html$Html$Events$targetValue = A2(
-	$elm$json$Json$Decode$at,
-	_List_fromArray(
-		['target', 'value']),
-	$elm$json$Json$Decode$string);
-var $elm$html$Html$Events$onInput = function (tagger) {
-	return A2(
-		$elm$html$Html$Events$stopPropagationOn,
-		'input',
-		A2(
-			$elm$json$Json$Decode$map,
-			$elm$html$Html$Events$alwaysStop,
-			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+var $author$project$Form$CustomError = function (a) {
+	return {$: 'CustomError', a: a};
 };
-var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
-var $author$project$Widgets$Text$widget = F2(
-	function (attrs, validators) {
-		return {
-			decoderModel: $elm$json$Json$Decode$string,
-			decoderMsg: $elm$json$Json$Decode$string,
-			encodeModel: $elm$json$Json$Encode$string,
-			encodeMsg: $elm$json$Json$Encode$string,
-			init: '',
-			update: F2(
-				function (msg, _v0) {
-					return msg;
-				}),
-			validate: $author$project$Widgets$Text$concatValidators(validators),
-			value: $elm$core$Basics$identity,
-			view: F2(
-				function (domId, model) {
-					return _List_fromArray(
-						[
-							A2(
-							$elm$html$Html$input,
-							_Utils_ap(
-								attrs,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$id(domId),
-										$elm$html$Html$Events$onInput($elm$core$Basics$identity),
-										$elm$html$Html$Attributes$value(model)
-									])),
-							_List_Nil)
-						]);
-				})
-		};
-	});
+var $author$project$Main$FirstNameMustNotBeSameAsLastName = {$: 'FirstNameMustNotBeSameAsLastName'};
+var $author$project$Main$validateFullName = function (_v0) {
+	var first = _v0.first;
+	var last = _v0.last;
+	return _Utils_eq(first, last) ? _List_fromArray(
+		[
+			$author$project$Form$CustomError($author$project$Main$FirstNameMustNotBeSameAsLastName)
+		]) : _List_Nil;
+};
 var $elm$html$Html$Attributes$for = $elm$html$Html$Attributes$stringProperty('htmlFor');
 var $elm$html$Html$label = _VirtualDom_node('label');
 var $author$project$Form$wrap = F2(
@@ -5689,23 +5745,23 @@ var $author$project$Main$withLabel = F2(
 var $author$project$Main$nameForm = A2(
 	$author$project$Form$field,
 	A2(
-		$author$project$Main$withLabel,
-		'last name',
+		$author$project$Form$validate,
+		_List_fromArray(
+			[$author$project$Widgets$Text$notBlank]),
 		A2(
-			$author$project$Widgets$Text$widget,
-			_List_Nil,
-			_List_fromArray(
-				[$author$project$Widgets$Text$notBlank]))),
+			$author$project$Main$withLabel,
+			'last name',
+			$author$project$Widgets$Text$textInput(_List_Nil))),
 	A2(
 		$author$project$Form$field,
 		A2(
-			$author$project$Main$withLabel,
-			'first name',
+			$author$project$Form$validate,
+			_List_fromArray(
+				[$author$project$Widgets$Text$notBlank]),
 			A2(
-				$author$project$Widgets$Text$widget,
-				_List_Nil,
-				_List_fromArray(
-					[$author$project$Widgets$Text$notBlank]))),
+				$author$project$Main$withLabel,
+				'first name',
+				$author$project$Widgets$Text$textInput(_List_Nil))),
 		A3(
 			$author$project$Form$form,
 			$author$project$Main$validateFullName,
@@ -5920,6 +5976,83 @@ var $author$project$Form$toWidget = function (f) {
 	};
 };
 var $author$project$Main$fullnameWidget = $author$project$Form$toWidget($author$project$Main$nameForm);
+var $author$project$Widgets$Int$Model = F2(
+	function (value, parsedValue) {
+		return {parsedValue: parsedValue, value: value};
+	});
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$Widgets$Int$integerInput = function (attrs) {
+	return {
+		decoderModel: A3(
+			$elm$json$Json$Decode$map2,
+			$author$project$Widgets$Int$Model,
+			A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$string),
+			A2($elm$json$Json$Decode$field, 'parsedValue', $elm$json$Json$Decode$int)),
+		decoderMsg: $elm$json$Json$Decode$string,
+		encodeModel: function (model) {
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'value',
+						$elm$json$Json$Encode$string(model.value)),
+						_Utils_Tuple2(
+						'parsedValue',
+						$elm$json$Json$Encode$int(model.parsedValue))
+					]));
+		},
+		encodeMsg: $elm$json$Json$Encode$string,
+		init: {parsedValue: 0, value: ''},
+		update: F2(
+			function (msg, model) {
+				return A2(
+					$elm$core$Maybe$withDefault,
+					_Utils_update(
+						model,
+						{value: msg}),
+					A2(
+						$elm$core$Maybe$map,
+						function (i) {
+							return _Utils_update(
+								model,
+								{parsedValue: i, value: msg});
+						},
+						$elm$core$String$toInt(msg)));
+			}),
+		validate: $author$project$Form$alwaysValid,
+		value: function ($) {
+			return $.parsedValue;
+		},
+		view: F2(
+			function (domId, model) {
+				return _List_fromArray(
+					[
+						A2(
+						$elm$html$Html$input,
+						_Utils_ap(
+							attrs,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$id(domId),
+									$elm$html$Html$Attributes$type_('number'),
+									$elm$html$Html$Events$onInput($elm$core$Basics$identity),
+									$elm$html$Html$Attributes$value(model.value)
+								])),
+						_List_Nil)
+					]);
+			})
+	};
+};
+var $author$project$Main$SelectedColorMustMatchCounter = {$: 'SelectedColorMustMatchCounter'};
 var $elm$core$Basics$neq = _Utils_notEqual;
 var $author$project$Main$validateFormData = function (_v0) {
 	var counter = _v0.a.counter;
@@ -5927,10 +6060,9 @@ var $author$project$Main$validateFormData = function (_v0) {
 	return (!_Utils_eq(
 		counter,
 		$elm$core$List$length(webColors))) ? _List_fromArray(
-		[$author$project$Form$MustNotBeBlank]) : _List_Nil;
-};
-var $author$project$Form$alwaysValid = function (_v0) {
-	return _List_Nil;
+		[
+			$author$project$Form$CustomError($author$project$Main$SelectedColorMustMatchCounter)
+		]) : _List_Nil;
 };
 var $author$project$MultiColorPicker$Model = F2(
 	function (prefix, selected) {
@@ -6390,16 +6522,6 @@ var $author$project$WebColor$fromString = function (s) {
 			return $elm$core$Maybe$Nothing;
 	}
 };
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
 var $author$project$WebColor$decoderColor = A2(
 	$elm$json$Json$Decode$andThen,
 	function (s) {
@@ -6946,122 +7068,6 @@ var $author$project$MultiColorPicker$widget = {
 	},
 	view: $author$project$MultiColorPicker$view
 };
-var $elm$json$Json$Decode$bool = _Json_decodeBool;
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
-var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
-var $elm$core$Basics$not = _Basics_not;
-var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
-var $author$project$Widgets$Checkbox$widget = function (attrs) {
-	return {
-		decoderModel: $elm$json$Json$Decode$bool,
-		decoderMsg: $elm$json$Json$Decode$succeed(_Utils_Tuple0),
-		encodeModel: $elm$json$Json$Encode$bool,
-		encodeMsg: function (_v0) {
-			return $elm$json$Json$Encode$object(_List_Nil);
-		},
-		init: false,
-		update: F2(
-			function (_v1, model) {
-				return !model;
-			}),
-		validate: $author$project$Form$alwaysValid,
-		value: $elm$core$Basics$identity,
-		view: F2(
-			function (domId, model) {
-				return _List_fromArray(
-					[
-						A2(
-						$elm$html$Html$input,
-						_Utils_ap(
-							attrs,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$id(domId),
-									$elm$html$Html$Attributes$type_('checkbox'),
-									$elm$html$Html$Events$onInput(
-									function (_v2) {
-										return _Utils_Tuple0;
-									}),
-									$elm$html$Html$Attributes$checked(model)
-								])),
-						_List_Nil)
-					]);
-			})
-	};
-};
-var $author$project$Widgets$Int$Model = F2(
-	function (value, parsedValue) {
-		return {parsedValue: parsedValue, value: value};
-	});
-var $author$project$Widgets$Int$widget = function (attrs) {
-	return {
-		decoderModel: A3(
-			$elm$json$Json$Decode$map2,
-			$author$project$Widgets$Int$Model,
-			A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$string),
-			A2($elm$json$Json$Decode$field, 'parsedValue', $elm$json$Json$Decode$int)),
-		decoderMsg: $elm$json$Json$Decode$string,
-		encodeModel: function (model) {
-			return $elm$json$Json$Encode$object(
-				_List_fromArray(
-					[
-						_Utils_Tuple2(
-						'value',
-						$elm$json$Json$Encode$string(model.value)),
-						_Utils_Tuple2(
-						'parsedValue',
-						$elm$json$Json$Encode$int(model.parsedValue))
-					]));
-		},
-		encodeMsg: $elm$json$Json$Encode$string,
-		init: {parsedValue: 0, value: ''},
-		update: F2(
-			function (msg, model) {
-				return A2(
-					$elm$core$Maybe$withDefault,
-					_Utils_update(
-						model,
-						{value: msg}),
-					A2(
-						$elm$core$Maybe$map,
-						function (i) {
-							return _Utils_update(
-								model,
-								{parsedValue: i, value: msg});
-						},
-						$elm$core$String$toInt(msg)));
-			}),
-		validate: $author$project$Form$alwaysValid,
-		value: function ($) {
-			return $.parsedValue;
-		},
-		view: F2(
-			function (domId, model) {
-				return _List_fromArray(
-					[
-						A2(
-						$elm$html$Html$input,
-						_Utils_ap(
-							attrs,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$id(domId),
-									$elm$html$Html$Attributes$type_('number'),
-									$elm$html$Html$Events$onInput($elm$core$Basics$identity),
-									$elm$html$Html$Attributes$value(model.value)
-								])),
-						_List_Nil)
-					]);
-			})
-	};
-};
 var $author$project$Main$myForm = A2(
 	$author$project$Form$field,
 	$author$project$Main$fullnameWidget,
@@ -7070,13 +7076,10 @@ var $author$project$Main$myForm = A2(
 		A2($author$project$Main$withLabel, 'Web Colors', $author$project$MultiColorPicker$widget),
 		A2(
 			$author$project$Form$field,
-			A2(
-				$author$project$Main$withLabel,
-				'checkbox',
-				$author$project$Widgets$Checkbox$widget(_List_Nil)),
+			A2($author$project$Main$withLabel, 'checkbox', $author$project$Widgets$Checkbox$checkbox),
 			A2(
 				$author$project$Form$field,
-				$author$project$Widgets$Int$widget(_List_Nil),
+				$author$project$Widgets$Int$integerInput(_List_Nil),
 				A3(
 					$author$project$Form$form,
 					$author$project$Main$validateFormData,
@@ -7232,6 +7235,7 @@ var $author$project$Main$displayFormData = function (_v0) {
 					]))
 			]));
 };
+var $elm$html$Html$footer = _VirtualDom_node('footer');
 var $author$project$Form$render = F3(
 	function (toMsg, form_, formState) {
 		return A2(
@@ -7268,7 +7272,12 @@ var $author$project$Main$view = function (model) {
 				A2(
 				$elm$html$Html$article,
 				_List_Nil,
-				A3($author$project$Form$render, $author$project$Main$ForForm, $author$project$Main$myForm, model.formState)),
+				_Utils_ap(
+					A3($author$project$Form$render, $author$project$Main$ForForm, $author$project$Main$myForm, model.formState),
+					_List_fromArray(
+						[
+							A2($elm$html$Html$footer, _List_Nil, _List_Nil)
+						]))),
 				A2(
 				$elm$core$Maybe$withDefault,
 				$elm$html$Html$text(''),

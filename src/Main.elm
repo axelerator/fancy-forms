@@ -1,16 +1,16 @@
 module Main exposing (main)
 
 import Browser
-import Form exposing (Error(..), FieldWithErrors, Form, FormState, Widget, toWidget)
+import Form exposing (Error(..), FieldWithErrors, Form, FormState, Widget, field, toWidget, validate)
 import Html exposing (Html, article, div, footer, label, text)
 import Html.Attributes exposing (class, classList, for)
 import Maybe exposing (withDefault)
 import MultiColorPicker
 import String exposing (fromInt)
 import WebColor exposing (WebColor, asStr)
-import Widgets.Checkbox
-import Widgets.Int
-import Widgets.Text exposing (notBlank)
+import Widgets.Checkbox exposing (checkbox)
+import Widgets.Int exposing (integerInput)
+import Widgets.Text exposing (notBlank, textInput)
 
 
 type alias Model =
@@ -72,7 +72,10 @@ view : Model -> Html Msg
 view model =
     div []
         [ styles
-        , article [] <| Form.render ForForm myForm model.formState
+        , article [] <|
+            Form.render ForForm myForm model.formState
+                ++ [ footer [] []
+                   ]
         , model.submitted
             |> Maybe.map displayFormData
             |> withDefault (text "")
@@ -122,18 +125,24 @@ errorToString e =
         Form.MustNotBeBlank ->
             "must not be blank"
 
-        Form.CustomError FirstNameMustNotBeSameAsLastName ->
-            "first name must not be the same as last name"
+        Form.CustomError myError ->
+            case myError of
+                FirstNameMustNotBeSameAsLastName ->
+                    "first name must not be the same as last name"
+
+                SelectedColorMustMatchCounter ->
+                    "amount of color must match counter"
 
 
 type MyError
     = FirstNameMustNotBeSameAsLastName
+    | SelectedColorMustMatchCounter
 
 
 validateFullName : Fullname -> List (Error MyError)
 validateFullName { first, last } =
     if first == last then
-        Debug.log "FirstNameMustNotBeSameAsLastName" [ CustomError FirstNameMustNotBeSameAsLastName ]
+        [ CustomError FirstNameMustNotBeSameAsLastName ]
 
     else
         []
@@ -160,8 +169,16 @@ nameForm =
                     }
             }
         )
-        |> Form.field (withLabel "first name" <| Widgets.Text.widget [] [ notBlank ])
-        |> Form.field (withLabel "last name" <| Widgets.Text.widget [] [ notBlank ])
+        |> field
+            (textInput []
+                |> withLabel "first name"
+                |> validate [ notBlank ]
+            )
+        |> field
+            (textInput []
+                |> withLabel "last name"
+                |> validate [ notBlank ]
+            )
 
 
 fullnameWidget : Widget FormState Form.Msg Fullname MyError
@@ -181,7 +198,7 @@ withLabel labelText wrapped =
 validateFormData : MyFormData -> List (Error MyError)
 validateFormData (FormData { counter, webColors }) =
     if counter /= List.length webColors then
-        [ Form.MustNotBeBlank ]
+        [ Form.CustomError SelectedColorMustMatchCounter ]
 
     else
         []
@@ -215,10 +232,10 @@ myForm =
                         }
             }
         )
-        |> Form.field (Widgets.Int.widget [])
-        |> Form.field (withLabel "checkbox" <| Widgets.Checkbox.widget [])
-        |> Form.field (withLabel "Web Colors" <| MultiColorPicker.widget)
-        |> Form.field fullnameWidget
+        |> field (integerInput [])
+        |> field (checkbox |> withLabel "checkbox")
+        |> field (MultiColorPicker.widget |> withLabel "Web Colors")
+        |> field fullnameWidget
 
 
 displayFormData : MyFormData -> Html Msg

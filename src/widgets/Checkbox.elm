@@ -1,4 +1,4 @@
-module Widgets.Checkbox exposing (widget)
+module Widgets.Checkbox exposing (checkbox)
 
 import Form exposing (Msg, Widget, alwaysValid)
 import Html exposing (Attribute, input)
@@ -12,14 +12,14 @@ type alias Msg =
     ()
 
 
-widget : List (Attribute Msg) -> Widget Bool Msg Bool customError
-widget attrs =
+checkbox : Widget Bool Msg Bool customError
+checkbox =
     { init = False
     , value = identity
     , validate = alwaysValid
     , view =
         \domId model ->
-            [input (attrs ++ [ id domId, type_ "checkbox", onInput (\_ -> ()), checked model ]) []]
+            [input ([ id domId, type_ "checkbox", onInput (\_ -> ()), checked model ]) []]
     , update = \_ model -> not model
     , encodeMsg = \_ -> E.object []
     , decoderMsg = D.succeed ()

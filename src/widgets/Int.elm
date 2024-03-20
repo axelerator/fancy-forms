@@ -1,4 +1,4 @@
-module Widgets.Int exposing (widget)
+module Widgets.Int exposing (integerInput)
 
 import Form exposing (Msg, Widget, alwaysValid)
 import Html exposing (Attribute, input)
@@ -18,8 +18,8 @@ type alias Model =
     }
 
 
-widget : List (Attribute Msg) -> Widget Model Msg Int customError
-widget attrs =
+integerInput : List (Attribute Msg) -> Widget Model Msg Int customError
+integerInput attrs =
     { init = { value = "", parsedValue = 0 }
     , value = .parsedValue
     , validate = alwaysValid

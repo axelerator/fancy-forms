@@ -258,6 +258,20 @@ alwaysValid _ =
     []
 
 
+validate :
+    List (Validator model customError)
+    -> Widget model msg value customError
+    -> Widget model msg value customError
+validate validators widget =
+    { widget | validate = concatValidators validators }
+
+
+concatValidators : List (Validator model customError) -> Validator model customError
+concatValidators validators model =
+    List.map (\validator -> validator model) validators
+        |> List.concat
+
+
 extract : { form | fn : { b | combine : FormState -> data } } -> FormState -> data
 extract { fn } =
     fn.combine

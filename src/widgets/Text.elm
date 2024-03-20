@@ -1,4 +1,4 @@
-module Widgets.Text exposing (notBlank, widget)
+module Widgets.Text exposing (notBlank, textInput)
 
 import Form exposing (Error(..), Msg, Validator, Widget)
 import Html exposing (Attribute, input)
@@ -6,6 +6,7 @@ import Html.Attributes exposing (id, value)
 import Html.Events exposing (onInput)
 import Json.Decode as D
 import Json.Encode as E
+import Form exposing (alwaysValid)
 
 
 type alias Msg =
@@ -20,18 +21,11 @@ notBlank model =
     else
         []
 
-
-concatValidators : List (Validator model customError) -> Validator model customError
-concatValidators validators model =
-    List.map (\validator -> validator model) validators
-        |> List.concat
-
-
-widget : List (Attribute Msg) -> List (Validator String customError) -> Widget String Msg String customError
-widget attrs validators =
+textInput : List (Attribute Msg) -> Widget String Msg String customError
+textInput attrs =
     { init = ""
     , value = identity
-    , validate = concatValidators validators
+    , validate = alwaysValid
     , view =
         \domId model ->
             [input (attrs ++ [ id domId, onInput identity, value model ]) []]
