@@ -5168,15 +5168,6 @@ var $author$project$Form$form = F3(
 	function (validator, fieldWithErrors, fn) {
 		return {count: 0, defaults: $elm$core$Dict$empty, fieldWithErrors: fieldWithErrors, fn: fn, updates: $elm$core$Dict$empty, validator: validator};
 	});
-var $elm$json$Json$Encode$string = _Json_wrap;
-var $elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$string(string));
-	});
-var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$json$Json$Decode$decodeValue = _Json_run;
 var $elm$core$List$drop = F2(
@@ -5761,6 +5752,15 @@ var $author$project$Form$field = F2(
 			validator: validator
 		};
 	});
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$core$List$isEmpty = function (xs) {
 	if (!xs.b) {
 		return true;
@@ -5864,7 +5864,7 @@ var $author$project$Widgets$Text$textInput = function (attrs) {
 		decoderMsg: $elm$json$Json$Decode$string,
 		encodeModel: $elm$json$Json$Encode$string,
 		encodeMsg: $elm$json$Json$Encode$string,
-		init: 'iii',
+		init: '',
 		update: F2(
 			function (msg, _v0) {
 				return msg;
@@ -6008,21 +6008,12 @@ var $author$project$Main$nameForm = A2(
 									[
 										A2(
 										$elm$html$Html$div,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('grid')
-											]),
-										_List_fromArray(
-											[
-												A2(
-												$elm$html$Html$div,
-												_List_Nil,
-												first.view(formState)),
-												A2(
-												$elm$html$Html$div,
-												_List_Nil,
-												last.view(formState))
-											])),
+										_List_Nil,
+										first.view(formState)),
+										A2(
+										$elm$html$Html$div,
+										_List_Nil,
+										last.view(formState)),
 										A2(
 										$elm$html$Html$div,
 										_List_Nil,
@@ -6460,20 +6451,31 @@ var $author$project$Main$withAddButton = F3(
 	});
 var $author$project$Main$withRemoveButton = F2(
 	function (remove, inputHtml) {
-		return A2(
-			$elm$core$List$cons,
-			A2(
-				$elm$html$Html$button,
+		return _List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$Events$onClick(remove),
-						$elm$html$Html$Attributes$class('secondary')
+						$elm$html$Html$Attributes$class('grid')
 					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Remove')
-					])),
-			inputHtml);
+				_Utils_ap(
+					inputHtml,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick(remove),
+									$elm$html$Html$Attributes$class('secondary')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Remove')
+								]))
+						])))
+			]);
 	});
 var $author$project$Main$hasManyNamesForm = A4(
 	$author$project$Form$listField,

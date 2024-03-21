@@ -165,12 +165,10 @@ nameForm =
         (\first last ->
             { view =
                 \formState errors ->
-                    [ div [ class "grid" ]
                         [ div [] <| first.view formState
                         , div [] <| last.view formState
+                        , div [] <| [ viewErrors errors ]
                         ]
-                    , div [] <| [ viewErrors errors ]
-                    ]
             , combine =
                 \formState ->
                     { first = first.value formState
@@ -248,7 +246,9 @@ hasManyNamesForm =
 
 withRemoveButton : FieldWithRemoveButton msg
 withRemoveButton remove inputHtml =
-    (button [onClick remove, class "secondary"] [text "Remove"]) :: inputHtml
+    [ div [class "grid"]
+        (inputHtml ++ [button [onClick remove, class "secondary"] [text "Remove"]] )
+    ]
 
 withAddButton : String -> ListWithAddButton msg
 withAddButton subject add inputHtml =
