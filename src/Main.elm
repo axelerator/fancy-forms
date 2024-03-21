@@ -1,9 +1,10 @@
 module Main exposing (main)
 
 import Browser
-import Form exposing (Error(..), FieldWithErrors, Form, FormState, Widget, field, toWidget, validate)
-import Html exposing (Html, article, div, footer, label, text)
+import Form exposing (Error(..), FieldWithErrors, Form, FormState, Widget, alwaysValid, extract, field, listField, toWidget, validate)
+import Html exposing (Html, article, button, div, footer, label, text)
 import Html.Attributes exposing (class, classList, for)
+import Html.Events exposing (onClick)
 import Maybe exposing (withDefault)
 import MultiColorPicker
 import String exposing (fromInt)
@@ -11,6 +12,12 @@ import WebColor exposing (WebColor, asStr)
 import Widgets.Checkbox exposing (checkbox)
 import Widgets.Int exposing (integerInput)
 import Widgets.Text exposing (notBlank, textInput)
+import Json.Encode as E
+import Form exposing (debugFormState)
+import Html exposing (a)
+import Html.Attributes exposing (attribute)
+import Form exposing (FieldWithRemoveButton)
+import Form exposing (ListWithAddButton)
 
 
 type alias Model =
@@ -36,18 +43,19 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { formState = Form.init
+    ( { formState = Form.init currentForm
       , submitted = Nothing
       }
     , Cmd.none
     )
 
+currentForm = hasManyNamesForm
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ForForm (Form.FormMsg fieldId value) ->
-            ( { model | formState = Form.updateField myForm fieldId value model.formState }
+        ForForm formMsg ->
+            ( { model | formState = Form.update currentForm formMsg (debugFormState model.formState) }
             , Cmd.none
             )
 
@@ -73,8 +81,8 @@ view model =
     div []
         [ styles
         , article [] <|
-            Form.render ForForm myForm model.formState
-                ++ [ footer [] []
+            Form.render ForForm currentForm model.formState
+                ++ [ footer [] [ button [ onClick <| Submit <| extract myForm model.formState ] [ text "Submit" ] ]
                    ]
         , model.submitted
             |> Maybe.map displayFormData
@@ -88,6 +96,7 @@ type MyFormData
         , webColors : List WebColor
         , check : Bool
         , name : Fullname
+        , ints : List Int
         }
 
 
@@ -204,12 +213,58 @@ validateFormData (FormData { counter, webColors }) =
         []
 
 
+type alias HasMany =
+    List String
+
+
+hasManyForm : Form HasMany ()
+hasManyForm =
+    Form.form
+        alwaysValid
+        (\_ html -> html)
+        (\ints ->
+            { view = \formState _ -> ints.view formState
+            , combine = \formState -> ints.value formState
+            }
+        )
+        |> listField (withAddButton "item" ) withRemoveButton (textInput [])
+
+
+type alias HasManyNames =
+    List Fullname
+
+
+hasManyNamesForm : Form HasManyNames MyError
+hasManyNamesForm =
+    Form.form
+        alwaysValid
+        (\_ html -> html)
+        (\names ->
+            { view = \formState _ -> names.view formState
+            , combine = \formState -> names.value formState
+            }
+        )
+        |> listField (withAddButton "person") withRemoveButton (fullnameWidget)
+
+withRemoveButton : FieldWithRemoveButton msg
+withRemoveButton remove inputHtml =
+    (button [onClick remove, class "secondary"] [text "Remove"]) :: inputHtml
+
+withAddButton : String -> ListWithAddButton msg
+withAddButton subject add inputHtml =
+    inputHtml ++
+        [button [onClick add, class "secondary"] [text <| "Add " ++ subject]] 
+    
+
+role : String -> Html.Attribute msg 
+role r = ( attribute "role" r )
+
 myForm : Form MyFormData MyError
 myForm =
     Form.form
         validateFormData
         (\_ html -> html)
-        (\int check wc name ->
+        (\int check wc name ints ->
             { view =
                 \formState errors ->
                     [ div [ classList [ ( "has-error", List.isEmpty errors ) ] ]
@@ -219,6 +274,7 @@ myForm =
                             , div [] (check.view formState)
                             , div [] (wc.view formState)
                             , div [] (name.view formState)
+                            , div [] (ints.view formState)
                             ]
                         ]
                     ]
@@ -229,6 +285,7 @@ myForm =
                         , webColors = wc.value formState
                         , check = check.value formState
                         , name = name.value formState
+                        , ints = ints.value formState
                         }
             }
         )
@@ -236,6 +293,7 @@ myForm =
         |> field (checkbox |> withLabel "checkbox")
         |> field (MultiColorPicker.widget |> withLabel "Web Colors")
         |> field fullnameWidget
+        |> listField (withAddButton "number") withRemoveButton (integerInput [])
 
 
 displayFormData : MyFormData -> Html Msg
@@ -253,4 +311,5 @@ displayFormData (FormData formData) =
             ]
         , div [] <| text "web colors: " :: List.map (\c -> text (asStr c)) formData.webColors
         , div [] <| [ text "name: ", text formData.name.first, text " ", text formData.name.last ]
+        , div [] <| text "numbers: " :: List.map (\i -> text (fromInt i)) formData.ints
         ]

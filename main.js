@@ -5159,38 +5159,15 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Form$FormState = function (a) {
-	return {$: 'FormState', a: a};
-};
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $author$project$Form$init = $author$project$Form$FormState(
-	{parentDomId: '', values: $elm$core$Dict$empty});
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$Main$init = function (_v0) {
-	return _Utils_Tuple2(
-		{formState: $author$project$Form$init, submitted: $elm$core$Maybe$Nothing},
-		$elm$core$Platform$Cmd$none);
-};
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$Main$FormData = function (a) {
-	return {$: 'FormData', a: a};
-};
 var $author$project$Form$alwaysValid = function (_v0) {
 	return _List_Nil;
 };
-var $elm$json$Json$Decode$bool = _Json_decodeBool;
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
+var $author$project$Form$form = F3(
+	function (validator, fieldWithErrors, fn) {
+		return {count: 0, defaults: $elm$core$Dict$empty, fieldWithErrors: fieldWithErrors, fn: fn, updates: $elm$core$Dict$empty, validator: validator};
 	});
-var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -5199,141 +5176,348 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			key,
 			$elm$json$Json$Encode$string(string));
 	});
-var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
-var $elm$html$Html$input = _VirtualDom_node('input');
-var $elm$core$Basics$not = _Basics_not;
-var $elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v0, obj) {
-					var k = _v0.a;
-					var v = _v0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
-var $elm$html$Html$Events$alwaysStop = function (x) {
-	return _Utils_Tuple2(x, true);
-};
-var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 'MayStopPropagation', a: a};
-};
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var $elm$html$Html$Events$stopPropagationOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
-	});
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
-	});
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $elm$html$Html$Events$targetValue = A2(
-	$elm$json$Json$Decode$at,
-	_List_fromArray(
-		['target', 'value']),
-	$elm$json$Json$Decode$string);
-var $elm$html$Html$Events$onInput = function (tagger) {
-	return A2(
-		$elm$html$Html$Events$stopPropagationOn,
-		'input',
-		A2(
-			$elm$json$Json$Decode$map,
-			$elm$html$Html$Events$alwaysStop,
-			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
-};
-var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
-var $author$project$Widgets$Checkbox$checkbox = {
-	decoderModel: $elm$json$Json$Decode$bool,
-	decoderMsg: $elm$json$Json$Decode$succeed(_Utils_Tuple0),
-	encodeModel: $elm$json$Json$Encode$bool,
-	encodeMsg: function (_v0) {
-		return $elm$json$Json$Encode$object(_List_Nil);
-	},
-	init: false,
-	update: F2(
-		function (_v1, model) {
-			return !model;
-		}),
-	validate: $author$project$Form$alwaysValid,
-	value: $elm$core$Basics$identity,
-	view: F2(
-		function (domId, model) {
-			return _List_fromArray(
-				[
-					A2(
-					$elm$html$Html$input,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$id(domId),
-							$elm$html$Html$Attributes$type_('checkbox'),
-							$elm$html$Html$Events$onInput(
-							function (_v2) {
-								return _Utils_Tuple0;
-							}),
-							$elm$html$Html$Attributes$checked(model)
-						]),
-					_List_Nil)
-				]);
-		})
-};
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $elm$html$Html$Attributes$classList = function (classes) {
-	return $elm$html$Html$Attributes$class(
-		A2(
-			$elm$core$String$join,
-			' ',
-			A2(
-				$elm$core$List$map,
-				$elm$core$Tuple$first,
-				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
-};
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$json$Json$Decode$decodeValue = _Json_run;
-var $author$project$Form$encodedUpdate = F3(
-	function (widget, msgVal, modelVal) {
+var $elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
+	});
+var $elm$json$Json$Decode$index = _Json_decodeIndex;
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $elm$core$Debug$log = _Debug_log;
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm$core$List$repeatHelp = F3(
+	function (result, n, value) {
+		repeatHelp:
+		while (true) {
+			if (n <= 0) {
+				return result;
+			} else {
+				var $temp$result = A2($elm$core$List$cons, value, result),
+					$temp$n = n - 1,
+					$temp$value = value;
+				result = $temp$result;
+				n = $temp$n;
+				value = $temp$value;
+				continue repeatHelp;
+			}
+		}
+	});
+var $elm$core$List$repeat = F2(
+	function (n, value) {
+		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
+	});
+var $elm$core$List$takeReverse = F3(
+	function (n, list, kept) {
+		takeReverse:
+		while (true) {
+			if (n <= 0) {
+				return kept;
+			} else {
+				if (!list.b) {
+					return kept;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs,
+						$temp$kept = A2($elm$core$List$cons, x, kept);
+					n = $temp$n;
+					list = $temp$list;
+					kept = $temp$kept;
+					continue takeReverse;
+				}
+			}
+		}
+	});
+var $elm$core$List$takeTailRec = F2(
+	function (n, list) {
+		return $elm$core$List$reverse(
+			A3($elm$core$List$takeReverse, n, list, _List_Nil));
+	});
+var $elm$core$List$takeFast = F3(
+	function (ctr, n, list) {
+		if (n <= 0) {
+			return _List_Nil;
+		} else {
+			var _v0 = _Utils_Tuple2(n, list);
+			_v0$1:
+			while (true) {
+				_v0$5:
+				while (true) {
+					if (!_v0.b.b) {
+						return list;
+					} else {
+						if (_v0.b.b.b) {
+							switch (_v0.a) {
+								case 1:
+									break _v0$1;
+								case 2:
+									var _v2 = _v0.b;
+									var x = _v2.a;
+									var _v3 = _v2.b;
+									var y = _v3.a;
+									return _List_fromArray(
+										[x, y]);
+								case 3:
+									if (_v0.b.b.b.b) {
+										var _v4 = _v0.b;
+										var x = _v4.a;
+										var _v5 = _v4.b;
+										var y = _v5.a;
+										var _v6 = _v5.b;
+										var z = _v6.a;
+										return _List_fromArray(
+											[x, y, z]);
+									} else {
+										break _v0$5;
+									}
+								default:
+									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
+										var _v7 = _v0.b;
+										var x = _v7.a;
+										var _v8 = _v7.b;
+										var y = _v8.a;
+										var _v9 = _v8.b;
+										var z = _v9.a;
+										var _v10 = _v9.b;
+										var w = _v10.a;
+										var tl = _v10.b;
+										return (ctr > 1000) ? A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
+									} else {
+										break _v0$5;
+									}
+							}
+						} else {
+							if (_v0.a === 1) {
+								break _v0$1;
+							} else {
+								break _v0$5;
+							}
+						}
+					}
+				}
+				return list;
+			}
+			var _v1 = _v0.b;
+			var x = _v1.a;
+			return _List_fromArray(
+				[x]);
+		}
+	});
+var $elm$core$List$take = F2(
+	function (n, list) {
+		return A3($elm$core$List$takeFast, 0, n, list);
+	});
+var $elm$core$Result$toMaybe = function (result) {
+	if (result.$ === 'Ok') {
+		var v = result.a;
+		return $elm$core$Maybe$Just(v);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $author$project$Form$encodedUpdate = F4(
+	function (widget, subfieldId, operation, modelVal) {
 		var decoderMsg = widget.decoderMsg;
 		var decoderModel = widget.decoderModel;
 		var encodeModel = widget.encodeModel;
-		var _v0 = _Utils_Tuple2(
-			A2($elm$json$Json$Decode$decodeValue, decoderMsg, msgVal),
-			A2($elm$json$Json$Decode$decodeValue, decoderModel, modelVal));
-		if (_v0.a.$ === 'Ok') {
-			if (_v0.b.$ === 'Ok') {
-				var msg = _v0.a.a;
-				var model = _v0.b.a;
-				return encodeModel(
-					A2(widget.update, msg, model));
+		var encodeSubfield = function (updatedModel) {
+			if (subfieldId.$ === 'SingleValue') {
+				return encodeModel(updatedModel);
 			} else {
-				var msg = _v0.a.a;
-				return encodeModel(
-					A2(widget.update, msg, widget.init));
+				var i = subfieldId.a;
+				return A2(
+					$elm$json$Json$Encode$list,
+					encodeModel,
+					A2(
+						$elm$core$List$indexedMap,
+						F2(
+							function (idx, e) {
+								return _Utils_eq(idx, i) ? updatedModel : e;
+							}),
+						A2(
+							$elm$core$Maybe$withDefault,
+							A2($elm$core$List$repeat, i + 1, widget.init),
+							$elm$core$Result$toMaybe(
+								A2(
+									$elm$json$Json$Decode$decodeValue,
+									$elm$json$Json$Decode$list(decoderModel),
+									modelVal)))));
 			}
-		} else {
-			return modelVal;
+		};
+		var decodeSubfield = function () {
+			if (subfieldId.$ === 'SingleValue') {
+				return decoderModel;
+			} else {
+				var i = subfieldId.a;
+				return A2($elm$json$Json$Decode$index, i, decoderModel);
+			}
+		}();
+		var _v0 = A2(
+			$elm$core$Debug$log,
+			'encodedUpdate',
+			function () {
+				switch (operation.$) {
+					case 'Add':
+						return 'add';
+					case 'Remove':
+						return 'remove';
+					default:
+						var uv = operation.a;
+						return A2($elm$json$Json$Encode$encode, -1, uv);
+				}
+			}());
+		var _v2 = _Utils_Tuple2(operation, subfieldId);
+		_v2$3:
+		while (true) {
+			switch (_v2.a.$) {
+				case 'Add':
+					if (_v2.b.$ === 'ArrayElement') {
+						var _v3 = _v2.a;
+						var i = _v2.b.a;
+						return function (list) {
+							return A2(
+								$elm$json$Json$Encode$list,
+								encodeModel,
+								_Utils_ap(
+									list,
+									_List_fromArray(
+										[
+											A2($elm$core$Debug$log, 'adding', widget.init)
+										])));
+						}(
+							A2(
+								$elm$core$Maybe$withDefault,
+								_List_Nil,
+								$elm$core$Result$toMaybe(
+									A2(
+										$elm$json$Json$Decode$decodeValue,
+										$elm$json$Json$Decode$list(decoderModel),
+										modelVal))));
+					} else {
+						break _v2$3;
+					}
+				case 'Remove':
+					if (_v2.b.$ === 'ArrayElement') {
+						var _v4 = _v2.a;
+						var i = _v2.b.a;
+						return A2(
+							$elm$json$Json$Encode$list,
+							encodeModel,
+							function (list) {
+								return _Utils_ap(
+									A2($elm$core$List$take, i, list),
+									A2($elm$core$List$drop, i + 1, list));
+							}(
+								A2(
+									$elm$core$Maybe$withDefault,
+									_List_Nil,
+									$elm$core$Result$toMaybe(
+										A2(
+											$elm$json$Json$Decode$decodeValue,
+											$elm$json$Json$Decode$list(decoderModel),
+											modelVal)))));
+					} else {
+						break _v2$3;
+					}
+				default:
+					var msgVal = _v2.a.a;
+					var _v5 = _Utils_Tuple2(
+						A2($elm$json$Json$Decode$decodeValue, decoderMsg, msgVal),
+						A2($elm$json$Json$Decode$decodeValue, decodeSubfield, modelVal));
+					if (_v5.a.$ === 'Ok') {
+						if (_v5.b.$ === 'Ok') {
+							var msg = _v5.a.a;
+							var model = _v5.b.a;
+							return encodeSubfield(
+								A2(
+									widget.update,
+									A2($elm$core$Debug$log, 'sg', msg),
+									model));
+						} else {
+							var msg = _v5.a.a;
+							var e = _v5.b;
+							return encodeSubfield(
+								A2(widget.update, msg, widget.init));
+						}
+					} else {
+						var e1 = _v5.a;
+						var e2 = _v5.b;
+						var _v6 = A2(
+							$elm$core$Debug$log,
+							'invalde',
+							_Utils_Tuple2(
+								e1,
+								A2($elm$json$Json$Encode$encode, -1, msgVal)));
+						return modelVal;
+					}
+			}
 		}
+		var _v7 = A2($elm$core$Debug$log, 'unknown operation', operation);
+		return modelVal;
 	});
 var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
@@ -5444,10 +5628,14 @@ var $elm$core$Dict$insert = F3(
 			return x;
 		}
 	});
-var $author$project$Form$FormMsg = F2(
-	function (a, b) {
-		return {$: 'FormMsg', a: a, b: b};
+var $author$project$Form$FormMsg = F3(
+	function (a, b, c) {
+		return {$: 'FormMsg', a: a, b: b, c: c};
 	});
+var $author$project$Form$SingleValue = {$: 'SingleValue'};
+var $author$project$Form$Update = function (a) {
+	return {$: 'Update', a: a};
+};
 var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
 var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
 var $elm$core$Dict$get = F2(
@@ -5481,15 +5669,19 @@ var $elm$core$Dict$get = F2(
 			}
 		}
 	});
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
 var $author$project$Form$read = F2(
 	function (fieldId, _v0) {
 		var values = _v0.a.values;
@@ -5498,14 +5690,6 @@ var $author$project$Form$read = F2(
 			$elm$json$Json$Encode$object(_List_Nil),
 			A2($elm$core$Dict$get, fieldId, values));
 	});
-var $elm$core$Result$toMaybe = function (result) {
-	if (result.$ === 'Ok') {
-		var v = result.a;
-		return $elm$core$Maybe$Just(v);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
 var $author$project$Form$mkField = F3(
 	function (fieldWithErrors, fieldId, widget) {
 		var deserializeModel = function (formState) {
@@ -5529,9 +5713,13 @@ var $author$project$Form$mkField = F3(
 		var viewField = function (formState) {
 			var parentDomId = formState.a.parentDomId;
 			var toMsg = function (msg) {
-				return A2(
-					$author$project$Form$FormMsg,
-					fieldId,
+				return function (v) {
+					return A3(
+						$author$project$Form$FormMsg,
+						fieldId,
+						$author$project$Form$SingleValue,
+						$author$project$Form$Update(v));
+				}(
 					widget.encodeMsg(msg));
 			};
 			var inputHtml = A2(
@@ -5539,12 +5727,12 @@ var $author$project$Form$mkField = F3(
 				$elm$html$Html$map(toMsg),
 				A2(
 					widget.view,
-					parentDomId + ('f-' + $elm$core$String$fromInt(fieldId)),
+					parentDomId + ('f-' + fieldId),
 					deserializeModel(formState)));
 			var fieldErrors = errors_(formState);
 			return A2(fieldWithErrors, fieldErrors, inputHtml);
 		};
-		return {errors: errors_, id: fieldId, value: value, view: viewField};
+		return {errors: errors_, id: fieldId, multiple: false, value: value, view: viewField};
 	});
 var $author$project$Form$field = F2(
 	function (widget, _v0) {
@@ -5553,22 +5741,25 @@ var $author$project$Form$field = F2(
 		var updates = _v0.updates;
 		var fieldWithErrors = _v0.fieldWithErrors;
 		var validator = _v0.validator;
+		var defaults = _v0.defaults;
+		var fieldId = $elm$core$String$fromInt(count);
 		return {
 			count: count + 1,
+			defaults: A3(
+				$elm$core$Dict$insert,
+				fieldId,
+				widget.encodeModel(widget.init),
+				defaults),
 			fieldWithErrors: fieldWithErrors,
 			fn: fn(
-				A3($author$project$Form$mkField, fieldWithErrors, count, widget)),
+				A3($author$project$Form$mkField, fieldWithErrors, fieldId, widget)),
 			updates: A3(
 				$elm$core$Dict$insert,
-				count,
+				$elm$core$String$fromInt(count),
 				$author$project$Form$encodedUpdate(widget),
 				updates),
 			validator: validator
 		};
-	});
-var $author$project$Form$form = F3(
-	function (validator, fieldWithErrors, fn) {
-		return {count: 0, fieldWithErrors: fieldWithErrors, fn: fn, updates: $elm$core$Dict$empty, validator: validator};
 	});
 var $elm$core$List$isEmpty = function (xs) {
 	if (!xs.b) {
@@ -5630,6 +5821,42 @@ var $author$project$Widgets$Text$notBlank = function (model) {
 	return (model === '') ? _List_fromArray(
 		[$author$project$Form$MustNotBeBlank]) : _List_Nil;
 };
+var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Widgets$Text$textInput = function (attrs) {
 	return {
@@ -5637,7 +5864,7 @@ var $author$project$Widgets$Text$textInput = function (attrs) {
 		decoderMsg: $elm$json$Json$Decode$string,
 		encodeModel: $elm$json$Json$Encode$string,
 		encodeMsg: $elm$json$Json$Encode$string,
-		init: '',
+		init: 'iii',
 		update: F2(
 			function (msg, _v0) {
 				return msg;
@@ -5807,6 +6034,142 @@ var $author$project$Main$nameForm = A2(
 							})
 					};
 				}))));
+var $author$project$Form$FormState = function (a) {
+	return {$: 'FormState', a: a};
+};
+var $author$project$Form$Add = {$: 'Add'};
+var $author$project$Form$Remove = {$: 'Remove'};
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$Form$decoderFieldOperation = A2(
+	$elm$json$Json$Decode$andThen,
+	function (kind) {
+		switch (kind) {
+			case 'add':
+				return $elm$json$Json$Decode$succeed($author$project$Form$Add);
+			case 'remove':
+				return $elm$json$Json$Decode$succeed($author$project$Form$Remove);
+			case 'update':
+				return A2(
+					$elm$json$Json$Decode$map,
+					$author$project$Form$Update,
+					A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$value));
+			default:
+				return $elm$json$Json$Decode$fail('unknown kind');
+		}
+	},
+	A2($elm$json$Json$Decode$field, 'kind', $elm$json$Json$Decode$string));
+var $author$project$Form$ArrayElement = function (a) {
+	return {$: 'ArrayElement', a: a};
+};
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $elm$json$Json$Decode$null = _Json_decodeNull;
+var $elm$json$Json$Decode$oneOf = _Json_oneOf;
+var $author$project$Form$decoderSubFieldId = $elm$json$Json$Decode$oneOf(
+	_List_fromArray(
+		[
+			A2(
+			$elm$json$Json$Decode$andThen,
+			function (i) {
+				return $elm$json$Json$Decode$succeed(
+					$author$project$Form$ArrayElement(i));
+			},
+			$elm$json$Json$Decode$int),
+			$elm$json$Json$Decode$null($author$project$Form$SingleValue)
+		]));
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $author$project$Form$decoderFormMsg = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$Form$FormMsg,
+	A2($elm$json$Json$Decode$field, 'fieldId', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'subFieldId', $author$project$Form$decoderSubFieldId),
+	A2($elm$json$Json$Decode$field, 'operation', $author$project$Form$decoderFieldOperation));
+var $author$project$Form$encodeFieldOperation = function (operation) {
+	switch (operation.$) {
+		case 'Add':
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'kind',
+						$elm$json$Json$Encode$string('add'))
+					]));
+		case 'Remove':
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'kind',
+						$elm$json$Json$Encode$string('remove'))
+					]));
+		default:
+			var v = operation.a;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'kind',
+						$elm$json$Json$Encode$string('update')),
+						_Utils_Tuple2('value', v)
+					]));
+	}
+};
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $author$project$Form$encodeSubFieldId = function (subfieldId) {
+	if (subfieldId.$ === 'SingleValue') {
+		return $elm$json$Json$Encode$null;
+	} else {
+		var i = subfieldId.a;
+		return $elm$json$Json$Encode$int(i);
+	}
+};
+var $author$project$Form$encodeFormMsg = function (_v0) {
+	var fieldId = _v0.a;
+	var subfieldId = _v0.b;
+	var operation = _v0.c;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'fieldId',
+				$elm$json$Json$Encode$string(fieldId)),
+				_Utils_Tuple2(
+				'subFieldId',
+				$author$project$Form$encodeSubFieldId(subfieldId)),
+				_Utils_Tuple2(
+				'operation',
+				$author$project$Form$encodeFieldOperation(operation))
+			]));
+};
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $elm$json$Json$Decode$keyValuePairs = _Json_decodeKeyValuePairs;
+var $elm$json$Json$Decode$dict = function (decoder) {
+	return A2(
+		$elm$json$Json$Decode$map,
+		$elm$core$Dict$fromList,
+		$elm$json$Json$Decode$keyValuePairs(decoder));
+};
+var $author$project$Form$formStateDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (d) {
+		return $elm$json$Json$Decode$succeed(
+			$author$project$Form$FormState(
+				{parentDomId: '', values: d}));
+	},
+	$elm$json$Json$Decode$dict($elm$json$Json$Decode$value));
 var $elm$core$Dict$foldl = F3(
 	function (func, acc, dict) {
 		foldl:
@@ -5848,72 +6211,29 @@ var $elm$json$Json$Encode$dict = F3(
 				_Json_emptyObject(_Utils_Tuple0),
 				dictionary));
 	});
-var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $elm$core$Dict$fromList = function (assocs) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (_v0, dict) {
-				var key = _v0.a;
-				var value = _v0.b;
-				return A3($elm$core$Dict$insert, key, value, dict);
-			}),
-		$elm$core$Dict$empty,
-		assocs);
+var $author$project$Form$formStateEncode = function (_v0) {
+	var values = _v0.a.values;
+	return A3($elm$json$Json$Encode$dict, $elm$core$Basics$identity, $elm$core$Basics$identity, values);
 };
-var $elm$json$Json$Decode$keyValuePairs = _Json_decodeKeyValuePairs;
-var $elm$json$Json$Decode$dict = function (decoder) {
-	return A2(
-		$elm$json$Json$Decode$map,
-		$elm$core$Dict$fromList,
-		$elm$json$Json$Decode$keyValuePairs(decoder));
-};
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
-var $author$project$Form$keysToInt = function (d) {
-	return $elm$core$Dict$fromList(
-		A2(
-			$elm$core$List$map,
-			function (_v0) {
-				var k = _v0.a;
-				var v = _v0.b;
-				return _Utils_Tuple2(
-					A2(
-						$elm$core$Maybe$withDefault,
-						-1,
-						$elm$core$String$toInt(k)),
-					v);
-			},
-			$elm$core$Dict$toList(d)));
-};
-var $elm$json$Json$Decode$value = _Json_decodeValue;
-var $author$project$Form$formStateDecoder = A2(
-	$elm$json$Json$Decode$andThen,
-	function (d) {
-		return $elm$json$Json$Decode$succeed(
-			$author$project$Form$FormState(
-				{
-					parentDomId: '',
-					values: $author$project$Form$keysToInt(d)
-				}));
-	},
-	$elm$json$Json$Decode$dict($elm$json$Json$Decode$value));
-var $elm$json$Json$Decode$int = _Json_decodeInt;
-var $elm$json$Json$Encode$int = _Json_wrap;
-var $author$project$Form$updateField = F4(
-	function (_v0, fieldId, msgValue, fs) {
+var $author$project$Form$updateField = F5(
+	function (_v0, fieldId, subfieldId, operation, fs) {
 		var updates = _v0.updates;
 		var formState = fs.a;
 		var updateFn = A2(
 			$elm$core$Maybe$withDefault,
-			F2(
-				function (_v1, modelValue_) {
+			F3(
+				function (_v2, _v3, modelValue_) {
 					return modelValue_;
 				}),
 			A2($elm$core$Dict$get, fieldId, updates));
 		var modelValue = A2($author$project$Form$read, fieldId, fs);
-		var updatedModelValue = A2(updateFn, msgValue, modelValue);
+		var updatedModelValue = A3(updateFn, subfieldId, operation, modelValue);
+		var _v1 = A2(
+			$elm$core$Debug$log,
+			'before, after',
+			_Utils_Tuple2(
+				A2($elm$json$Json$Encode$encode, -1, modelValue),
+				A2($elm$json$Json$Encode$encode, -1, updatedModelValue)));
 		return $author$project$Form$FormState(
 			_Utils_update(
 				formState,
@@ -5928,33 +6248,17 @@ var $author$project$Form$toWidget = function (f) {
 	};
 	return {
 		decoderModel: $author$project$Form$formStateDecoder,
-		decoderMsg: A3(
-			$elm$json$Json$Decode$map2,
-			$author$project$Form$FormMsg,
-			A2($elm$json$Json$Decode$field, 'fieldId', $elm$json$Json$Decode$int),
-			A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$value)),
-		encodeModel: function (_v0) {
-			var values = _v0.a.values;
-			return A3($elm$json$Json$Encode$dict, $elm$core$String$fromInt, $elm$core$Basics$identity, values);
-		},
-		encodeMsg: function (_v1) {
-			var fieldId = _v1.a;
-			var value = _v1.b;
-			return $elm$json$Json$Encode$object(
-				_List_fromArray(
-					[
-						_Utils_Tuple2(
-						'fieldId',
-						$elm$json$Json$Encode$int(fieldId)),
-						_Utils_Tuple2('value', value)
-					]));
-		},
-		init: $author$project$Form$init,
+		decoderMsg: $author$project$Form$decoderFormMsg,
+		encodeModel: $author$project$Form$formStateEncode,
+		encodeMsg: $author$project$Form$encodeFormMsg,
+		init: $author$project$Form$FormState(
+			{parentDomId: '', values: f.defaults}),
 		update: F2(
-			function (_v2, model) {
-				var fieldId = _v2.a;
-				var value = _v2.b;
-				return A4($author$project$Form$updateField, f, fieldId, value, model);
+			function (_v0, model) {
+				var fieldId = _v0.a;
+				var subfieldId = _v0.b;
+				var value = _v0.c;
+				return A5($author$project$Form$updateField, f, fieldId, subfieldId, value, model);
 			}),
 		validate: function (formState) {
 			return widgetErrors(formState);
@@ -5976,10 +6280,683 @@ var $author$project$Form$toWidget = function (f) {
 	};
 };
 var $author$project$Main$fullnameWidget = $author$project$Form$toWidget($author$project$Main$nameForm);
-var $author$project$Widgets$Int$Model = F2(
-	function (value, parsedValue) {
-		return {parsedValue: parsedValue, value: value};
+var $author$project$Form$buildDomId = F3(
+	function (parentDomId, fieldId, subfieldId) {
+		return parentDomId + ('-' + (fieldId + function () {
+			if (subfieldId.$ === 'SingleValue') {
+				return '';
+			} else {
+				var i = subfieldId.a;
+				return '-' + $elm$core$String$fromInt(i);
+			}
+		}()));
 	});
+var $author$project$Form$mkListField = F5(
+	function (fieldWithErrors, listWithAddButton, fieldWithRemoveButton, fieldId, widget) {
+		var deserializeModel = function (formState) {
+			return A2(
+				$elm$core$Maybe$withDefault,
+				_List_Nil,
+				$elm$core$Result$toMaybe(
+					A2(
+						$elm$json$Json$Decode$decodeValue,
+						$elm$json$Json$Decode$list(widget.decoderModel),
+						A2($author$project$Form$read, fieldId, formState))));
+		};
+		var errors_ = function (formState) {
+			return $elm$core$List$concat(
+				A2(
+					$elm$core$List$map,
+					widget.validate,
+					deserializeModel(formState)));
+		};
+		var value = function (formState) {
+			return A2(
+				$elm$core$List$map,
+				widget.value,
+				deserializeModel(formState));
+		};
+		var viewField = function (formState) {
+			var parentDomId = formState.a.parentDomId;
+			var toMsg_ = F2(
+				function (i, html) {
+					return A2(
+						$elm$html$Html$map,
+						function (msg) {
+							return A3(
+								$author$project$Form$FormMsg,
+								fieldId,
+								$author$project$Form$ArrayElement(i),
+								$author$project$Form$Update(
+									widget.encodeMsg(msg)));
+						},
+						html);
+				});
+			var toMsg = F2(
+				function (i, html) {
+					return A2(
+						$elm$core$List$map,
+						toMsg_(i),
+						html);
+				});
+			var removeArrayElementMsg = function (x) {
+				return A3(
+					$author$project$Form$FormMsg,
+					fieldId,
+					$author$project$Form$ArrayElement(x),
+					$author$project$Form$Remove);
+			};
+			var fieldErrors = errors_(formState);
+			var arrayElementHtml = F2(
+				function (i, model) {
+					return A2(
+						widget.view,
+						A3(
+							$author$project$Form$buildDomId,
+							parentDomId,
+							fieldId,
+							$author$project$Form$ArrayElement(i)),
+						model);
+				});
+			var addRemoveButton = F2(
+				function (i, html) {
+					return A2(
+						fieldWithRemoveButton,
+						removeArrayElementMsg(i),
+						html);
+				});
+			var inputHtml = $elm$core$List$concat(
+				A2(
+					$elm$core$List$indexedMap,
+					addRemoveButton,
+					A2(
+						$elm$core$List$indexedMap,
+						toMsg,
+						A2(
+							$elm$core$List$indexedMap,
+							arrayElementHtml,
+							deserializeModel(formState)))));
+			var addArrayElementMsg = A3(
+				$author$project$Form$FormMsg,
+				fieldId,
+				$author$project$Form$ArrayElement(0),
+				$author$project$Form$Add);
+			var addArrayElement = function (html) {
+				return A2(listWithAddButton, addArrayElementMsg, html);
+			};
+			return A2(
+				fieldWithErrors,
+				fieldErrors,
+				addArrayElement(inputHtml));
+		};
+		return {errors: errors_, id: fieldId, multiple: true, value: value, view: viewField};
+	});
+var $author$project$Form$listField = F4(
+	function (listWithAddButton, fieldWithRemoveButton, widget, _v0) {
+		var fn = _v0.fn;
+		var count = _v0.count;
+		var updates = _v0.updates;
+		var fieldWithErrors = _v0.fieldWithErrors;
+		var validator = _v0.validator;
+		var defaults = _v0.defaults;
+		var fieldId = $elm$core$String$fromInt(count);
+		return {
+			count: count + 1,
+			defaults: A3(
+				$elm$core$Dict$insert,
+				fieldId,
+				A2(
+					$elm$json$Json$Encode$list,
+					widget.encodeModel,
+					_List_fromArray(
+						[widget.init])),
+				defaults),
+			fieldWithErrors: fieldWithErrors,
+			fn: fn(
+				A5($author$project$Form$mkListField, fieldWithErrors, listWithAddButton, fieldWithRemoveButton, fieldId, widget)),
+			updates: A3(
+				$elm$core$Dict$insert,
+				$elm$core$String$fromInt(count),
+				$author$project$Form$encodedUpdate(widget),
+				updates),
+			validator: validator
+		};
+	});
+var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $author$project$Main$withAddButton = F3(
+	function (subject, add, inputHtml) {
+		return _Utils_ap(
+			inputHtml,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick(add),
+							$elm$html$Html$Attributes$class('secondary')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Add ' + subject)
+						]))
+				]));
+	});
+var $author$project$Main$withRemoveButton = F2(
+	function (remove, inputHtml) {
+		return A2(
+			$elm$core$List$cons,
+			A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick(remove),
+						$elm$html$Html$Attributes$class('secondary')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Remove')
+					])),
+			inputHtml);
+	});
+var $author$project$Main$hasManyNamesForm = A4(
+	$author$project$Form$listField,
+	$author$project$Main$withAddButton('person'),
+	$author$project$Main$withRemoveButton,
+	$author$project$Main$fullnameWidget,
+	A3(
+		$author$project$Form$form,
+		$author$project$Form$alwaysValid,
+		F2(
+			function (_v0, html) {
+				return html;
+			}),
+		function (names) {
+			return {
+				combine: function (formState) {
+					return names.value(formState);
+				},
+				view: F2(
+					function (formState, _v1) {
+						return names.view(formState);
+					})
+			};
+		}));
+var $author$project$Main$currentForm = $author$project$Main$hasManyNamesForm;
+var $author$project$Form$init = function (_v0) {
+	var defaults = _v0.defaults;
+	return $author$project$Form$FormState(
+		{parentDomId: '', values: defaults});
+};
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Main$init = function (_v0) {
+	return _Utils_Tuple2(
+		{
+			formState: $author$project$Form$init($author$project$Main$currentForm),
+			submitted: $elm$core$Maybe$Nothing
+		},
+		$elm$core$Platform$Cmd$none);
+};
+var $elm$core$Platform$Sub$batch = _Platform_batch;
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $elm$core$Dict$map = F2(
+	function (func, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return $elm$core$Dict$RBEmpty_elm_builtin;
+		} else {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				color,
+				key,
+				A2(func, key, value),
+				A2($elm$core$Dict$map, func, left),
+				A2($elm$core$Dict$map, func, right));
+		}
+	});
+var $author$project$Form$debugFormState = function (fs) {
+	var values = fs.a.values;
+	var dbg = F2(
+		function (k, v) {
+			return A2(
+				$elm$core$Debug$log,
+				k,
+				A2($elm$json$Json$Encode$encode, -1, v));
+		});
+	var _v0 = A2($elm$core$Dict$map, dbg, values);
+	return fs;
+};
+var $author$project$Form$update = F3(
+	function (form_, _v0, formState) {
+		var fieldId = _v0.a;
+		var subfieldId = _v0.b;
+		var op = _v0.c;
+		return A5($author$project$Form$updateField, form_, fieldId, subfieldId, op, formState);
+	});
+var $author$project$Main$update = F2(
+	function (msg, model) {
+		if (msg.$ === 'ForForm') {
+			var formMsg = msg.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						formState: A3(
+							$author$project$Form$update,
+							$author$project$Main$currentForm,
+							formMsg,
+							$author$project$Form$debugFormState(model.formState))
+					}),
+				$elm$core$Platform$Cmd$none);
+		} else {
+			var formData = msg.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						submitted: $elm$core$Maybe$Just(formData)
+					}),
+				$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Main$ForForm = function (a) {
+	return {$: 'ForForm', a: a};
+};
+var $author$project$Main$Submit = function (a) {
+	return {$: 'Submit', a: a};
+};
+var $elm$html$Html$article = _VirtualDom_node('article');
+var $author$project$WebColor$asStr = function (c) {
+	switch (c.$) {
+		case 'Aliceblue':
+			return 'Aliceblue';
+		case 'Antiquewhite':
+			return 'Antiquewhite';
+		case 'Aqua':
+			return 'Aqua';
+		case 'Aquamarine':
+			return 'Aquamarine';
+		case 'Azure':
+			return 'Azure';
+		case 'Beige':
+			return 'Beige';
+		case 'Bisque':
+			return 'Bisque';
+		case 'Black':
+			return 'Black';
+		case 'Blanchedalmond':
+			return 'Blanchedalmond';
+		case 'Blue':
+			return 'Blue';
+		case 'Blueviolet':
+			return 'Blueviolet';
+		case 'Brown':
+			return 'Brown';
+		case 'Burlywood':
+			return 'Burlywood';
+		case 'Cadetblue':
+			return 'Cadetblue';
+		case 'Chartreuse':
+			return 'Chartreuse';
+		case 'Chocolate':
+			return 'Chocolate';
+		case 'Coral':
+			return 'Coral';
+		case 'Cornflowerblue':
+			return 'Cornflowerblue';
+		case 'Cornsilk':
+			return 'Cornsilk';
+		case 'Crimson':
+			return 'Crimson';
+		case 'Cyan':
+			return 'Cyan';
+		case 'Darkblue':
+			return 'Darkblue';
+		case 'Darkcyan':
+			return 'Darkcyan';
+		case 'Darkgoldenrod':
+			return 'Darkgoldenrod';
+		case 'Darkgray':
+			return 'Darkgray';
+		case 'Darkgreen':
+			return 'Darkgreen';
+		case 'Darkgrey':
+			return 'Darkgrey';
+		case 'Darkkhaki':
+			return 'Darkkhaki';
+		case 'Darkmagenta':
+			return 'Darkmagenta';
+		case 'Darkolivegreen':
+			return 'Darkolivegreen';
+		case 'Darkorange':
+			return 'Darkorange';
+		case 'Darkorchid':
+			return 'Darkorchid';
+		case 'Darkred':
+			return 'Darkred';
+		case 'Darksalmon':
+			return 'Darksalmon';
+		case 'Darkseagreen':
+			return 'Darkseagreen';
+		case 'Darkslateblue':
+			return 'Darkslateblue';
+		case 'Darkslategray':
+			return 'Darkslategray';
+		case 'Darkslategrey':
+			return 'Darkslategrey';
+		case 'Darkturquoise':
+			return 'Darkturquoise';
+		case 'Darkviolet':
+			return 'Darkviolet';
+		case 'Deeppink':
+			return 'Deeppink';
+		case 'Deepskyblue':
+			return 'Deepskyblue';
+		case 'Dimgray':
+			return 'Dimgray';
+		case 'Dimgrey':
+			return 'Dimgrey';
+		case 'Dodgerblue':
+			return 'Dodgerblue';
+		case 'Firebrick':
+			return 'Firebrick';
+		case 'Floralwhite':
+			return 'Floralwhite';
+		case 'Forestgreen':
+			return 'Forestgreen';
+		case 'Fuchsia':
+			return 'Fuchsia';
+		case 'Gainsboro':
+			return 'Gainsboro';
+		case 'Ghostwhite':
+			return 'Ghostwhite';
+		case 'Gold':
+			return 'Gold';
+		case 'Goldenrod':
+			return 'Goldenrod';
+		case 'Gray':
+			return 'Gray';
+		case 'Green':
+			return 'Green';
+		case 'Greenyellow':
+			return 'Greenyellow';
+		case 'Grey':
+			return 'Grey';
+		case 'Honeydew':
+			return 'Honeydew';
+		case 'Hotpink':
+			return 'Hotpink';
+		case 'Indianred':
+			return 'Indianred';
+		case 'Indigo':
+			return 'Indigo';
+		case 'Ivory':
+			return 'Ivory';
+		case 'Khaki':
+			return 'Khaki';
+		case 'Lavender':
+			return 'Lavender';
+		case 'Lavenderblush':
+			return 'Lavenderblush';
+		case 'Lawngreen':
+			return 'Lawngreen';
+		case 'Lemonchiffon':
+			return 'Lemonchiffon';
+		case 'Lightblue':
+			return 'Lightblue';
+		case 'Lightcoral':
+			return 'Lightcoral';
+		case 'Lightcyan':
+			return 'Lightcyan';
+		case 'Lightgoldenrodyellow':
+			return 'Lightgoldenrodyellow';
+		case 'Lightgray':
+			return 'Lightgray';
+		case 'Lightgreen':
+			return 'Lightgreen';
+		case 'Lightgrey':
+			return 'Lightgrey';
+		case 'Lightpink':
+			return 'Lightpink';
+		case 'Lightsalmon':
+			return 'Lightsalmon';
+		case 'Lightseagreen':
+			return 'Lightseagreen';
+		case 'Lightskyblue':
+			return 'Lightskyblue';
+		case 'Lightslategray':
+			return 'Lightslategray';
+		case 'Lightslategrey':
+			return 'Lightslategrey';
+		case 'Lightsteelblue':
+			return 'Lightsteelblue';
+		case 'Lightyellow':
+			return 'Lightyellow';
+		case 'Lime':
+			return 'Lime';
+		case 'Limegreen':
+			return 'Limegreen';
+		case 'Linen':
+			return 'Linen';
+		case 'Magenta':
+			return 'Magenta';
+		case 'Maroon':
+			return 'Maroon';
+		case 'Mediumaquamarine':
+			return 'Mediumaquamarine';
+		case 'Mediumblue':
+			return 'Mediumblue';
+		case 'Mediumorchid':
+			return 'Mediumorchid';
+		case 'Mediumpurple':
+			return 'Mediumpurple';
+		case 'Mediumseagreen':
+			return 'Mediumseagreen';
+		case 'Mediumslateblue':
+			return 'Mediumslateblue';
+		case 'Mediumspringgreen':
+			return 'Mediumspringgreen';
+		case 'Mediumturquoise':
+			return 'Mediumturquoise';
+		case 'Mediumvioletred':
+			return 'Mediumvioletred';
+		case 'Midnightblue':
+			return 'Midnightblue';
+		case 'Mintcream':
+			return 'Mintcream';
+		case 'Mistyrose':
+			return 'Mistyrose';
+		case 'Moccasin':
+			return 'Moccasin';
+		case 'Navajowhite':
+			return 'Navajowhite';
+		case 'Navy':
+			return 'Navy';
+		case 'Oldlace':
+			return 'Oldlace';
+		case 'Olive':
+			return 'Olive';
+		case 'Olivedrab':
+			return 'Olivedrab';
+		case 'Orange':
+			return 'Orange';
+		case 'Orangered':
+			return 'Orangered';
+		case 'Orchid':
+			return 'Orchid';
+		case 'Palegoldenrod':
+			return 'Palegoldenrod';
+		case 'Palegreen':
+			return 'Palegreen';
+		case 'Paleturquoise':
+			return 'Paleturquoise';
+		case 'Palevioletred':
+			return 'Palevioletred';
+		case 'Papayawhip':
+			return 'Papayawhip';
+		case 'Peachpuff':
+			return 'Peachpuff';
+		case 'Peru':
+			return 'Peru';
+		case 'Pink':
+			return 'Pink';
+		case 'Plum':
+			return 'Plum';
+		case 'Powderblue':
+			return 'Powderblue';
+		case 'Purple':
+			return 'Purple';
+		case 'Rebeccapurple':
+			return 'Rebeccapurple';
+		case 'Red':
+			return 'Red';
+		case 'Rosybrown':
+			return 'Rosybrown';
+		case 'Royalblue':
+			return 'Royalblue';
+		case 'Saddlebrown':
+			return 'Saddlebrown';
+		case 'Salmon':
+			return 'Salmon';
+		case 'Sandybrown':
+			return 'Sandybrown';
+		case 'Seagreen':
+			return 'Seagreen';
+		case 'Seashell':
+			return 'Seashell';
+		case 'Sienna':
+			return 'Sienna';
+		case 'Silver':
+			return 'Silver';
+		case 'Skyblue':
+			return 'Skyblue';
+		case 'Slateblue':
+			return 'Slateblue';
+		case 'Slategray':
+			return 'Slategray';
+		case 'Slategrey':
+			return 'Slategrey';
+		case 'Snow':
+			return 'Snow';
+		case 'Springgreen':
+			return 'Springgreen';
+		case 'Steelblue':
+			return 'Steelblue';
+		case 'Tan':
+			return 'Tan';
+		case 'Teal':
+			return 'Teal';
+		case 'Thistle':
+			return 'Thistle';
+		case 'Tomato':
+			return 'Tomato';
+		case 'Transparent':
+			return 'Transparent';
+		case 'Turquoise':
+			return 'Turquoise';
+		case 'Violet':
+			return 'Violet';
+		case 'Wheat':
+			return 'Wheat';
+		case 'White':
+			return 'White';
+		case 'Whitesmoke':
+			return 'Whitesmoke';
+		case 'Yellow':
+			return 'Yellow';
+		default:
+			return 'Yellowgreen';
+	}
+};
+var $author$project$Main$displayFormData = function (_v0) {
+	var formData = _v0.a;
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('counter: '),
+						$elm$html$Html$text(
+						$elm$core$String$fromInt(formData.counter))
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('check: '),
+						$elm$html$Html$text(
+						formData.check ? 'true' : 'false')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				A2(
+					$elm$core$List$cons,
+					$elm$html$Html$text('web colors: '),
+					A2(
+						$elm$core$List$map,
+						function (c) {
+							return $elm$html$Html$text(
+								$author$project$WebColor$asStr(c));
+						},
+						formData.webColors))),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('name: '),
+						$elm$html$Html$text(formData.name.first),
+						$elm$html$Html$text(' '),
+						$elm$html$Html$text(formData.name.last)
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				A2(
+					$elm$core$List$cons,
+					$elm$html$Html$text('numbers: '),
+					A2(
+						$elm$core$List$map,
+						function (i) {
+							return $elm$html$Html$text(
+								$elm$core$String$fromInt(i));
+						},
+						formData.ints)))
+			]));
+};
+var $author$project$Form$extract = function (_v0) {
+	var fn = _v0.fn;
+	return fn.combine;
+};
+var $elm$html$Html$footer = _VirtualDom_node('footer');
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
 		if (maybe.$ === 'Just') {
@@ -5989,6 +6966,84 @@ var $elm$core$Maybe$map = F2(
 		} else {
 			return $elm$core$Maybe$Nothing;
 		}
+	});
+var $author$project$Main$FormData = function (a) {
+	return {$: 'FormData', a: a};
+};
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
+var $elm$core$Basics$not = _Basics_not;
+var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $author$project$Widgets$Checkbox$checkbox = {
+	decoderModel: $elm$json$Json$Decode$bool,
+	decoderMsg: $elm$json$Json$Decode$succeed(_Utils_Tuple0),
+	encodeModel: $elm$json$Json$Encode$bool,
+	encodeMsg: function (_v0) {
+		return $elm$json$Json$Encode$object(_List_Nil);
+	},
+	init: false,
+	update: F2(
+		function (_v1, model) {
+			return !model;
+		}),
+	validate: $author$project$Form$alwaysValid,
+	value: $elm$core$Basics$identity,
+	view: F2(
+		function (domId, model) {
+			return _List_fromArray(
+				[
+					A2(
+					$elm$html$Html$input,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$id(domId),
+							$elm$html$Html$Attributes$type_('checkbox'),
+							$elm$html$Html$Events$onInput(
+							function (_v2) {
+								return _Utils_Tuple0;
+							}),
+							$elm$html$Html$Attributes$checked(model)
+						]),
+					_List_Nil)
+				]);
+		})
+};
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$html$Html$Attributes$classList = function (classes) {
+	return $elm$html$Html$Attributes$class(
+		A2(
+			$elm$core$String$join,
+			' ',
+			A2(
+				$elm$core$List$map,
+				$elm$core$Tuple$first,
+				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
+};
+var $author$project$Widgets$Int$Model = F2(
+	function (value, parsedValue) {
+		return {parsedValue: parsedValue, value: value};
 	});
 var $author$project$Widgets$Int$integerInput = function (attrs) {
 	return {
@@ -6068,7 +7123,6 @@ var $author$project$MultiColorPicker$Model = F2(
 	function (prefix, selected) {
 		return {prefix: prefix, selected: selected};
 	});
-var $elm$json$Json$Decode$fail = _Json_fail;
 var $author$project$WebColor$Aliceblue = {$: 'Aliceblue'};
 var $author$project$WebColor$Antiquewhite = {$: 'Antiquewhite'};
 var $author$project$WebColor$Aqua = {$: 'Aqua'};
@@ -6534,7 +7588,6 @@ var $author$project$WebColor$decoderColor = A2(
 				$author$project$WebColor$fromString(s)));
 	},
 	$elm$json$Json$Decode$string);
-var $elm$json$Json$Decode$list = _Json_decodeList;
 var $author$project$MultiColorPicker$decoderModel = A3(
 	$elm$json$Json$Decode$map2,
 	$author$project$MultiColorPicker$Model,
@@ -6576,321 +7629,10 @@ var $author$project$MultiColorPicker$decoderMsg = A2(
 		}
 	},
 	A2($elm$json$Json$Decode$field, 'kind', $elm$json$Json$Decode$string));
-var $author$project$WebColor$asStr = function (c) {
-	switch (c.$) {
-		case 'Aliceblue':
-			return 'Aliceblue';
-		case 'Antiquewhite':
-			return 'Antiquewhite';
-		case 'Aqua':
-			return 'Aqua';
-		case 'Aquamarine':
-			return 'Aquamarine';
-		case 'Azure':
-			return 'Azure';
-		case 'Beige':
-			return 'Beige';
-		case 'Bisque':
-			return 'Bisque';
-		case 'Black':
-			return 'Black';
-		case 'Blanchedalmond':
-			return 'Blanchedalmond';
-		case 'Blue':
-			return 'Blue';
-		case 'Blueviolet':
-			return 'Blueviolet';
-		case 'Brown':
-			return 'Brown';
-		case 'Burlywood':
-			return 'Burlywood';
-		case 'Cadetblue':
-			return 'Cadetblue';
-		case 'Chartreuse':
-			return 'Chartreuse';
-		case 'Chocolate':
-			return 'Chocolate';
-		case 'Coral':
-			return 'Coral';
-		case 'Cornflowerblue':
-			return 'Cornflowerblue';
-		case 'Cornsilk':
-			return 'Cornsilk';
-		case 'Crimson':
-			return 'Crimson';
-		case 'Cyan':
-			return 'Cyan';
-		case 'Darkblue':
-			return 'Darkblue';
-		case 'Darkcyan':
-			return 'Darkcyan';
-		case 'Darkgoldenrod':
-			return 'Darkgoldenrod';
-		case 'Darkgray':
-			return 'Darkgray';
-		case 'Darkgreen':
-			return 'Darkgreen';
-		case 'Darkgrey':
-			return 'Darkgrey';
-		case 'Darkkhaki':
-			return 'Darkkhaki';
-		case 'Darkmagenta':
-			return 'Darkmagenta';
-		case 'Darkolivegreen':
-			return 'Darkolivegreen';
-		case 'Darkorange':
-			return 'Darkorange';
-		case 'Darkorchid':
-			return 'Darkorchid';
-		case 'Darkred':
-			return 'Darkred';
-		case 'Darksalmon':
-			return 'Darksalmon';
-		case 'Darkseagreen':
-			return 'Darkseagreen';
-		case 'Darkslateblue':
-			return 'Darkslateblue';
-		case 'Darkslategray':
-			return 'Darkslategray';
-		case 'Darkslategrey':
-			return 'Darkslategrey';
-		case 'Darkturquoise':
-			return 'Darkturquoise';
-		case 'Darkviolet':
-			return 'Darkviolet';
-		case 'Deeppink':
-			return 'Deeppink';
-		case 'Deepskyblue':
-			return 'Deepskyblue';
-		case 'Dimgray':
-			return 'Dimgray';
-		case 'Dimgrey':
-			return 'Dimgrey';
-		case 'Dodgerblue':
-			return 'Dodgerblue';
-		case 'Firebrick':
-			return 'Firebrick';
-		case 'Floralwhite':
-			return 'Floralwhite';
-		case 'Forestgreen':
-			return 'Forestgreen';
-		case 'Fuchsia':
-			return 'Fuchsia';
-		case 'Gainsboro':
-			return 'Gainsboro';
-		case 'Ghostwhite':
-			return 'Ghostwhite';
-		case 'Gold':
-			return 'Gold';
-		case 'Goldenrod':
-			return 'Goldenrod';
-		case 'Gray':
-			return 'Gray';
-		case 'Green':
-			return 'Green';
-		case 'Greenyellow':
-			return 'Greenyellow';
-		case 'Grey':
-			return 'Grey';
-		case 'Honeydew':
-			return 'Honeydew';
-		case 'Hotpink':
-			return 'Hotpink';
-		case 'Indianred':
-			return 'Indianred';
-		case 'Indigo':
-			return 'Indigo';
-		case 'Ivory':
-			return 'Ivory';
-		case 'Khaki':
-			return 'Khaki';
-		case 'Lavender':
-			return 'Lavender';
-		case 'Lavenderblush':
-			return 'Lavenderblush';
-		case 'Lawngreen':
-			return 'Lawngreen';
-		case 'Lemonchiffon':
-			return 'Lemonchiffon';
-		case 'Lightblue':
-			return 'Lightblue';
-		case 'Lightcoral':
-			return 'Lightcoral';
-		case 'Lightcyan':
-			return 'Lightcyan';
-		case 'Lightgoldenrodyellow':
-			return 'Lightgoldenrodyellow';
-		case 'Lightgray':
-			return 'Lightgray';
-		case 'Lightgreen':
-			return 'Lightgreen';
-		case 'Lightgrey':
-			return 'Lightgrey';
-		case 'Lightpink':
-			return 'Lightpink';
-		case 'Lightsalmon':
-			return 'Lightsalmon';
-		case 'Lightseagreen':
-			return 'Lightseagreen';
-		case 'Lightskyblue':
-			return 'Lightskyblue';
-		case 'Lightslategray':
-			return 'Lightslategray';
-		case 'Lightslategrey':
-			return 'Lightslategrey';
-		case 'Lightsteelblue':
-			return 'Lightsteelblue';
-		case 'Lightyellow':
-			return 'Lightyellow';
-		case 'Lime':
-			return 'Lime';
-		case 'Limegreen':
-			return 'Limegreen';
-		case 'Linen':
-			return 'Linen';
-		case 'Magenta':
-			return 'Magenta';
-		case 'Maroon':
-			return 'Maroon';
-		case 'Mediumaquamarine':
-			return 'Mediumaquamarine';
-		case 'Mediumblue':
-			return 'Mediumblue';
-		case 'Mediumorchid':
-			return 'Mediumorchid';
-		case 'Mediumpurple':
-			return 'Mediumpurple';
-		case 'Mediumseagreen':
-			return 'Mediumseagreen';
-		case 'Mediumslateblue':
-			return 'Mediumslateblue';
-		case 'Mediumspringgreen':
-			return 'Mediumspringgreen';
-		case 'Mediumturquoise':
-			return 'Mediumturquoise';
-		case 'Mediumvioletred':
-			return 'Mediumvioletred';
-		case 'Midnightblue':
-			return 'Midnightblue';
-		case 'Mintcream':
-			return 'Mintcream';
-		case 'Mistyrose':
-			return 'Mistyrose';
-		case 'Moccasin':
-			return 'Moccasin';
-		case 'Navajowhite':
-			return 'Navajowhite';
-		case 'Navy':
-			return 'Navy';
-		case 'Oldlace':
-			return 'Oldlace';
-		case 'Olive':
-			return 'Olive';
-		case 'Olivedrab':
-			return 'Olivedrab';
-		case 'Orange':
-			return 'Orange';
-		case 'Orangered':
-			return 'Orangered';
-		case 'Orchid':
-			return 'Orchid';
-		case 'Palegoldenrod':
-			return 'Palegoldenrod';
-		case 'Palegreen':
-			return 'Palegreen';
-		case 'Paleturquoise':
-			return 'Paleturquoise';
-		case 'Palevioletred':
-			return 'Palevioletred';
-		case 'Papayawhip':
-			return 'Papayawhip';
-		case 'Peachpuff':
-			return 'Peachpuff';
-		case 'Peru':
-			return 'Peru';
-		case 'Pink':
-			return 'Pink';
-		case 'Plum':
-			return 'Plum';
-		case 'Powderblue':
-			return 'Powderblue';
-		case 'Purple':
-			return 'Purple';
-		case 'Rebeccapurple':
-			return 'Rebeccapurple';
-		case 'Red':
-			return 'Red';
-		case 'Rosybrown':
-			return 'Rosybrown';
-		case 'Royalblue':
-			return 'Royalblue';
-		case 'Saddlebrown':
-			return 'Saddlebrown';
-		case 'Salmon':
-			return 'Salmon';
-		case 'Sandybrown':
-			return 'Sandybrown';
-		case 'Seagreen':
-			return 'Seagreen';
-		case 'Seashell':
-			return 'Seashell';
-		case 'Sienna':
-			return 'Sienna';
-		case 'Silver':
-			return 'Silver';
-		case 'Skyblue':
-			return 'Skyblue';
-		case 'Slateblue':
-			return 'Slateblue';
-		case 'Slategray':
-			return 'Slategray';
-		case 'Slategrey':
-			return 'Slategrey';
-		case 'Snow':
-			return 'Snow';
-		case 'Springgreen':
-			return 'Springgreen';
-		case 'Steelblue':
-			return 'Steelblue';
-		case 'Tan':
-			return 'Tan';
-		case 'Teal':
-			return 'Teal';
-		case 'Thistle':
-			return 'Thistle';
-		case 'Tomato':
-			return 'Tomato';
-		case 'Transparent':
-			return 'Transparent';
-		case 'Turquoise':
-			return 'Turquoise';
-		case 'Violet':
-			return 'Violet';
-		case 'Wheat':
-			return 'Wheat';
-		case 'White':
-			return 'White';
-		case 'Whitesmoke':
-			return 'Whitesmoke';
-		case 'Yellow':
-			return 'Yellow';
-		default:
-			return 'Yellowgreen';
-	}
-};
 var $author$project$WebColor$encodeColor = function (color) {
 	return $elm$json$Json$Encode$string(
 		$author$project$WebColor$asStr(color));
 };
-var $elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				$elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
-	});
 var $author$project$MultiColorPicker$encodeModel = function (_v0) {
 	var prefix = _v0.prefix;
 	var selected = _v0.selected;
@@ -6970,23 +7712,6 @@ var $author$project$MultiColorPicker$update = F2(
 	});
 var $author$project$WebColor$all = _List_fromArray(
 	[$author$project$WebColor$Aliceblue, $author$project$WebColor$Antiquewhite, $author$project$WebColor$Aqua, $author$project$WebColor$Aquamarine, $author$project$WebColor$Azure, $author$project$WebColor$Beige, $author$project$WebColor$Bisque, $author$project$WebColor$Black, $author$project$WebColor$Blanchedalmond, $author$project$WebColor$Blue, $author$project$WebColor$Blueviolet, $author$project$WebColor$Brown, $author$project$WebColor$Burlywood, $author$project$WebColor$Cadetblue, $author$project$WebColor$Chartreuse, $author$project$WebColor$Chocolate, $author$project$WebColor$Coral, $author$project$WebColor$Cornflowerblue, $author$project$WebColor$Cornsilk, $author$project$WebColor$Crimson, $author$project$WebColor$Cyan, $author$project$WebColor$Darkblue, $author$project$WebColor$Darkcyan, $author$project$WebColor$Darkgoldenrod, $author$project$WebColor$Darkgray, $author$project$WebColor$Darkgreen, $author$project$WebColor$Darkgrey, $author$project$WebColor$Darkkhaki, $author$project$WebColor$Darkmagenta, $author$project$WebColor$Darkolivegreen, $author$project$WebColor$Darkorange, $author$project$WebColor$Darkorchid, $author$project$WebColor$Darkred, $author$project$WebColor$Darksalmon, $author$project$WebColor$Darkseagreen, $author$project$WebColor$Darkslateblue, $author$project$WebColor$Darkslategray, $author$project$WebColor$Darkslategrey, $author$project$WebColor$Darkturquoise, $author$project$WebColor$Darkviolet, $author$project$WebColor$Deeppink, $author$project$WebColor$Deepskyblue, $author$project$WebColor$Dimgray, $author$project$WebColor$Dimgrey, $author$project$WebColor$Dodgerblue, $author$project$WebColor$Firebrick, $author$project$WebColor$Floralwhite, $author$project$WebColor$Forestgreen, $author$project$WebColor$Fuchsia, $author$project$WebColor$Gainsboro, $author$project$WebColor$Ghostwhite, $author$project$WebColor$Gold, $author$project$WebColor$Goldenrod, $author$project$WebColor$Gray, $author$project$WebColor$Green, $author$project$WebColor$Greenyellow, $author$project$WebColor$Grey, $author$project$WebColor$Honeydew, $author$project$WebColor$Hotpink, $author$project$WebColor$Indianred, $author$project$WebColor$Indigo, $author$project$WebColor$Ivory, $author$project$WebColor$Khaki, $author$project$WebColor$Lavender, $author$project$WebColor$Lavenderblush, $author$project$WebColor$Lawngreen, $author$project$WebColor$Lemonchiffon, $author$project$WebColor$Lightblue, $author$project$WebColor$Lightcoral, $author$project$WebColor$Lightcyan, $author$project$WebColor$Lightgoldenrodyellow, $author$project$WebColor$Lightgray, $author$project$WebColor$Lightgreen, $author$project$WebColor$Lightgrey, $author$project$WebColor$Lightpink, $author$project$WebColor$Lightsalmon, $author$project$WebColor$Lightseagreen, $author$project$WebColor$Lightskyblue, $author$project$WebColor$Lightslategray, $author$project$WebColor$Lightslategrey, $author$project$WebColor$Lightsteelblue, $author$project$WebColor$Lightyellow, $author$project$WebColor$Lime, $author$project$WebColor$Limegreen, $author$project$WebColor$Linen, $author$project$WebColor$Magenta, $author$project$WebColor$Maroon, $author$project$WebColor$Mediumaquamarine, $author$project$WebColor$Mediumblue, $author$project$WebColor$Mediumorchid, $author$project$WebColor$Mediumpurple, $author$project$WebColor$Mediumseagreen, $author$project$WebColor$Mediumslateblue, $author$project$WebColor$Mediumspringgreen, $author$project$WebColor$Mediumturquoise, $author$project$WebColor$Mediumvioletred, $author$project$WebColor$Midnightblue, $author$project$WebColor$Mintcream, $author$project$WebColor$Mistyrose, $author$project$WebColor$Moccasin, $author$project$WebColor$Navajowhite, $author$project$WebColor$Navy, $author$project$WebColor$Oldlace, $author$project$WebColor$Olive, $author$project$WebColor$Olivedrab, $author$project$WebColor$Orange, $author$project$WebColor$Orangered, $author$project$WebColor$Orchid, $author$project$WebColor$Palegoldenrod, $author$project$WebColor$Palegreen, $author$project$WebColor$Paleturquoise, $author$project$WebColor$Palevioletred, $author$project$WebColor$Papayawhip, $author$project$WebColor$Peachpuff, $author$project$WebColor$Peru, $author$project$WebColor$Pink, $author$project$WebColor$Plum, $author$project$WebColor$Powderblue, $author$project$WebColor$Purple, $author$project$WebColor$Rebeccapurple, $author$project$WebColor$Red, $author$project$WebColor$Rosybrown, $author$project$WebColor$Royalblue, $author$project$WebColor$Saddlebrown, $author$project$WebColor$Salmon, $author$project$WebColor$Sandybrown, $author$project$WebColor$Seagreen, $author$project$WebColor$Seashell, $author$project$WebColor$Sienna, $author$project$WebColor$Silver, $author$project$WebColor$Skyblue, $author$project$WebColor$Slateblue, $author$project$WebColor$Slategray, $author$project$WebColor$Slategrey, $author$project$WebColor$Snow, $author$project$WebColor$Springgreen, $author$project$WebColor$Steelblue, $author$project$WebColor$Tan, $author$project$WebColor$Teal, $author$project$WebColor$Thistle, $author$project$WebColor$Tomato, $author$project$WebColor$Transparent, $author$project$WebColor$Turquoise, $author$project$WebColor$Violet, $author$project$WebColor$Wheat, $author$project$WebColor$White, $author$project$WebColor$Whitesmoke, $author$project$WebColor$Yellow, $author$project$WebColor$Yellowgreen]);
-var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var $elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
-};
 var $elm$core$String$toLower = _String_toLower;
 var $author$project$MultiColorPicker$viewOptions = function (prefix) {
 	return $elm$core$String$isEmpty(prefix) ? _List_Nil : A2(
@@ -7068,174 +7793,105 @@ var $author$project$MultiColorPicker$widget = {
 	},
 	view: $author$project$MultiColorPicker$view
 };
-var $author$project$Main$myForm = A2(
-	$author$project$Form$field,
-	$author$project$Main$fullnameWidget,
+var $author$project$Main$myForm = A4(
+	$author$project$Form$listField,
+	$author$project$Main$withAddButton('number'),
+	$author$project$Main$withRemoveButton,
+	$author$project$Widgets$Int$integerInput(_List_Nil),
 	A2(
 		$author$project$Form$field,
-		A2($author$project$Main$withLabel, 'Web Colors', $author$project$MultiColorPicker$widget),
+		$author$project$Main$fullnameWidget,
 		A2(
 			$author$project$Form$field,
-			A2($author$project$Main$withLabel, 'checkbox', $author$project$Widgets$Checkbox$checkbox),
+			A2($author$project$Main$withLabel, 'Web Colors', $author$project$MultiColorPicker$widget),
 			A2(
 				$author$project$Form$field,
-				$author$project$Widgets$Int$integerInput(_List_Nil),
-				A3(
-					$author$project$Form$form,
-					$author$project$Main$validateFormData,
-					F2(
-						function (_v0, html) {
-							return html;
-						}),
-					F4(
-						function (_int, check, wc, name) {
-							return {
-								combine: function (formState) {
-									return $author$project$Main$FormData(
-										{
-											check: check.value(formState),
-											counter: _int.value(formState),
-											name: name.value(formState),
-											webColors: wc.value(formState)
-										});
-								},
-								view: F2(
-									function (formState, errors) {
-										return _List_fromArray(
-											[
-												A2(
-												$elm$html$Html$div,
-												_List_fromArray(
-													[
-														$elm$html$Html$Attributes$classList(
-														_List_fromArray(
-															[
-																_Utils_Tuple2(
-																'has-error',
-																$elm$core$List$isEmpty(errors))
-															]))
-													]),
-												_List_fromArray(
-													[
-														A2(
-														$elm$html$Html$div,
-														_List_fromArray(
-															[
-																$elm$html$Html$Attributes$class('errors')
-															]),
-														_List_fromArray(
-															[
-																$author$project$Main$viewErrors(errors)
-															])),
-														A2(
-														$elm$html$Html$div,
-														_List_fromArray(
-															[
-																$elm$html$Html$Attributes$class('grid')
-															]),
-														_List_fromArray(
-															[
-																A2(
-																$elm$html$Html$div,
-																_List_Nil,
-																_int.view(formState)),
-																A2(
-																$elm$html$Html$div,
-																_List_Nil,
-																check.view(formState)),
-																A2(
-																$elm$html$Html$div,
-																_List_Nil,
-																wc.view(formState)),
-																A2(
-																$elm$html$Html$div,
-																_List_Nil,
-																name.view(formState))
-															]))
-													]))
-											]);
-									})
-							};
-						}))))));
-var $author$project$Main$update = F2(
-	function (msg, model) {
-		if (msg.$ === 'ForForm') {
-			var _v1 = msg.a;
-			var fieldId = _v1.a;
-			var value = _v1.b;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						formState: A4($author$project$Form$updateField, $author$project$Main$myForm, fieldId, value, model.formState)
-					}),
-				$elm$core$Platform$Cmd$none);
-		} else {
-			var formData = msg.a;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						submitted: $elm$core$Maybe$Just(formData)
-					}),
-				$elm$core$Platform$Cmd$none);
-		}
-	});
-var $author$project$Main$ForForm = function (a) {
-	return {$: 'ForForm', a: a};
-};
-var $elm$html$Html$article = _VirtualDom_node('article');
-var $author$project$Main$displayFormData = function (_v0) {
-	var formData = _v0.a;
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
+				A2($author$project$Main$withLabel, 'checkbox', $author$project$Widgets$Checkbox$checkbox),
 				A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('counter: '),
-						$elm$html$Html$text(
-						$elm$core$String$fromInt(formData.counter))
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('check: '),
-						$elm$html$Html$text(
-						formData.check ? 'true' : 'false')
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				A2(
-					$elm$core$List$cons,
-					$elm$html$Html$text('web colors: '),
-					A2(
-						$elm$core$List$map,
-						function (c) {
-							return $elm$html$Html$text(
-								$author$project$WebColor$asStr(c));
-						},
-						formData.webColors))),
-				A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('name: '),
-						$elm$html$Html$text(formData.name.first),
-						$elm$html$Html$text(' '),
-						$elm$html$Html$text(formData.name.last)
-					]))
-			]));
-};
-var $elm$html$Html$footer = _VirtualDom_node('footer');
+					$author$project$Form$field,
+					$author$project$Widgets$Int$integerInput(_List_Nil),
+					A3(
+						$author$project$Form$form,
+						$author$project$Main$validateFormData,
+						F2(
+							function (_v0, html) {
+								return html;
+							}),
+						F5(
+							function (_int, check, wc, name, ints) {
+								return {
+									combine: function (formState) {
+										return $author$project$Main$FormData(
+											{
+												check: check.value(formState),
+												counter: _int.value(formState),
+												ints: ints.value(formState),
+												name: name.value(formState),
+												webColors: wc.value(formState)
+											});
+									},
+									view: F2(
+										function (formState, errors) {
+											return _List_fromArray(
+												[
+													A2(
+													$elm$html$Html$div,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$classList(
+															_List_fromArray(
+																[
+																	_Utils_Tuple2(
+																	'has-error',
+																	$elm$core$List$isEmpty(errors))
+																]))
+														]),
+													_List_fromArray(
+														[
+															A2(
+															$elm$html$Html$div,
+															_List_fromArray(
+																[
+																	$elm$html$Html$Attributes$class('errors')
+																]),
+															_List_fromArray(
+																[
+																	$author$project$Main$viewErrors(errors)
+																])),
+															A2(
+															$elm$html$Html$div,
+															_List_fromArray(
+																[
+																	$elm$html$Html$Attributes$class('grid')
+																]),
+															_List_fromArray(
+																[
+																	A2(
+																	$elm$html$Html$div,
+																	_List_Nil,
+																	_int.view(formState)),
+																	A2(
+																	$elm$html$Html$div,
+																	_List_Nil,
+																	check.view(formState)),
+																	A2(
+																	$elm$html$Html$div,
+																	_List_Nil,
+																	wc.view(formState)),
+																	A2(
+																	$elm$html$Html$div,
+																	_List_Nil,
+																	name.view(formState)),
+																	A2(
+																	$elm$html$Html$div,
+																	_List_Nil,
+																	ints.view(formState))
+																]))
+														]))
+												]);
+										})
+								};
+							})))))));
 var $author$project$Form$render = F3(
 	function (toMsg, form_, formState) {
 		return A2(
@@ -7273,10 +7929,27 @@ var $author$project$Main$view = function (model) {
 				$elm$html$Html$article,
 				_List_Nil,
 				_Utils_ap(
-					A3($author$project$Form$render, $author$project$Main$ForForm, $author$project$Main$myForm, model.formState),
+					A3($author$project$Form$render, $author$project$Main$ForForm, $author$project$Main$currentForm, model.formState),
 					_List_fromArray(
 						[
-							A2($elm$html$Html$footer, _List_Nil, _List_Nil)
+							A2(
+							$elm$html$Html$footer,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$button,
+									_List_fromArray(
+										[
+											$elm$html$Html$Events$onClick(
+											$author$project$Main$Submit(
+												A2($author$project$Form$extract, $author$project$Main$myForm, model.formState)))
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Submit')
+										]))
+								]))
 						]))),
 				A2(
 				$elm$core$Maybe$withDefault,
