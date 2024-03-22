@@ -56,9 +56,6 @@ updateField { updates } fieldId subfieldId operation ((FormState formState) as f
         modelValue =
             read fieldId fs
 
-        _ =
-            Debug.log "before, after" ( E.encode -1 modelValue, E.encode -1 updatedModelValue )
-
         updatedModelValue =
             updateFn subfieldId operation modelValue
     in

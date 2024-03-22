@@ -5162,13 +5162,192 @@ var $elm$browser$Browser$element = _Browser_element;
 var $author$project$Form$alwaysValid = function (_v0) {
 	return _List_Nil;
 };
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $author$project$Form$form = F3(
-	function (validator, fieldWithErrors, fn) {
-		return {count: 0, defaults: $elm$core$Dict$empty, fieldWithErrors: fieldWithErrors, fn: fn, updates: $elm$core$Dict$empty, validator: validator};
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
 	});
-var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$core$List$concat = function (lists) {
+	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
+};
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $author$project$Widgets$Dropdown$fromString = F2(
+	function (_v0, s) {
+		var first = _v0.a;
+		var others = _v0.b;
+		return A2(
+			$elm$core$Maybe$withDefault,
+			first.value,
+			A2(
+				$elm$core$Maybe$map,
+				function ($) {
+					return $.value;
+				},
+				$elm$core$List$head(
+					A2(
+						$elm$core$List$filter,
+						function (_v1) {
+							var id = _v1.id;
+							return _Utils_eq(s, id);
+						},
+						A2($elm$core$List$cons, first, others)))));
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$Widgets$Dropdown$update = F2(
+	function (id, _v0) {
+		return id;
+	});
+var $author$project$Widgets$Dropdown$all = function (_v0) {
+	var first = _v0.a;
+	var others = _v0.b;
+	return A2($elm$core$List$cons, first, others);
+};
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $elm$html$Html$option = _VirtualDom_node('option');
+var $elm$html$Html$select = _VirtualDom_node('select');
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $author$project$Widgets$Dropdown$view = F3(
+	function (variants, _v0, selectedId) {
+		var selected = A2($author$project$Widgets$Dropdown$fromString, variants, selectedId);
+		var opt = function (_v1) {
+			var id = _v1.id;
+			var label = _v1.label;
+			var value = _v1.value;
+			return A2(
+				$elm$html$Html$option,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$value(id),
+						$elm$html$Html$Attributes$checked(
+						_Utils_eq(selected, value))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(label)
+					]));
+		};
+		return _List_fromArray(
+			[
+				A2(
+				$elm$html$Html$select,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('dropdown'),
+						$elm$html$Html$Events$onInput($elm$core$Basics$identity)
+					]),
+				A2(
+					$elm$core$List$map,
+					opt,
+					$author$project$Widgets$Dropdown$all(variants)))
+			]);
+	});
+var $author$project$Widgets$Dropdown$dropdown = function (variants) {
+	var _default = variants.a;
+	return {
+		decoderModel: $elm$json$Json$Decode$string,
+		decoderMsg: $elm$json$Json$Decode$string,
+		encodeModel: $elm$json$Json$Encode$string,
+		encodeMsg: $elm$json$Json$Encode$string,
+		init: _default.id,
+		update: $author$project$Widgets$Dropdown$update,
+		validate: $author$project$Form$alwaysValid,
+		value: $author$project$Widgets$Dropdown$fromString(variants),
+		view: $author$project$Widgets$Dropdown$view(variants)
+	};
+};
 var $elm$json$Json$Decode$decodeValue = _Json_run;
 var $elm$core$List$drop = F2(
 	function (n, list) {
@@ -5361,15 +5540,6 @@ var $elm$core$Result$toMaybe = function (result) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
 var $author$project$Form$encodedUpdate = F4(
 	function (widget, subfieldId, operation, modelVal) {
 		var decoderMsg = widget.decoderMsg;
@@ -5515,6 +5685,7 @@ var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
 		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
 	});
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$Red = {$: 'Red'};
 var $elm$core$Dict$balance = F5(
 	function (color, key, value, left, right) {
@@ -5752,112 +5923,82 @@ var $author$project$Form$field = F2(
 			validator: validator
 		};
 	});
-var $elm$json$Json$Encode$string = _Json_wrap;
-var $elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$string(string));
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
+var $author$project$Form$form = F3(
+	function (validator, fieldWithErrors, fn) {
+		return {count: 0, defaults: $elm$core$Dict$empty, fieldWithErrors: fieldWithErrors, fn: fn, updates: $elm$core$Dict$empty, validator: validator};
 	});
-var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-var $elm$core$List$isEmpty = function (xs) {
-	if (!xs.b) {
-		return true;
-	} else {
-		return false;
-	}
-};
-var $author$project$Main$errorToString = function (e) {
-	if (e.$ === 'MustNotBeBlank') {
-		return 'must not be blank';
-	} else {
-		var myError = e.a;
-		if (myError.$ === 'FirstNameMustNotBeSameAsLastName') {
-			return 'first name must not be the same as last name';
-		} else {
-			return 'amount of color must match counter';
-		}
-	}
-};
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $author$project$Main$viewErrors = function (errors) {
-	return $elm$core$List$isEmpty(errors) ? $elm$html$Html$text('') : A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('errors')
-			]),
-		_List_fromArray(
-			[
-				$elm$html$Html$text(
-				A2(
-					$elm$core$String$join,
-					' ',
-					A2($elm$core$List$map, $author$project$Main$errorToString, errors)))
-			]));
-};
-var $author$project$Main$fieldWithErrors = F2(
-	function (errors, html) {
-		return _List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				$elm$core$List$isEmpty(errors) ? _List_Nil : _List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('has-error')
-					]),
-				_Utils_ap(
-					html,
-					_List_fromArray(
-						[
-							$author$project$Main$viewErrors(errors)
-						])))
-			]);
+var $author$project$Widgets$Int$Model = F2(
+	function (value, parsedValue) {
+		return {parsedValue: parsedValue, value: value};
 	});
-var $author$project$Form$MustNotBeBlank = {$: 'MustNotBeBlank'};
-var $author$project$Widgets$Text$notBlank = function (model) {
-	return (model === '') ? _List_fromArray(
-		[$author$project$Form$MustNotBeBlank]) : _List_Nil;
-};
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $elm$html$Html$input = _VirtualDom_node('input');
-var $elm$html$Html$Events$alwaysStop = function (x) {
-	return _Utils_Tuple2(x, true);
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $author$project$Widgets$Int$integerInput = function (attrs) {
+	return {
+		decoderModel: A3(
+			$elm$json$Json$Decode$map2,
+			$author$project$Widgets$Int$Model,
+			A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$string),
+			A2($elm$json$Json$Decode$field, 'parsedValue', $elm$json$Json$Decode$int)),
+		decoderMsg: $elm$json$Json$Decode$string,
+		encodeModel: function (model) {
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'value',
+						$elm$json$Json$Encode$string(model.value)),
+						_Utils_Tuple2(
+						'parsedValue',
+						$elm$json$Json$Encode$int(model.parsedValue))
+					]));
+		},
+		encodeMsg: $elm$json$Json$Encode$string,
+		init: {parsedValue: 0, value: ''},
+		update: F2(
+			function (msg, model) {
+				return A2(
+					$elm$core$Maybe$withDefault,
+					_Utils_update(
+						model,
+						{value: msg}),
+					A2(
+						$elm$core$Maybe$map,
+						function (i) {
+							return _Utils_update(
+								model,
+								{parsedValue: i, value: msg});
+						},
+						$elm$core$String$toInt(msg)));
+			}),
+		validate: $author$project$Form$alwaysValid,
+		value: function ($) {
+			return $.parsedValue;
+		},
+		view: F2(
+			function (domId, model) {
+				return _List_fromArray(
+					[
+						A2(
+						$elm$html$Html$input,
+						_Utils_ap(
+							attrs,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$id(domId),
+									$elm$html$Html$Attributes$type_('number'),
+									$elm$html$Html$Events$onInput($elm$core$Basics$identity),
+									$elm$html$Html$Attributes$value(model.value)
+								])),
+						_List_Nil)
+					]);
+			})
+	};
 };
-var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 'MayStopPropagation', a: a};
-};
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var $elm$html$Html$Events$stopPropagationOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
-	});
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
-	});
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $elm$html$Html$Events$targetValue = A2(
-	$elm$json$Json$Decode$at,
-	_List_fromArray(
-		['target', 'value']),
-	$elm$json$Json$Decode$string);
-var $elm$html$Html$Events$onInput = function (tagger) {
-	return A2(
-		$elm$html$Html$Events$stopPropagationOn,
-		'input',
-		A2(
-			$elm$json$Json$Decode$map,
-			$elm$html$Html$Events$alwaysStop,
-			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
-};
-var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Widgets$Text$textInput = function (attrs) {
 	return {
 		decoderModel: $elm$json$Json$Decode$string,
@@ -5890,47 +6031,16 @@ var $author$project$Widgets$Text$textInput = function (attrs) {
 			})
 	};
 };
-var $elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
-		}
-	});
-var $elm$core$List$concat = function (lists) {
-	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
-};
-var $author$project$Form$concatValidators = F2(
-	function (validators, model) {
-		return $elm$core$List$concat(
-			A2(
-				$elm$core$List$map,
-				function (validator) {
-					return validator(model);
-				},
-				validators));
-	});
-var $author$project$Form$validate = F2(
-	function (validators, widget) {
-		return _Utils_update(
-			widget,
-			{
-				validate: $author$project$Form$concatValidators(validators)
-			});
-	});
-var $author$project$Form$CustomError = function (a) {
-	return {$: 'CustomError', a: a};
-};
-var $author$project$Main$FirstNameMustNotBeSameAsLastName = {$: 'FirstNameMustNotBeSameAsLastName'};
-var $author$project$Main$validateFullName = function (_v0) {
-	var first = _v0.first;
-	var last = _v0.last;
-	return _Utils_eq(first, last) ? _List_fromArray(
+var $author$project$Main$CentiLiter = {$: 'CentiLiter'};
+var $author$project$Main$Liter = {$: 'Liter'};
+var $author$project$Main$Milliliter = {$: 'Milliliter'};
+var $author$project$Main$volumeUnitVariants = _Utils_Tuple2(
+	{id: 'ml', label: 'milliliter', value: $author$project$Main$Milliliter},
+	_List_fromArray(
 		[
-			$author$project$Form$CustomError($author$project$Main$FirstNameMustNotBeSameAsLastName)
-		]) : _List_Nil;
-};
+			{id: 'cl', label: 'centiliter', value: $author$project$Main$CentiLiter},
+			{id: 'l', label: 'liter', value: $author$project$Main$Liter}
+		]));
 var $elm$html$Html$Attributes$for = $elm$html$Html$Attributes$stringProperty('htmlFor');
 var $elm$html$Html$label = _VirtualDom_node('label');
 var $author$project$Form$wrap = F2(
@@ -5969,538 +6079,57 @@ var $author$project$Main$withLabel = F2(
 						content);
 				}));
 	});
-var $author$project$Main$nameForm = A2(
+var $author$project$Main$liquidForm = A2(
 	$author$project$Form$field,
 	A2(
-		$author$project$Form$validate,
-		_List_fromArray(
-			[$author$project$Widgets$Text$notBlank]),
-		A2(
-			$author$project$Main$withLabel,
-			'last name',
-			$author$project$Widgets$Text$textInput(_List_Nil))),
+		$author$project$Main$withLabel,
+		'unit',
+		$author$project$Widgets$Dropdown$dropdown($author$project$Main$volumeUnitVariants)),
 	A2(
 		$author$project$Form$field,
 		A2(
-			$author$project$Form$validate,
-			_List_fromArray(
-				[$author$project$Widgets$Text$notBlank]),
+			$author$project$Main$withLabel,
+			'amount',
+			$author$project$Widgets$Int$integerInput(_List_Nil)),
+		A2(
+			$author$project$Form$field,
 			A2(
 				$author$project$Main$withLabel,
-				'first name',
-				$author$project$Widgets$Text$textInput(_List_Nil))),
-		A3(
-			$author$project$Form$form,
-			$author$project$Main$validateFullName,
-			$author$project$Main$fieldWithErrors,
-			F2(
-				function (first, last) {
-					return {
-						combine: function (formState) {
-							return {
-								first: first.value(formState),
-								last: last.value(formState)
-							};
-						},
-						view: F2(
-							function (formState, errors) {
-								return _List_fromArray(
-									[
-										A2(
-										$elm$html$Html$div,
-										_List_Nil,
-										first.view(formState)),
-										A2(
-										$elm$html$Html$div,
-										_List_Nil,
-										last.view(formState)),
-										A2(
-										$elm$html$Html$div,
-										_List_Nil,
+				'name',
+				$author$project$Widgets$Text$textInput(_List_Nil)),
+			A3(
+				$author$project$Form$form,
+				$author$project$Form$alwaysValid,
+				F2(
+					function (_v0, html) {
+						return html;
+					}),
+				F3(
+					function (name, amount, unit) {
+						return {
+							combine: function (formState) {
+								return {
+									amount: amount.value(formState),
+									name: name.value(formState),
+									unit: unit.value(formState)
+								};
+							},
+							view: F2(
+								function (formState, _v1) {
+									return $elm$core$List$concat(
 										_List_fromArray(
 											[
-												$author$project$Main$viewErrors(errors)
-											]))
-									]);
-							})
-					};
-				}))));
+												name.view(formState),
+												amount.view(formState),
+												unit.view(formState)
+											]));
+								})
+						};
+					})))));
+var $author$project$Main$currentForm = $author$project$Main$liquidForm;
 var $author$project$Form$FormState = function (a) {
 	return {$: 'FormState', a: a};
 };
-var $author$project$Form$Add = {$: 'Add'};
-var $author$project$Form$Remove = {$: 'Remove'};
-var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $elm$json$Json$Decode$fail = _Json_fail;
-var $elm$json$Json$Decode$value = _Json_decodeValue;
-var $author$project$Form$decoderFieldOperation = A2(
-	$elm$json$Json$Decode$andThen,
-	function (kind) {
-		switch (kind) {
-			case 'add':
-				return $elm$json$Json$Decode$succeed($author$project$Form$Add);
-			case 'remove':
-				return $elm$json$Json$Decode$succeed($author$project$Form$Remove);
-			case 'update':
-				return A2(
-					$elm$json$Json$Decode$map,
-					$author$project$Form$Update,
-					A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$value));
-			default:
-				return $elm$json$Json$Decode$fail('unknown kind');
-		}
-	},
-	A2($elm$json$Json$Decode$field, 'kind', $elm$json$Json$Decode$string));
-var $author$project$Form$ArrayElement = function (a) {
-	return {$: 'ArrayElement', a: a};
-};
-var $elm$json$Json$Decode$int = _Json_decodeInt;
-var $elm$json$Json$Decode$null = _Json_decodeNull;
-var $elm$json$Json$Decode$oneOf = _Json_oneOf;
-var $author$project$Form$decoderSubFieldId = $elm$json$Json$Decode$oneOf(
-	_List_fromArray(
-		[
-			A2(
-			$elm$json$Json$Decode$andThen,
-			function (i) {
-				return $elm$json$Json$Decode$succeed(
-					$author$project$Form$ArrayElement(i));
-			},
-			$elm$json$Json$Decode$int),
-			$elm$json$Json$Decode$null($author$project$Form$SingleValue)
-		]));
-var $elm$json$Json$Decode$map3 = _Json_map3;
-var $author$project$Form$decoderFormMsg = A4(
-	$elm$json$Json$Decode$map3,
-	$author$project$Form$FormMsg,
-	A2($elm$json$Json$Decode$field, 'fieldId', $elm$json$Json$Decode$string),
-	A2($elm$json$Json$Decode$field, 'subFieldId', $author$project$Form$decoderSubFieldId),
-	A2($elm$json$Json$Decode$field, 'operation', $author$project$Form$decoderFieldOperation));
-var $author$project$Form$encodeFieldOperation = function (operation) {
-	switch (operation.$) {
-		case 'Add':
-			return $elm$json$Json$Encode$object(
-				_List_fromArray(
-					[
-						_Utils_Tuple2(
-						'kind',
-						$elm$json$Json$Encode$string('add'))
-					]));
-		case 'Remove':
-			return $elm$json$Json$Encode$object(
-				_List_fromArray(
-					[
-						_Utils_Tuple2(
-						'kind',
-						$elm$json$Json$Encode$string('remove'))
-					]));
-		default:
-			var v = operation.a;
-			return $elm$json$Json$Encode$object(
-				_List_fromArray(
-					[
-						_Utils_Tuple2(
-						'kind',
-						$elm$json$Json$Encode$string('update')),
-						_Utils_Tuple2('value', v)
-					]));
-	}
-};
-var $elm$json$Json$Encode$int = _Json_wrap;
-var $elm$json$Json$Encode$null = _Json_encodeNull;
-var $author$project$Form$encodeSubFieldId = function (subfieldId) {
-	if (subfieldId.$ === 'SingleValue') {
-		return $elm$json$Json$Encode$null;
-	} else {
-		var i = subfieldId.a;
-		return $elm$json$Json$Encode$int(i);
-	}
-};
-var $author$project$Form$encodeFormMsg = function (_v0) {
-	var fieldId = _v0.a;
-	var subfieldId = _v0.b;
-	var operation = _v0.c;
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'fieldId',
-				$elm$json$Json$Encode$string(fieldId)),
-				_Utils_Tuple2(
-				'subFieldId',
-				$author$project$Form$encodeSubFieldId(subfieldId)),
-				_Utils_Tuple2(
-				'operation',
-				$author$project$Form$encodeFieldOperation(operation))
-			]));
-};
-var $elm$core$Dict$fromList = function (assocs) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (_v0, dict) {
-				var key = _v0.a;
-				var value = _v0.b;
-				return A3($elm$core$Dict$insert, key, value, dict);
-			}),
-		$elm$core$Dict$empty,
-		assocs);
-};
-var $elm$json$Json$Decode$keyValuePairs = _Json_decodeKeyValuePairs;
-var $elm$json$Json$Decode$dict = function (decoder) {
-	return A2(
-		$elm$json$Json$Decode$map,
-		$elm$core$Dict$fromList,
-		$elm$json$Json$Decode$keyValuePairs(decoder));
-};
-var $author$project$Form$formStateDecoder = A2(
-	$elm$json$Json$Decode$andThen,
-	function (d) {
-		return $elm$json$Json$Decode$succeed(
-			$author$project$Form$FormState(
-				{parentDomId: '', values: d}));
-	},
-	$elm$json$Json$Decode$dict($elm$json$Json$Decode$value));
-var $elm$core$Dict$foldl = F3(
-	function (func, acc, dict) {
-		foldl:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return acc;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var $temp$func = func,
-					$temp$acc = A3(
-					func,
-					key,
-					value,
-					A3($elm$core$Dict$foldl, func, acc, left)),
-					$temp$dict = right;
-				func = $temp$func;
-				acc = $temp$acc;
-				dict = $temp$dict;
-				continue foldl;
-			}
-		}
-	});
-var $elm$json$Json$Encode$dict = F3(
-	function (toKey, toValue, dictionary) {
-		return _Json_wrap(
-			A3(
-				$elm$core$Dict$foldl,
-				F3(
-					function (key, value, obj) {
-						return A3(
-							_Json_addField,
-							toKey(key),
-							toValue(value),
-							obj);
-					}),
-				_Json_emptyObject(_Utils_Tuple0),
-				dictionary));
-	});
-var $author$project$Form$formStateEncode = function (_v0) {
-	var values = _v0.a.values;
-	return A3($elm$json$Json$Encode$dict, $elm$core$Basics$identity, $elm$core$Basics$identity, values);
-};
-var $author$project$Form$updateField = F5(
-	function (_v0, fieldId, subfieldId, operation, fs) {
-		var updates = _v0.updates;
-		var formState = fs.a;
-		var updateFn = A2(
-			$elm$core$Maybe$withDefault,
-			F3(
-				function (_v2, _v3, modelValue_) {
-					return modelValue_;
-				}),
-			A2($elm$core$Dict$get, fieldId, updates));
-		var modelValue = A2($author$project$Form$read, fieldId, fs);
-		var updatedModelValue = A3(updateFn, subfieldId, operation, modelValue);
-		var _v1 = A2(
-			$elm$core$Debug$log,
-			'before, after',
-			_Utils_Tuple2(
-				A2($elm$json$Json$Encode$encode, -1, modelValue),
-				A2($elm$json$Json$Encode$encode, -1, updatedModelValue)));
-		return $author$project$Form$FormState(
-			_Utils_update(
-				formState,
-				{
-					values: A3($elm$core$Dict$insert, fieldId, updatedModelValue, formState.values)
-				}));
-	});
-var $author$project$Form$toWidget = function (f) {
-	var widgetErrors = function (formState) {
-		return f.validator(
-			f.fn.combine(formState));
-	};
-	return {
-		decoderModel: $author$project$Form$formStateDecoder,
-		decoderMsg: $author$project$Form$decoderFormMsg,
-		encodeModel: $author$project$Form$formStateEncode,
-		encodeMsg: $author$project$Form$encodeFormMsg,
-		init: $author$project$Form$FormState(
-			{parentDomId: '', values: f.defaults}),
-		update: F2(
-			function (_v0, model) {
-				var fieldId = _v0.a;
-				var subfieldId = _v0.b;
-				var value = _v0.c;
-				return A5($author$project$Form$updateField, f, fieldId, subfieldId, value, model);
-			}),
-		validate: function (formState) {
-			return widgetErrors(formState);
-		},
-		value: function (formState) {
-			return f.fn.combine(formState);
-		},
-		view: F2(
-			function (domId, fs) {
-				var model = fs.a;
-				return A2(
-					f.fn.view,
-					$author$project$Form$FormState(
-						_Utils_update(
-							model,
-							{parentDomId: domId})),
-					widgetErrors(fs));
-			})
-	};
-};
-var $author$project$Main$fullnameWidget = $author$project$Form$toWidget($author$project$Main$nameForm);
-var $author$project$Form$buildDomId = F3(
-	function (parentDomId, fieldId, subfieldId) {
-		return parentDomId + ('-' + (fieldId + function () {
-			if (subfieldId.$ === 'SingleValue') {
-				return '';
-			} else {
-				var i = subfieldId.a;
-				return '-' + $elm$core$String$fromInt(i);
-			}
-		}()));
-	});
-var $author$project$Form$mkListField = F5(
-	function (fieldWithErrors, listWithAddButton, fieldWithRemoveButton, fieldId, widget) {
-		var deserializeModel = function (formState) {
-			return A2(
-				$elm$core$Maybe$withDefault,
-				_List_Nil,
-				$elm$core$Result$toMaybe(
-					A2(
-						$elm$json$Json$Decode$decodeValue,
-						$elm$json$Json$Decode$list(widget.decoderModel),
-						A2($author$project$Form$read, fieldId, formState))));
-		};
-		var errors_ = function (formState) {
-			return $elm$core$List$concat(
-				A2(
-					$elm$core$List$map,
-					widget.validate,
-					deserializeModel(formState)));
-		};
-		var value = function (formState) {
-			return A2(
-				$elm$core$List$map,
-				widget.value,
-				deserializeModel(formState));
-		};
-		var viewField = function (formState) {
-			var parentDomId = formState.a.parentDomId;
-			var toMsg_ = F2(
-				function (i, html) {
-					return A2(
-						$elm$html$Html$map,
-						function (msg) {
-							return A3(
-								$author$project$Form$FormMsg,
-								fieldId,
-								$author$project$Form$ArrayElement(i),
-								$author$project$Form$Update(
-									widget.encodeMsg(msg)));
-						},
-						html);
-				});
-			var toMsg = F2(
-				function (i, html) {
-					return A2(
-						$elm$core$List$map,
-						toMsg_(i),
-						html);
-				});
-			var removeArrayElementMsg = function (x) {
-				return A3(
-					$author$project$Form$FormMsg,
-					fieldId,
-					$author$project$Form$ArrayElement(x),
-					$author$project$Form$Remove);
-			};
-			var fieldErrors = errors_(formState);
-			var arrayElementHtml = F2(
-				function (i, model) {
-					return A2(
-						widget.view,
-						A3(
-							$author$project$Form$buildDomId,
-							parentDomId,
-							fieldId,
-							$author$project$Form$ArrayElement(i)),
-						model);
-				});
-			var addRemoveButton = F2(
-				function (i, html) {
-					return A2(
-						fieldWithRemoveButton,
-						removeArrayElementMsg(i),
-						html);
-				});
-			var inputHtml = $elm$core$List$concat(
-				A2(
-					$elm$core$List$indexedMap,
-					addRemoveButton,
-					A2(
-						$elm$core$List$indexedMap,
-						toMsg,
-						A2(
-							$elm$core$List$indexedMap,
-							arrayElementHtml,
-							deserializeModel(formState)))));
-			var addArrayElementMsg = A3(
-				$author$project$Form$FormMsg,
-				fieldId,
-				$author$project$Form$ArrayElement(0),
-				$author$project$Form$Add);
-			var addArrayElement = function (html) {
-				return A2(listWithAddButton, addArrayElementMsg, html);
-			};
-			return A2(
-				fieldWithErrors,
-				fieldErrors,
-				addArrayElement(inputHtml));
-		};
-		return {errors: errors_, id: fieldId, multiple: true, value: value, view: viewField};
-	});
-var $author$project$Form$listField = F4(
-	function (listWithAddButton, fieldWithRemoveButton, widget, _v0) {
-		var fn = _v0.fn;
-		var count = _v0.count;
-		var updates = _v0.updates;
-		var fieldWithErrors = _v0.fieldWithErrors;
-		var validator = _v0.validator;
-		var defaults = _v0.defaults;
-		var fieldId = $elm$core$String$fromInt(count);
-		return {
-			count: count + 1,
-			defaults: A3(
-				$elm$core$Dict$insert,
-				fieldId,
-				A2(
-					$elm$json$Json$Encode$list,
-					widget.encodeModel,
-					_List_fromArray(
-						[widget.init])),
-				defaults),
-			fieldWithErrors: fieldWithErrors,
-			fn: fn(
-				A5($author$project$Form$mkListField, fieldWithErrors, listWithAddButton, fieldWithRemoveButton, fieldId, widget)),
-			updates: A3(
-				$elm$core$Dict$insert,
-				$elm$core$String$fromInt(count),
-				$author$project$Form$encodedUpdate(widget),
-				updates),
-			validator: validator
-		};
-	});
-var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var $elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $author$project$Main$withAddButton = F3(
-	function (subject, add, inputHtml) {
-		return _Utils_ap(
-			inputHtml,
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$button,
-					_List_fromArray(
-						[
-							$elm$html$Html$Events$onClick(add),
-							$elm$html$Html$Attributes$class('secondary')
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Add ' + subject)
-						]))
-				]));
-	});
-var $author$project$Main$withRemoveButton = F2(
-	function (remove, inputHtml) {
-		return _List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('grid')
-					]),
-				_Utils_ap(
-					inputHtml,
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$button,
-							_List_fromArray(
-								[
-									$elm$html$Html$Events$onClick(remove),
-									$elm$html$Html$Attributes$class('secondary')
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Remove')
-								]))
-						])))
-			]);
-	});
-var $author$project$Main$hasManyNamesForm = A4(
-	$author$project$Form$listField,
-	$author$project$Main$withAddButton('person'),
-	$author$project$Main$withRemoveButton,
-	$author$project$Main$fullnameWidget,
-	A3(
-		$author$project$Form$form,
-		$author$project$Form$alwaysValid,
-		F2(
-			function (_v0, html) {
-				return html;
-			}),
-		function (names) {
-			return {
-				combine: function (formState) {
-					return names.value(formState);
-				},
-				view: F2(
-					function (formState, _v1) {
-						return names.view(formState);
-					})
-			};
-		}));
-var $author$project$Main$currentForm = $author$project$Main$hasManyNamesForm;
 var $author$project$Form$init = function (_v0) {
 	var defaults = _v0.defaults;
 	return $author$project$Form$FormState(
@@ -6518,37 +6147,26 @@ var $author$project$Main$init = function (_v0) {
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $elm$core$Dict$map = F2(
-	function (func, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return $elm$core$Dict$RBEmpty_elm_builtin;
-		} else {
-			var color = dict.a;
-			var key = dict.b;
-			var value = dict.c;
-			var left = dict.d;
-			var right = dict.e;
-			return A5(
-				$elm$core$Dict$RBNode_elm_builtin,
-				color,
-				key,
-				A2(func, key, value),
-				A2($elm$core$Dict$map, func, left),
-				A2($elm$core$Dict$map, func, right));
-		}
+var $author$project$Form$updateField = F5(
+	function (_v0, fieldId, subfieldId, operation, fs) {
+		var updates = _v0.updates;
+		var formState = fs.a;
+		var updateFn = A2(
+			$elm$core$Maybe$withDefault,
+			F3(
+				function (_v1, _v2, modelValue_) {
+					return modelValue_;
+				}),
+			A2($elm$core$Dict$get, fieldId, updates));
+		var modelValue = A2($author$project$Form$read, fieldId, fs);
+		var updatedModelValue = A3(updateFn, subfieldId, operation, modelValue);
+		return $author$project$Form$FormState(
+			_Utils_update(
+				formState,
+				{
+					values: A3($elm$core$Dict$insert, fieldId, updatedModelValue, formState.values)
+				}));
 	});
-var $author$project$Form$debugFormState = function (fs) {
-	var values = fs.a.values;
-	var dbg = F2(
-		function (k, v) {
-			return A2(
-				$elm$core$Debug$log,
-				k,
-				A2($elm$json$Json$Encode$encode, -1, v));
-		});
-	var _v0 = A2($elm$core$Dict$map, dbg, values);
-	return fs;
-};
 var $author$project$Form$update = F3(
 	function (form_, _v0, formState) {
 		var fieldId = _v0.a;
@@ -6564,11 +6182,7 @@ var $author$project$Main$update = F2(
 				_Utils_update(
 					model,
 					{
-						formState: A3(
-							$author$project$Form$update,
-							$author$project$Main$currentForm,
-							formMsg,
-							$author$project$Form$debugFormState(model.formState))
+						formState: A3($author$project$Form$update, $author$project$Main$currentForm, formMsg, model.formState)
 					}),
 				$elm$core$Platform$Cmd$none);
 		} else {
@@ -6589,6 +6203,7 @@ var $author$project$Main$Submit = function (a) {
 	return {$: 'Submit', a: a};
 };
 var $elm$html$Html$article = _VirtualDom_node('article');
+var $elm$html$Html$button = _VirtualDom_node('button');
 var $author$project$WebColor$asStr = function (c) {
 	switch (c.$) {
 		case 'Aliceblue':
@@ -6891,6 +6506,7 @@ var $author$project$WebColor$asStr = function (c) {
 			return 'Yellowgreen';
 	}
 };
+var $elm$html$Html$div = _VirtualDom_node('div');
 var $author$project$Main$displayFormData = function (_v0) {
 	var formData = _v0.a;
 	return A2(
@@ -6959,31 +6575,12 @@ var $author$project$Form$extract = function (_v0) {
 	return fn.combine;
 };
 var $elm$html$Html$footer = _VirtualDom_node('footer');
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
+var $elm$html$Html$main_ = _VirtualDom_node('main');
 var $author$project$Main$FormData = function (a) {
 	return {$: 'FormData', a: a};
 };
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
-var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
 var $elm$core$Basics$not = _Basics_not;
-var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $author$project$Widgets$Checkbox$checkbox = {
 	decoderModel: $elm$json$Json$Decode$bool,
 	decoderMsg: $elm$json$Json$Decode$succeed(_Utils_Tuple0),
@@ -7018,17 +6615,6 @@ var $author$project$Widgets$Checkbox$checkbox = {
 				]);
 		})
 };
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
 var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;
@@ -7043,72 +6629,507 @@ var $elm$html$Html$Attributes$classList = function (classes) {
 				$elm$core$Tuple$first,
 				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
 };
-var $author$project$Widgets$Int$Model = F2(
-	function (value, parsedValue) {
-		return {parsedValue: parsedValue, value: value};
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $author$project$Main$errorToString = function (e) {
+	if (e.$ === 'MustNotBeBlank') {
+		return 'must not be blank';
+	} else {
+		var myError = e.a;
+		if (myError.$ === 'FirstNameMustNotBeSameAsLastName') {
+			return 'first name must not be the same as last name';
+		} else {
+			return 'amount of color must match counter';
+		}
+	}
+};
+var $author$project$Main$viewErrors = function (errors) {
+	return $elm$core$List$isEmpty(errors) ? $elm$html$Html$text('') : A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('errors')
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(
+				A2(
+					$elm$core$String$join,
+					' ',
+					A2($elm$core$List$map, $author$project$Main$errorToString, errors)))
+			]));
+};
+var $author$project$Main$fieldWithErrors = F2(
+	function (errors, html) {
+		return _List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				$elm$core$List$isEmpty(errors) ? _List_Nil : _List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('has-error')
+					]),
+				_Utils_ap(
+					html,
+					_List_fromArray(
+						[
+							$author$project$Main$viewErrors(errors)
+						])))
+			]);
 	});
-var $author$project$Widgets$Int$integerInput = function (attrs) {
-	return {
-		decoderModel: A3(
-			$elm$json$Json$Decode$map2,
-			$author$project$Widgets$Int$Model,
-			A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$string),
-			A2($elm$json$Json$Decode$field, 'parsedValue', $elm$json$Json$Decode$int)),
-		decoderMsg: $elm$json$Json$Decode$string,
-		encodeModel: function (model) {
+var $author$project$Form$MustNotBeBlank = {$: 'MustNotBeBlank'};
+var $author$project$Widgets$Text$notBlank = function (model) {
+	return (model === '') ? _List_fromArray(
+		[$author$project$Form$MustNotBeBlank]) : _List_Nil;
+};
+var $author$project$Form$concatValidators = F2(
+	function (validators, model) {
+		return $elm$core$List$concat(
+			A2(
+				$elm$core$List$map,
+				function (validator) {
+					return validator(model);
+				},
+				validators));
+	});
+var $author$project$Form$validate = F2(
+	function (validators, widget) {
+		return _Utils_update(
+			widget,
+			{
+				validate: $author$project$Form$concatValidators(validators)
+			});
+	});
+var $author$project$Form$CustomError = function (a) {
+	return {$: 'CustomError', a: a};
+};
+var $author$project$Main$FirstNameMustNotBeSameAsLastName = {$: 'FirstNameMustNotBeSameAsLastName'};
+var $author$project$Main$validateFullName = function (_v0) {
+	var first = _v0.first;
+	var last = _v0.last;
+	return _Utils_eq(first, last) ? _List_fromArray(
+		[
+			$author$project$Form$CustomError($author$project$Main$FirstNameMustNotBeSameAsLastName)
+		]) : _List_Nil;
+};
+var $author$project$Main$nameForm = A2(
+	$author$project$Form$field,
+	A2(
+		$author$project$Form$validate,
+		_List_fromArray(
+			[$author$project$Widgets$Text$notBlank]),
+		A2(
+			$author$project$Main$withLabel,
+			'last name',
+			$author$project$Widgets$Text$textInput(_List_Nil))),
+	A2(
+		$author$project$Form$field,
+		A2(
+			$author$project$Form$validate,
+			_List_fromArray(
+				[$author$project$Widgets$Text$notBlank]),
+			A2(
+				$author$project$Main$withLabel,
+				'first name',
+				$author$project$Widgets$Text$textInput(_List_Nil))),
+		A3(
+			$author$project$Form$form,
+			$author$project$Main$validateFullName,
+			$author$project$Main$fieldWithErrors,
+			F2(
+				function (first, last) {
+					return {
+						combine: function (formState) {
+							return {
+								first: first.value(formState),
+								last: last.value(formState)
+							};
+						},
+						view: F2(
+							function (formState, errors) {
+								return _List_fromArray(
+									[
+										A2(
+										$elm$html$Html$div,
+										_List_Nil,
+										first.view(formState)),
+										A2(
+										$elm$html$Html$div,
+										_List_Nil,
+										last.view(formState)),
+										A2(
+										$elm$html$Html$div,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$author$project$Main$viewErrors(errors)
+											]))
+									]);
+							})
+					};
+				}))));
+var $author$project$Form$Add = {$: 'Add'};
+var $author$project$Form$Remove = {$: 'Remove'};
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$Form$decoderFieldOperation = A2(
+	$elm$json$Json$Decode$andThen,
+	function (kind) {
+		switch (kind) {
+			case 'add':
+				return $elm$json$Json$Decode$succeed($author$project$Form$Add);
+			case 'remove':
+				return $elm$json$Json$Decode$succeed($author$project$Form$Remove);
+			case 'update':
+				return A2(
+					$elm$json$Json$Decode$map,
+					$author$project$Form$Update,
+					A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$value));
+			default:
+				return $elm$json$Json$Decode$fail('unknown kind');
+		}
+	},
+	A2($elm$json$Json$Decode$field, 'kind', $elm$json$Json$Decode$string));
+var $author$project$Form$ArrayElement = function (a) {
+	return {$: 'ArrayElement', a: a};
+};
+var $elm$json$Json$Decode$null = _Json_decodeNull;
+var $elm$json$Json$Decode$oneOf = _Json_oneOf;
+var $author$project$Form$decoderSubFieldId = $elm$json$Json$Decode$oneOf(
+	_List_fromArray(
+		[
+			A2(
+			$elm$json$Json$Decode$andThen,
+			function (i) {
+				return $elm$json$Json$Decode$succeed(
+					$author$project$Form$ArrayElement(i));
+			},
+			$elm$json$Json$Decode$int),
+			$elm$json$Json$Decode$null($author$project$Form$SingleValue)
+		]));
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $author$project$Form$decoderFormMsg = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$Form$FormMsg,
+	A2($elm$json$Json$Decode$field, 'fieldId', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'subFieldId', $author$project$Form$decoderSubFieldId),
+	A2($elm$json$Json$Decode$field, 'operation', $author$project$Form$decoderFieldOperation));
+var $author$project$Form$encodeFieldOperation = function (operation) {
+	switch (operation.$) {
+		case 'Add':
 			return $elm$json$Json$Encode$object(
 				_List_fromArray(
 					[
 						_Utils_Tuple2(
-						'value',
-						$elm$json$Json$Encode$string(model.value)),
-						_Utils_Tuple2(
-						'parsedValue',
-						$elm$json$Json$Encode$int(model.parsedValue))
+						'kind',
+						$elm$json$Json$Encode$string('add'))
 					]));
-		},
-		encodeMsg: $elm$json$Json$Encode$string,
-		init: {parsedValue: 0, value: ''},
-		update: F2(
-			function (msg, model) {
-				return A2(
-					$elm$core$Maybe$withDefault,
-					_Utils_update(
-						model,
-						{value: msg}),
-					A2(
-						$elm$core$Maybe$map,
-						function (i) {
-							return _Utils_update(
-								model,
-								{parsedValue: i, value: msg});
-						},
-						$elm$core$String$toInt(msg)));
+		case 'Remove':
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'kind',
+						$elm$json$Json$Encode$string('remove'))
+					]));
+		default:
+			var v = operation.a;
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'kind',
+						$elm$json$Json$Encode$string('update')),
+						_Utils_Tuple2('value', v)
+					]));
+	}
+};
+var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $author$project$Form$encodeSubFieldId = function (subfieldId) {
+	if (subfieldId.$ === 'SingleValue') {
+		return $elm$json$Json$Encode$null;
+	} else {
+		var i = subfieldId.a;
+		return $elm$json$Json$Encode$int(i);
+	}
+};
+var $author$project$Form$encodeFormMsg = function (_v0) {
+	var fieldId = _v0.a;
+	var subfieldId = _v0.b;
+	var operation = _v0.c;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'fieldId',
+				$elm$json$Json$Encode$string(fieldId)),
+				_Utils_Tuple2(
+				'subFieldId',
+				$author$project$Form$encodeSubFieldId(subfieldId)),
+				_Utils_Tuple2(
+				'operation',
+				$author$project$Form$encodeFieldOperation(operation))
+			]));
+};
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
 			}),
-		validate: $author$project$Form$alwaysValid,
-		value: function ($) {
-			return $.parsedValue;
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $elm$json$Json$Decode$keyValuePairs = _Json_decodeKeyValuePairs;
+var $elm$json$Json$Decode$dict = function (decoder) {
+	return A2(
+		$elm$json$Json$Decode$map,
+		$elm$core$Dict$fromList,
+		$elm$json$Json$Decode$keyValuePairs(decoder));
+};
+var $author$project$Form$formStateDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (d) {
+		return $elm$json$Json$Decode$succeed(
+			$author$project$Form$FormState(
+				{parentDomId: '', values: d}));
+	},
+	$elm$json$Json$Decode$dict($elm$json$Json$Decode$value));
+var $elm$core$Dict$foldl = F3(
+	function (func, acc, dict) {
+		foldl:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return acc;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var $temp$func = func,
+					$temp$acc = A3(
+					func,
+					key,
+					value,
+					A3($elm$core$Dict$foldl, func, acc, left)),
+					$temp$dict = right;
+				func = $temp$func;
+				acc = $temp$acc;
+				dict = $temp$dict;
+				continue foldl;
+			}
+		}
+	});
+var $elm$json$Json$Encode$dict = F3(
+	function (toKey, toValue, dictionary) {
+		return _Json_wrap(
+			A3(
+				$elm$core$Dict$foldl,
+				F3(
+					function (key, value, obj) {
+						return A3(
+							_Json_addField,
+							toKey(key),
+							toValue(value),
+							obj);
+					}),
+				_Json_emptyObject(_Utils_Tuple0),
+				dictionary));
+	});
+var $author$project$Form$formStateEncode = function (_v0) {
+	var values = _v0.a.values;
+	return A3($elm$json$Json$Encode$dict, $elm$core$Basics$identity, $elm$core$Basics$identity, values);
+};
+var $author$project$Form$toWidget = function (f) {
+	var widgetErrors = function (formState) {
+		return f.validator(
+			f.fn.combine(formState));
+	};
+	return {
+		decoderModel: $author$project$Form$formStateDecoder,
+		decoderMsg: $author$project$Form$decoderFormMsg,
+		encodeModel: $author$project$Form$formStateEncode,
+		encodeMsg: $author$project$Form$encodeFormMsg,
+		init: $author$project$Form$FormState(
+			{parentDomId: '', values: f.defaults}),
+		update: F2(
+			function (_v0, model) {
+				var fieldId = _v0.a;
+				var subfieldId = _v0.b;
+				var value = _v0.c;
+				return A5($author$project$Form$updateField, f, fieldId, subfieldId, value, model);
+			}),
+		validate: function (formState) {
+			return widgetErrors(formState);
+		},
+		value: function (formState) {
+			return f.fn.combine(formState);
 		},
 		view: F2(
-			function (domId, model) {
-				return _List_fromArray(
-					[
-						A2(
-						$elm$html$Html$input,
-						_Utils_ap(
-							attrs,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$id(domId),
-									$elm$html$Html$Attributes$type_('number'),
-									$elm$html$Html$Events$onInput($elm$core$Basics$identity),
-									$elm$html$Html$Attributes$value(model.value)
-								])),
-						_List_Nil)
-					]);
+			function (domId, fs) {
+				var model = fs.a;
+				return A2(
+					f.fn.view,
+					$author$project$Form$FormState(
+						_Utils_update(
+							model,
+							{parentDomId: domId})),
+					widgetErrors(fs));
 			})
 	};
 };
+var $author$project$Main$fullnameWidget = $author$project$Form$toWidget($author$project$Main$nameForm);
+var $author$project$Form$buildDomId = F3(
+	function (parentDomId, fieldId, subfieldId) {
+		return parentDomId + ('-' + (fieldId + function () {
+			if (subfieldId.$ === 'SingleValue') {
+				return '';
+			} else {
+				var i = subfieldId.a;
+				return '-' + $elm$core$String$fromInt(i);
+			}
+		}()));
+	});
+var $author$project$Form$mkListField = F5(
+	function (fieldWithErrors, listWithAddButton, fieldWithRemoveButton, fieldId, widget) {
+		var deserializeModel = function (formState) {
+			return A2(
+				$elm$core$Maybe$withDefault,
+				_List_Nil,
+				$elm$core$Result$toMaybe(
+					A2(
+						$elm$json$Json$Decode$decodeValue,
+						$elm$json$Json$Decode$list(widget.decoderModel),
+						A2($author$project$Form$read, fieldId, formState))));
+		};
+		var errors_ = function (formState) {
+			return $elm$core$List$concat(
+				A2(
+					$elm$core$List$map,
+					widget.validate,
+					deserializeModel(formState)));
+		};
+		var value = function (formState) {
+			return A2(
+				$elm$core$List$map,
+				widget.value,
+				deserializeModel(formState));
+		};
+		var viewField = function (formState) {
+			var parentDomId = formState.a.parentDomId;
+			var toMsg_ = F2(
+				function (i, html) {
+					return A2(
+						$elm$html$Html$map,
+						function (msg) {
+							return A3(
+								$author$project$Form$FormMsg,
+								fieldId,
+								$author$project$Form$ArrayElement(i),
+								$author$project$Form$Update(
+									widget.encodeMsg(msg)));
+						},
+						html);
+				});
+			var toMsg = F2(
+				function (i, html) {
+					return A2(
+						$elm$core$List$map,
+						toMsg_(i),
+						html);
+				});
+			var removeArrayElementMsg = function (x) {
+				return A3(
+					$author$project$Form$FormMsg,
+					fieldId,
+					$author$project$Form$ArrayElement(x),
+					$author$project$Form$Remove);
+			};
+			var fieldErrors = errors_(formState);
+			var arrayElementHtml = F2(
+				function (i, model) {
+					return A2(
+						widget.view,
+						A3(
+							$author$project$Form$buildDomId,
+							parentDomId,
+							fieldId,
+							$author$project$Form$ArrayElement(i)),
+						model);
+				});
+			var addRemoveButton = F2(
+				function (i, html) {
+					return A2(
+						fieldWithRemoveButton,
+						removeArrayElementMsg(i),
+						html);
+				});
+			var inputHtml = $elm$core$List$concat(
+				A2(
+					$elm$core$List$indexedMap,
+					addRemoveButton,
+					A2(
+						$elm$core$List$indexedMap,
+						toMsg,
+						A2(
+							$elm$core$List$indexedMap,
+							arrayElementHtml,
+							deserializeModel(formState)))));
+			var addArrayElementMsg = A3(
+				$author$project$Form$FormMsg,
+				fieldId,
+				$author$project$Form$ArrayElement(0),
+				$author$project$Form$Add);
+			var addArrayElement = function (html) {
+				return A2(listWithAddButton, addArrayElementMsg, html);
+			};
+			return A2(
+				fieldWithErrors,
+				fieldErrors,
+				addArrayElement(inputHtml));
+		};
+		return {errors: errors_, id: fieldId, multiple: true, value: value, view: viewField};
+	});
+var $author$project$Form$listField = F4(
+	function (listWithAddButton, fieldWithRemoveButton, widget, _v0) {
+		var fn = _v0.fn;
+		var count = _v0.count;
+		var updates = _v0.updates;
+		var fieldWithErrors = _v0.fieldWithErrors;
+		var validator = _v0.validator;
+		var defaults = _v0.defaults;
+		var fieldId = $elm$core$String$fromInt(count);
+		return {
+			count: count + 1,
+			defaults: A3(
+				$elm$core$Dict$insert,
+				fieldId,
+				A2(
+					$elm$json$Json$Encode$list,
+					widget.encodeModel,
+					_List_fromArray(
+						[widget.init])),
+				defaults),
+			fieldWithErrors: fieldWithErrors,
+			fn: fn(
+				A5($author$project$Form$mkListField, fieldWithErrors, listWithAddButton, fieldWithRemoveButton, fieldId, widget)),
+			updates: A3(
+				$elm$core$Dict$insert,
+				$elm$core$String$fromInt(count),
+				$author$project$Form$encodedUpdate(widget),
+				updates),
+			validator: validator
+		};
+	});
 var $author$project$Main$SelectedColorMustMatchCounter = {$: 'SelectedColorMustMatchCounter'};
 var $elm$core$Basics$neq = _Utils_notEqual;
 var $author$project$Main$validateFormData = function (_v0) {
@@ -7714,6 +7735,22 @@ var $author$project$MultiColorPicker$update = F2(
 	});
 var $author$project$WebColor$all = _List_fromArray(
 	[$author$project$WebColor$Aliceblue, $author$project$WebColor$Antiquewhite, $author$project$WebColor$Aqua, $author$project$WebColor$Aquamarine, $author$project$WebColor$Azure, $author$project$WebColor$Beige, $author$project$WebColor$Bisque, $author$project$WebColor$Black, $author$project$WebColor$Blanchedalmond, $author$project$WebColor$Blue, $author$project$WebColor$Blueviolet, $author$project$WebColor$Brown, $author$project$WebColor$Burlywood, $author$project$WebColor$Cadetblue, $author$project$WebColor$Chartreuse, $author$project$WebColor$Chocolate, $author$project$WebColor$Coral, $author$project$WebColor$Cornflowerblue, $author$project$WebColor$Cornsilk, $author$project$WebColor$Crimson, $author$project$WebColor$Cyan, $author$project$WebColor$Darkblue, $author$project$WebColor$Darkcyan, $author$project$WebColor$Darkgoldenrod, $author$project$WebColor$Darkgray, $author$project$WebColor$Darkgreen, $author$project$WebColor$Darkgrey, $author$project$WebColor$Darkkhaki, $author$project$WebColor$Darkmagenta, $author$project$WebColor$Darkolivegreen, $author$project$WebColor$Darkorange, $author$project$WebColor$Darkorchid, $author$project$WebColor$Darkred, $author$project$WebColor$Darksalmon, $author$project$WebColor$Darkseagreen, $author$project$WebColor$Darkslateblue, $author$project$WebColor$Darkslategray, $author$project$WebColor$Darkslategrey, $author$project$WebColor$Darkturquoise, $author$project$WebColor$Darkviolet, $author$project$WebColor$Deeppink, $author$project$WebColor$Deepskyblue, $author$project$WebColor$Dimgray, $author$project$WebColor$Dimgrey, $author$project$WebColor$Dodgerblue, $author$project$WebColor$Firebrick, $author$project$WebColor$Floralwhite, $author$project$WebColor$Forestgreen, $author$project$WebColor$Fuchsia, $author$project$WebColor$Gainsboro, $author$project$WebColor$Ghostwhite, $author$project$WebColor$Gold, $author$project$WebColor$Goldenrod, $author$project$WebColor$Gray, $author$project$WebColor$Green, $author$project$WebColor$Greenyellow, $author$project$WebColor$Grey, $author$project$WebColor$Honeydew, $author$project$WebColor$Hotpink, $author$project$WebColor$Indianred, $author$project$WebColor$Indigo, $author$project$WebColor$Ivory, $author$project$WebColor$Khaki, $author$project$WebColor$Lavender, $author$project$WebColor$Lavenderblush, $author$project$WebColor$Lawngreen, $author$project$WebColor$Lemonchiffon, $author$project$WebColor$Lightblue, $author$project$WebColor$Lightcoral, $author$project$WebColor$Lightcyan, $author$project$WebColor$Lightgoldenrodyellow, $author$project$WebColor$Lightgray, $author$project$WebColor$Lightgreen, $author$project$WebColor$Lightgrey, $author$project$WebColor$Lightpink, $author$project$WebColor$Lightsalmon, $author$project$WebColor$Lightseagreen, $author$project$WebColor$Lightskyblue, $author$project$WebColor$Lightslategray, $author$project$WebColor$Lightslategrey, $author$project$WebColor$Lightsteelblue, $author$project$WebColor$Lightyellow, $author$project$WebColor$Lime, $author$project$WebColor$Limegreen, $author$project$WebColor$Linen, $author$project$WebColor$Magenta, $author$project$WebColor$Maroon, $author$project$WebColor$Mediumaquamarine, $author$project$WebColor$Mediumblue, $author$project$WebColor$Mediumorchid, $author$project$WebColor$Mediumpurple, $author$project$WebColor$Mediumseagreen, $author$project$WebColor$Mediumslateblue, $author$project$WebColor$Mediumspringgreen, $author$project$WebColor$Mediumturquoise, $author$project$WebColor$Mediumvioletred, $author$project$WebColor$Midnightblue, $author$project$WebColor$Mintcream, $author$project$WebColor$Mistyrose, $author$project$WebColor$Moccasin, $author$project$WebColor$Navajowhite, $author$project$WebColor$Navy, $author$project$WebColor$Oldlace, $author$project$WebColor$Olive, $author$project$WebColor$Olivedrab, $author$project$WebColor$Orange, $author$project$WebColor$Orangered, $author$project$WebColor$Orchid, $author$project$WebColor$Palegoldenrod, $author$project$WebColor$Palegreen, $author$project$WebColor$Paleturquoise, $author$project$WebColor$Palevioletred, $author$project$WebColor$Papayawhip, $author$project$WebColor$Peachpuff, $author$project$WebColor$Peru, $author$project$WebColor$Pink, $author$project$WebColor$Plum, $author$project$WebColor$Powderblue, $author$project$WebColor$Purple, $author$project$WebColor$Rebeccapurple, $author$project$WebColor$Red, $author$project$WebColor$Rosybrown, $author$project$WebColor$Royalblue, $author$project$WebColor$Saddlebrown, $author$project$WebColor$Salmon, $author$project$WebColor$Sandybrown, $author$project$WebColor$Seagreen, $author$project$WebColor$Seashell, $author$project$WebColor$Sienna, $author$project$WebColor$Silver, $author$project$WebColor$Skyblue, $author$project$WebColor$Slateblue, $author$project$WebColor$Slategray, $author$project$WebColor$Slategrey, $author$project$WebColor$Snow, $author$project$WebColor$Springgreen, $author$project$WebColor$Steelblue, $author$project$WebColor$Tan, $author$project$WebColor$Teal, $author$project$WebColor$Thistle, $author$project$WebColor$Tomato, $author$project$WebColor$Transparent, $author$project$WebColor$Turquoise, $author$project$WebColor$Violet, $author$project$WebColor$Wheat, $author$project$WebColor$White, $author$project$WebColor$Whitesmoke, $author$project$WebColor$Yellow, $author$project$WebColor$Yellowgreen]);
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
 var $elm$core$String$toLower = _String_toLower;
 var $author$project$MultiColorPicker$viewOptions = function (prefix) {
 	return $elm$core$String$isEmpty(prefix) ? _List_Nil : A2(
@@ -7795,6 +7832,53 @@ var $author$project$MultiColorPicker$widget = {
 	},
 	view: $author$project$MultiColorPicker$view
 };
+var $author$project$Main$withAddButton = F3(
+	function (subject, add, inputHtml) {
+		return _Utils_ap(
+			inputHtml,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick(add),
+							$elm$html$Html$Attributes$class('secondary')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Add ' + subject)
+						]))
+				]));
+	});
+var $author$project$Main$withRemoveButton = F2(
+	function (remove, inputHtml) {
+		return _List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('grid')
+					]),
+				_Utils_ap(
+					inputHtml,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick(remove),
+									$elm$html$Html$Attributes$class('secondary')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Remove')
+								]))
+						])))
+			]);
+	});
 var $author$project$Main$myForm = A4(
 	$author$project$Form$listField,
 	$author$project$Main$withAddButton('number'),
@@ -7922,7 +8006,7 @@ var $author$project$Main$styles = A3(
 		$elm$html$Html$text('\n    .has-error > input { border-color: red; }\n    .errors { color: red; }\n    ')));
 var $author$project$Main$view = function (model) {
 	return A2(
-		$elm$html$Html$div,
+		$elm$html$Html$main_,
 		_List_Nil,
 		_List_fromArray(
 			[

@@ -1,23 +1,18 @@
 module Main exposing (main)
 
 import Browser
-import Form exposing (Error(..), FieldWithErrors, Form, FormState, Widget, alwaysValid, extract, field, listField, toWidget, validate)
+import Form exposing (Error(..), FieldWithErrors, FieldWithRemoveButton, Form, FormState, ListWithAddButton, Widget, alwaysValid, debugFormState, extract, field, listField, toWidget, validate)
 import Html exposing (Html, article, button, div, footer, label, text)
-import Html.Attributes exposing (class, classList, for)
+import Html.Attributes exposing (attribute, class, classList, for)
 import Html.Events exposing (onClick)
 import Maybe exposing (withDefault)
 import MultiColorPicker
 import String exposing (fromInt)
 import WebColor exposing (WebColor, asStr)
 import Widgets.Checkbox exposing (checkbox)
+import Widgets.Dropdown exposing (Variants, dropdown)
 import Widgets.Int exposing (integerInput)
 import Widgets.Text exposing (notBlank, textInput)
-import Json.Encode as E
-import Form exposing (debugFormState)
-import Html exposing (a)
-import Html.Attributes exposing (attribute)
-import Form exposing (FieldWithRemoveButton)
-import Form exposing (ListWithAddButton)
 
 
 type alias Model =
@@ -49,13 +44,16 @@ init _ =
     , Cmd.none
     )
 
-currentForm = hasManyNamesForm
+
+currentForm =
+    liquidForm
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ForForm formMsg ->
-            ( { model | formState = Form.update currentForm formMsg (debugFormState model.formState) }
+            ( { model | formState = Form.update currentForm formMsg model.formState }
             , Cmd.none
             )
 
@@ -78,7 +76,7 @@ styles =
 
 view : Model -> Html Msg
 view model =
-    div []
+    Html.main_ []
         [ styles
         , article [] <|
             Form.render ForForm currentForm model.formState
@@ -165,10 +163,10 @@ nameForm =
         (\first last ->
             { view =
                 \formState errors ->
-                        [ div [] <| first.view formState
-                        , div [] <| last.view formState
-                        , div [] <| [ viewErrors errors ]
-                        ]
+                    [ div [] <| first.view formState
+                    , div [] <| last.view formState
+                    , div [] <| [ viewErrors errors ]
+                    ]
             , combine =
                 \formState ->
                     { first = first.value formState
@@ -225,7 +223,7 @@ hasManyForm =
             , combine = \formState -> ints.value formState
             }
         )
-        |> listField (withAddButton "item" ) withRemoveButton (textInput [])
+        |> listField (withAddButton "item") withRemoveButton (textInput [])
 
 
 type alias HasManyNames =
@@ -242,22 +240,74 @@ hasManyNamesForm =
             , combine = \formState -> names.value formState
             }
         )
-        |> listField (withAddButton "person") withRemoveButton (fullnameWidget)
+        |> listField (withAddButton "person") withRemoveButton fullnameWidget
+
 
 withRemoveButton : FieldWithRemoveButton msg
 withRemoveButton remove inputHtml =
-    [ div [class "grid"]
-        (inputHtml ++ [button [onClick remove, class "secondary"] [text "Remove"]] )
+    [ div [ class "grid" ]
+        (inputHtml ++ [ button [ onClick remove, class "secondary" ] [ text "Remove" ] ])
     ]
+
 
 withAddButton : String -> ListWithAddButton msg
 withAddButton subject add inputHtml =
-    inputHtml ++
-        [button [onClick add, class "secondary"] [text <| "Add " ++ subject]] 
-    
+    inputHtml
+        ++ [ button [ onClick add, class "secondary" ] [ text <| "Add " ++ subject ] ]
 
-role : String -> Html.Attribute msg 
-role r = ( attribute "role" r )
+
+type VolumeUnit
+    = Milliliter
+    | CentiLiter
+    | Liter
+
+
+volumeUnitVariants : Variants VolumeUnit
+volumeUnitVariants =
+    ( { value = Milliliter, id = "ml", label = "milliliter" } 
+    , [ { value = CentiLiter, id = "cl", label = "centiliter" }
+      , { value = Liter, id = "l", label = "liter" }
+      ]
+    )
+
+
+type alias LiquidIngredient =
+    { name : String
+    , amount : Int
+    , unit : VolumeUnit
+    }
+
+
+liquidForm : Form LiquidIngredient ()
+liquidForm =
+    Form.form
+        alwaysValid
+        (\_ html -> html)
+        (\name amount unit ->
+            { view =
+                \formState _ ->
+                    List.concat
+                        [ name.view formState
+                        , amount.view formState
+                        , unit.view formState
+                        ]
+            , combine =
+                \formState ->
+                    { name = name.value formState
+                    , amount = amount.value formState
+                    , unit = unit.value formState
+                    }
+            }
+        )
+        |> field (textInput [] |> withLabel "name")
+        |> field (integerInput [] |> withLabel "amount")
+        |> field (dropdown volumeUnitVariants |> withLabel "unit")
+
+
+role : String -> Html.Attribute msg
+role r =
+    attribute "role" r
+
 
 myForm : Form MyFormData MyError
 myForm =
