@@ -1,14 +1,13 @@
 module MultiColorPicker exposing (widget)
 
-import Form exposing (DomId, Widget)
-import Html exposing (Html, button, div, input, s, span, text)
+import FormState exposing (DomId, Widget, alwaysValid)
+import Html exposing (Html, button, input, s, span, text)
 import Html.Attributes exposing (style, value)
 import Html.Events exposing (onClick, onInput)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E exposing (Value)
 import String exposing (toLower)
 import WebColor exposing (WebColor, asStr)
-import Form exposing (alwaysValid)
 
 
 widget : Widget Model Msg (List WebColor) customError
@@ -117,9 +116,8 @@ update msg model =
 
 view : DomId -> Model -> List (Html Msg)
 view _ { prefix, selected } =
-        (input [ value prefix, onInput ChangePrefix ] []
-            :: (viewOptions prefix ++ List.map viewSelectedColor selected)
-        )
+    input [ value prefix, onInput ChangePrefix ] []
+        :: (viewOptions prefix ++ List.map viewSelectedColor selected)
 
 
 viewOptions : String -> List (Html Msg)

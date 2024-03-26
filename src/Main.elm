@@ -1,7 +1,8 @@
 module Main exposing (main)
 
 import Browser
-import Form exposing (Variants,fieldWithVariants, Error(..), FieldWithErrors, FieldWithRemoveButton, Form, FormState, ListWithAddButton, Widget, alwaysValid, debugFormState, extract, field, listField, toWidget, validate)
+import Form exposing (FieldWithErrors, FieldWithRemoveButton, Form, ListWithAddButton, Variants, debugFormState, extract, field, fieldWithVariants, listField, toWidget, validate)
+import FormState exposing (Error(..), FormState, Widget, alwaysValid)
 import Html exposing (Html, article, button, div, footer, label, text)
 import Html.Attributes exposing (attribute, class, classList, for)
 import Html.Events exposing (onClick)
@@ -16,7 +17,7 @@ import Widgets.Text exposing (notBlank, textInput)
 
 
 type alias Model =
-    { formState : Form.FormState
+    { formState : FormState
     , submitted : Maybe MyFormData
     }
 
@@ -59,9 +60,9 @@ update msg model =
 
         Submit formData ->
             let
-                _ = Debug.log "submitted form" formData
+                _ =
+                    Debug.log "submitted form" formData
             in
-            
             ( model
             , Cmd.none
             )
@@ -133,10 +134,10 @@ viewErrors errors =
 errorToString : Error MyError -> String
 errorToString e =
     case e of
-        Form.MustNotBeBlank ->
+        FormState.MustNotBeBlank ->
             "must not be blank"
 
-        Form.CustomError myError ->
+        FormState.CustomError myError ->
             case myError of
                 FirstNameMustNotBeSameAsLastName ->
                     "first name must not be the same as last name"
@@ -207,7 +208,7 @@ withLabel labelText wrapped =
 validateFormData : MyFormData -> List (Error MyError)
 validateFormData (FormData { counter, webColors }) =
     if counter /= List.length webColors then
-        [ Form.CustomError SelectedColorMustMatchCounter ]
+        [ FormState.CustomError SelectedColorMustMatchCounter ]
 
     else
         []
@@ -282,29 +283,32 @@ type alias LiquidIngredient =
     }
 
 
-liquidForm : Form Ingredient ()
+liquidForm : Form Ingredient MyError
 liquidForm =
     Form.form
         alwaysValid
-        (\_ html -> html)
+        fieldWithErrors
         (\name amount unit ->
             { view =
-                \formState _ ->
-                    List.concat
-                        [ name.view formState
-                        , amount.view formState
-                        , unit.view formState
-                        ]
+                \formState errors ->
+                    [ div [ classList [ ( "has-error", List.isEmpty errors ) ] ] <|
+                        List.concat
+                            [ [ div [ class "errors" ] <| [ viewErrors errors ] ]
+                            , name.view formState
+                            , amount.view formState
+                            , unit.view formState
+                            ]
+                    ]
             , combine =
                 \formState ->
                     Liquid
-                    { name = name.value formState
-                    , amount = amount.value formState
-                    , unit = unit.value formState
-                    }
+                        { name = name.value formState
+                        , amount = amount.value formState
+                        , unit = unit.value formState
+                        }
             }
         )
-        |> field (textInput [] |> withLabel "name")
+        |> field (textInput [] |> withLabel "name" |> validate [ notBlank ])
         |> field (integerInput [] |> withLabel "amount")
         |> field (dropdown volumeUnitVariants |> withLabel "unit")
 
@@ -320,7 +324,7 @@ type Ingredient
     | Whole WholeIngredient
 
 
-wholeForm : Form Ingredient ()
+wholeForm : Form Ingredient MyError
 wholeForm =
     Form.form
         alwaysValid
@@ -350,11 +354,11 @@ wholeForm =
             )
 
 
-ingredientForm : Form Ingredient ()
+ingredientForm : Form Ingredient MyError
 ingredientForm =
     Form.form
         alwaysValid
-        (\_ html -> html)
+        fieldWithErrors
         (\ingredient ->
             { view =
                 \formState _ ->
@@ -363,13 +367,12 @@ ingredientForm =
                         ]
             , combine =
                 \formState ->
-                      ingredient.value formState
+                    ingredient.value formState
             }
         )
         |> fieldWithVariants dropdown
-            [ ("Liquid ingredient", liquidForm |> toWidget)
-            , ("Whole ingredient", wholeForm |> toWidget)
-            ]
+            ( "Liquid ingredient", liquidForm |> toWidget )
+            [ ( "Whole ingredient", wholeForm |> toWidget ) ]
 
 
 role : String -> Html.Attribute msg

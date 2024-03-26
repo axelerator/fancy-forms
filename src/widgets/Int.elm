@@ -1,6 +1,7 @@
 module Widgets.Int exposing (integerInput)
 
-import Form exposing (Msg, Widget, alwaysValid)
+import Form exposing (Msg)
+import FormState exposing (Widget, alwaysValid)
 import Html exposing (Attribute, input)
 import Html.Attributes exposing (id, type_, value)
 import Html.Events exposing (onInput)
@@ -25,12 +26,12 @@ integerInput attrs =
     , validate = alwaysValid
     , view =
         \domId model ->
-            [input (attrs ++ [ id domId, type_ "number", onInput identity, value model.value ]) []]
+            [ input (attrs ++ [ id domId, type_ "number", onInput identity, value model.value ]) [] ]
     , update =
         \msg model ->
             String.toInt msg
-            |> Maybe.map (\i -> { model | parsedValue = i, value = msg } )
-            |> Maybe.withDefault { model | value = msg }
+                |> Maybe.map (\i -> { model | parsedValue = i, value = msg })
+                |> Maybe.withDefault { model | value = msg }
     , encodeMsg = E.string
     , decoderMsg = D.string
     , encodeModel =

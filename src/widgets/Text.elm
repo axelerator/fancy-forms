@@ -1,12 +1,12 @@
 module Widgets.Text exposing (notBlank, textInput)
 
-import Form exposing (Error(..), Msg, Validator, Widget)
+import Form exposing (Msg)
+import FormState exposing (Error(..), Validator, Widget, alwaysValid)
 import Html exposing (Attribute, input)
 import Html.Attributes exposing (id, value)
 import Html.Events exposing (onInput)
 import Json.Decode as D
 import Json.Encode as E
-import Form exposing (alwaysValid)
 
 
 type alias Msg =
@@ -21,6 +21,7 @@ notBlank model =
     else
         []
 
+
 textInput : List (Attribute Msg) -> Widget String Msg String customError
 textInput attrs =
     { init = ""
@@ -28,7 +29,7 @@ textInput attrs =
     , validate = alwaysValid
     , view =
         \domId model ->
-            [input (attrs ++ [ id domId, onInput identity, value model ]) []]
+            [ input (attrs ++ [ id domId, onInput identity, value model ]) [] ]
     , update = \msg _ -> msg
     , encodeMsg = E.string
     , decoderMsg = D.string

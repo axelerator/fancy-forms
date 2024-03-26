@@ -5159,7 +5159,7 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Form$alwaysValid = function (_v0) {
+var $author$project$FormState$alwaysValid = function (_v0) {
 	return _List_Nil;
 };
 var $elm$core$List$append = F2(
@@ -5343,11 +5343,65 @@ var $author$project$Widgets$Dropdown$dropdown = function (variants) {
 		encodeMsg: $elm$json$Json$Encode$string,
 		init: _default.id,
 		update: $author$project$Widgets$Dropdown$update,
-		validate: $author$project$Form$alwaysValid,
+		validate: $author$project$FormState$alwaysValid,
 		value: $author$project$Widgets$Dropdown$fromString(variants),
 		view: $author$project$Widgets$Dropdown$view(variants)
 	};
 };
+var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $author$project$Main$errorToString = function (e) {
+	if (e.$ === 'MustNotBeBlank') {
+		return 'must not be blank';
+	} else {
+		var myError = e.a;
+		if (myError.$ === 'FirstNameMustNotBeSameAsLastName') {
+			return 'first name must not be the same as last name';
+		} else {
+			return 'amount of color must match counter';
+		}
+	}
+};
+var $author$project$Main$viewErrors = function (errors) {
+	return $elm$core$List$isEmpty(errors) ? $elm$html$Html$text('') : A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('errors')
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(
+				A2(
+					$elm$core$String$join,
+					' ',
+					A2($elm$core$List$map, $author$project$Main$errorToString, errors)))
+			]));
+};
+var $author$project$Main$fieldWithErrors = F2(
+	function (errors, html) {
+		return _List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				$elm$core$List$isEmpty(errors) ? _List_Nil : _List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('has-error')
+					]),
+				_Utils_ap(
+					html,
+					_List_fromArray(
+						[
+							$author$project$Main$viewErrors(errors)
+						])))
+			]);
+	});
 var $elm$json$Json$Decode$decodeValue = _Json_run;
 var $elm$core$List$drop = F2(
 	function (n, list) {
@@ -5532,14 +5586,15 @@ var $elm$core$List$take = F2(
 	function (n, list) {
 		return A3($elm$core$List$takeFast, 0, n, list);
 	});
-var $elm$core$Result$toMaybe = function (result) {
-	if (result.$ === 'Ok') {
-		var v = result.a;
-		return $elm$core$Maybe$Just(v);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
+var $elm$core$Result$withDefault = F2(
+	function (def, result) {
+		if (result.$ === 'Ok') {
+			var a = result.a;
+			return a;
+		} else {
+			return def;
+		}
+	});
 var $author$project$Form$encodedUpdate = F4(
 	function (widget, subfieldId, operation, modelVal) {
 		var decoderMsg = widget.decoderMsg;
@@ -5560,13 +5615,12 @@ var $author$project$Form$encodedUpdate = F4(
 								return _Utils_eq(idx, i) ? updatedModel : e;
 							}),
 						A2(
-							$elm$core$Maybe$withDefault,
+							$elm$core$Result$withDefault,
 							A2($elm$core$List$repeat, i + 1, widget.init),
-							$elm$core$Result$toMaybe(
-								A2(
-									$elm$json$Json$Decode$decodeValue,
-									$elm$json$Json$Decode$list(decoderModel),
-									modelVal)))));
+							A2(
+								$elm$json$Json$Decode$decodeValue,
+								$elm$json$Json$Decode$list(decoderModel),
+								modelVal))));
 			}
 		};
 		var decodeSubfield = function () {
@@ -5577,28 +5631,13 @@ var $author$project$Form$encodedUpdate = F4(
 				return A2($elm$json$Json$Decode$index, i, decoderModel);
 			}
 		}();
-		var _v0 = A2(
-			$elm$core$Debug$log,
-			'encodedUpdate',
-			function () {
-				switch (operation.$) {
-					case 'Add':
-						return 'add';
-					case 'Remove':
-						return 'remove';
-					default:
-						var uv = operation.a;
-						return A2($elm$json$Json$Encode$encode, -1, uv);
-				}
-			}());
-		var _v2 = _Utils_Tuple2(operation, subfieldId);
-		_v2$3:
+		var _v0 = _Utils_Tuple2(operation, subfieldId);
+		_v0$3:
 		while (true) {
-			switch (_v2.a.$) {
+			switch (_v0.a.$) {
 				case 'Add':
-					if (_v2.b.$ === 'ArrayElement') {
-						var _v3 = _v2.a;
-						var i = _v2.b.a;
+					if (_v0.b.$ === 'ArrayElement') {
+						var _v1 = _v0.a;
 						return function (list) {
 							return A2(
 								$elm$json$Json$Encode$list,
@@ -5606,25 +5645,22 @@ var $author$project$Form$encodedUpdate = F4(
 								_Utils_ap(
 									list,
 									_List_fromArray(
-										[
-											A2($elm$core$Debug$log, 'adding', widget.init)
-										])));
+										[widget.init])));
 						}(
 							A2(
-								$elm$core$Maybe$withDefault,
+								$elm$core$Result$withDefault,
 								_List_Nil,
-								$elm$core$Result$toMaybe(
-									A2(
-										$elm$json$Json$Decode$decodeValue,
-										$elm$json$Json$Decode$list(decoderModel),
-										modelVal))));
+								A2(
+									$elm$json$Json$Decode$decodeValue,
+									$elm$json$Json$Decode$list(decoderModel),
+									modelVal)));
 					} else {
-						break _v2$3;
+						break _v0$3;
 					}
 				case 'Remove':
-					if (_v2.b.$ === 'ArrayElement') {
-						var _v4 = _v2.a;
-						var i = _v2.b.a;
+					if (_v0.b.$ === 'ArrayElement') {
+						var _v2 = _v0.a;
+						var i = _v0.b.a;
 						return A2(
 							$elm$json$Json$Encode$list,
 							encodeModel,
@@ -5634,40 +5670,34 @@ var $author$project$Form$encodedUpdate = F4(
 									A2($elm$core$List$drop, i + 1, list));
 							}(
 								A2(
-									$elm$core$Maybe$withDefault,
+									$elm$core$Result$withDefault,
 									_List_Nil,
-									$elm$core$Result$toMaybe(
-										A2(
-											$elm$json$Json$Decode$decodeValue,
-											$elm$json$Json$Decode$list(decoderModel),
-											modelVal)))));
+									A2(
+										$elm$json$Json$Decode$decodeValue,
+										$elm$json$Json$Decode$list(decoderModel),
+										modelVal))));
 					} else {
-						break _v2$3;
+						break _v0$3;
 					}
 				default:
-					var msgVal = _v2.a.a;
-					var _v5 = _Utils_Tuple2(
+					var msgVal = _v0.a.a;
+					var _v3 = _Utils_Tuple2(
 						A2($elm$json$Json$Decode$decodeValue, decoderMsg, msgVal),
 						A2($elm$json$Json$Decode$decodeValue, decodeSubfield, modelVal));
-					if (_v5.a.$ === 'Ok') {
-						if (_v5.b.$ === 'Ok') {
-							var msg = _v5.a.a;
-							var model = _v5.b.a;
+					if (_v3.a.$ === 'Ok') {
+						if (_v3.b.$ === 'Ok') {
+							var msg = _v3.a.a;
+							var model = _v3.b.a;
 							return encodeSubfield(
-								A2(
-									widget.update,
-									A2($elm$core$Debug$log, 'sg', msg),
-									model));
+								A2(widget.update, msg, model));
 						} else {
-							var msg = _v5.a.a;
-							var e = _v5.b;
+							var msg = _v3.a.a;
 							return encodeSubfield(
 								A2(widget.update, msg, widget.init));
 						}
 					} else {
-						var e1 = _v5.a;
-						var e2 = _v5.b;
-						var _v6 = A2(
+						var e1 = _v3.a;
+						var _v4 = A2(
 							$elm$core$Debug$log,
 							'invalde',
 							_Utils_Tuple3(
@@ -5678,9 +5708,13 @@ var $author$project$Form$encodedUpdate = F4(
 					}
 			}
 		}
-		var _v7 = A2($elm$core$Debug$log, 'unknown operation', operation);
 		return modelVal;
 	});
+var $coreygirard$elm_nonempty_list$List$Nonempty$head = function (_v0) {
+	var a = _v0.a;
+	var b = _v0.b;
+	return a;
+};
 var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
@@ -5791,12 +5825,20 @@ var $elm$core$Dict$insert = F3(
 			return x;
 		}
 	});
+var $coreygirard$elm_nonempty_list$List$Nonempty$map = F2(
+	function (f, _v0) {
+		var a = _v0.a;
+		var b = _v0.b;
+		return _Utils_Tuple2(
+			f(a),
+			A2($elm$core$List$map, f, b));
+	});
 var $author$project$Form$FormMsg = F3(
 	function (a, b, c) {
 		return {$: 'FormMsg', a: a, b: b, c: c};
 	});
-var $author$project$Form$SingleValue = {$: 'SingleValue'};
-var $author$project$Form$Update = function (a) {
+var $author$project$FormState$SingleValue = {$: 'SingleValue'};
+var $author$project$FormState$Update = function (a) {
 	return {$: 'Update', a: a};
 };
 var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
@@ -5845,7 +5887,7 @@ var $elm$json$Json$Encode$object = function (pairs) {
 			_Json_emptyObject(_Utils_Tuple0),
 			pairs));
 };
-var $author$project$Form$read = F2(
+var $author$project$FormState$read = F2(
 	function (fieldId, _v0) {
 		var values = _v0.a.values;
 		return A2(
@@ -5857,13 +5899,12 @@ var $author$project$Form$mkField = F3(
 	function (fieldWithErrors, fieldId, widget) {
 		var deserializeModel = function (formState) {
 			return A2(
-				$elm$core$Maybe$withDefault,
+				$elm$core$Result$withDefault,
 				widget.init,
-				$elm$core$Result$toMaybe(
-					A2(
-						$elm$json$Json$Decode$decodeValue,
-						widget.decoderModel,
-						A2($author$project$Form$read, fieldId, formState))));
+				A2(
+					$elm$json$Json$Decode$decodeValue,
+					widget.decoderModel,
+					A2($author$project$FormState$read, fieldId, formState)));
 		};
 		var errors_ = function (formState) {
 			return widget.validate(
@@ -5880,8 +5921,8 @@ var $author$project$Form$mkField = F3(
 					return A3(
 						$author$project$Form$FormMsg,
 						fieldId,
-						$author$project$Form$SingleValue,
-						$author$project$Form$Update(v));
+						$author$project$FormState$SingleValue,
+						$author$project$FormState$Update(v));
 				}(
 					widget.encodeMsg(msg));
 			};
@@ -5897,9 +5938,64 @@ var $author$project$Form$mkField = F3(
 		};
 		return {errors: errors_, id: fieldId, multiple: false, value: value, view: viewField};
 	});
-var $elm$core$Debug$todo = _Debug_todo;
+var $author$project$Widgets$VariantSelect$ForVariant = F2(
+	function (a, b) {
+		return {$: 'ForVariant', a: a, b: b};
+	});
+var $author$project$Widgets$VariantSelect$ForVariantSelect = function (a) {
+	return {$: 'ForVariantSelect', a: a};
+};
 var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $author$project$Form$FormState = function (a) {
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$Widgets$VariantSelect$decoderMsg = A2(
+	$elm$json$Json$Decode$andThen,
+	function (kind) {
+		switch (kind) {
+			case 'ForVariantSelect':
+				return A2(
+					$elm$json$Json$Decode$map,
+					$author$project$Widgets$VariantSelect$ForVariantSelect,
+					A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$value));
+			case 'ForVariant':
+				return A3(
+					$elm$json$Json$Decode$map2,
+					$author$project$Widgets$VariantSelect$ForVariant,
+					A2($elm$json$Json$Decode$field, 'variantName', $elm$json$Json$Decode$string),
+					A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$value));
+			default:
+				return $elm$json$Json$Decode$fail('unknown kind');
+		}
+	},
+	A2($elm$json$Json$Decode$field, 'kind', $elm$json$Json$Decode$string));
+var $author$project$Widgets$VariantSelect$encodeMsg = function (msg) {
+	if (msg.$ === 'ForVariantSelect') {
+		var v = msg.a;
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'kind',
+					$elm$json$Json$Encode$string('ForVariantSelect')),
+					_Utils_Tuple2('value', v)
+				]));
+	} else {
+		var variantName = msg.a;
+		var v = msg.b;
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'kind',
+					$elm$json$Json$Encode$string('ForVariant')),
+					_Utils_Tuple2(
+					'variantName',
+					$elm$json$Json$Encode$string(variantName)),
+					_Utils_Tuple2('value', v)
+				]));
+	}
+};
+var $author$project$FormState$FormState = function (a) {
 	return {$: 'FormState', a: a};
 };
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
@@ -5922,12 +6018,11 @@ var $elm$json$Json$Decode$dict = function (decoder) {
 		$elm$core$Dict$fromList,
 		$elm$json$Json$Decode$keyValuePairs(decoder));
 };
-var $elm$json$Json$Decode$value = _Json_decodeValue;
-var $author$project$Form$formStateDecoder = A2(
+var $author$project$FormState$formStateDecoder = A2(
 	$elm$json$Json$Decode$andThen,
 	function (d) {
 		return $elm$json$Json$Decode$succeed(
-			$author$project$Form$FormState(
+			$author$project$FormState$FormState(
 				{parentDomId: '', values: d}));
 	},
 	$elm$json$Json$Decode$dict($elm$json$Json$Decode$value));
@@ -5972,67 +6067,47 @@ var $elm$json$Json$Encode$dict = F3(
 				_Json_emptyObject(_Utils_Tuple0),
 				dictionary));
 	});
-var $author$project$Form$formStateEncode = function (_v0) {
+var $author$project$FormState$formStateEncode = function (_v0) {
 	var values = _v0.a.values;
 	return A3($elm$json$Json$Encode$dict, $elm$core$Basics$identity, $elm$core$Basics$identity, values);
 };
-var $author$project$Form$ForVariant = F2(
-	function (a, b) {
-		return {$: 'ForVariant', a: a, b: b};
-	});
-var $author$project$Form$ForVariantSelect = function (a) {
-	return {$: 'ForVariantSelect', a: a};
+var $coreygirard$elm_nonempty_list$List$Nonempty$toList = function (_v0) {
+	var a = _v0.a;
+	var b = _v0.b;
+	return A2($elm$core$List$cons, a, b);
 };
-var $elm$json$Json$Decode$fail = _Json_fail;
-var $author$project$Form$vWdecoderMsg = A2(
-	$elm$json$Json$Decode$andThen,
-	function (kind) {
-		switch (kind) {
-			case 'ForVariantSelect':
-				return A2(
-					$elm$json$Json$Decode$map,
-					$author$project$Form$ForVariantSelect,
-					A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$value));
-			case 'ForVariant':
-				return A3(
-					$elm$json$Json$Decode$map2,
-					$author$project$Form$ForVariant,
-					A2($elm$json$Json$Decode$field, 'variantName', $elm$json$Json$Decode$string),
-					A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$value));
-			default:
-				return $elm$json$Json$Decode$fail('unknown kind');
+var $coreygirard$elm_nonempty_list$List$Nonempty$filter = F2(
+	function (f, elems) {
+		return A2(
+			$elm$core$List$filter,
+			f,
+			$coreygirard$elm_nonempty_list$List$Nonempty$toList(elems));
+	});
+var $elm$core$Result$map = F2(
+	function (func, ra) {
+		if (ra.$ === 'Ok') {
+			var a = ra.a;
+			return $elm$core$Result$Ok(
+				func(a));
+		} else {
+			var e = ra.a;
+			return $elm$core$Result$Err(e);
 		}
-	},
-	A2($elm$json$Json$Decode$field, 'kind', $elm$json$Json$Decode$string));
-var $author$project$Form$vWencodeMsg = function (msg) {
-	if (msg.$ === 'ForVariantSelect') {
-		var v = msg.a;
-		return $elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'kind',
-					$elm$json$Json$Encode$string('ForVariantSelect')),
-					_Utils_Tuple2('value', v)
-				]));
+	});
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $author$project$Widgets$VariantSelect$selectorFieldId = 'selectorValue';
+var $elm$core$Result$toMaybe = function (result) {
+	if (result.$ === 'Ok') {
+		var v = result.a;
+		return $elm$core$Maybe$Just(v);
 	} else {
-		var variantName = msg.a;
-		var v = msg.b;
-		return $elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'kind',
-					$elm$json$Json$Encode$string('ForVariant')),
-					_Utils_Tuple2(
-					'variantName',
-					$elm$json$Json$Encode$string(variantName)),
-					_Utils_Tuple2('value', v)
-				]));
+		return $elm$core$Maybe$Nothing;
 	}
 };
-var $author$project$Form$vWselectorFieldId = 'selectorValue';
-var $author$project$Form$vWdeserializeModel = F2(
+var $author$project$Widgets$VariantSelect$deserializeModel = F2(
 	function (widget, formState) {
 		return A2(
 			$elm$core$Maybe$withDefault,
@@ -6041,201 +6116,246 @@ var $author$project$Form$vWdeserializeModel = F2(
 				A2(
 					$elm$json$Json$Decode$decodeValue,
 					widget.decoderModel,
-					A2($author$project$Form$read, $author$project$Form$vWselectorFieldId, formState))));
+					A2($author$project$FormState$read, $author$project$Widgets$VariantSelect$selectorFieldId, formState))));
 	});
-var $author$project$Form$vWvalue = F2(
-	function (widget, _v0) {
-		var state = _v0.state;
+var $author$project$Widgets$VariantSelect$value = F2(
+	function (widget, state) {
 		return widget.value(
-			A2($author$project$Form$vWdeserializeModel, widget, state));
+			A2($author$project$Widgets$VariantSelect$deserializeModel, widget, state));
 	});
-var $author$project$Form$vWselectedValue = F3(
+var $author$project$Widgets$VariantSelect$selectedValue = F3(
 	function (variantSelectWidget, variantWidgets, model) {
-		var selectedVariantName = A2($author$project$Form$vWvalue, variantSelectWidget, model);
-		var selectedWidget = $elm$core$List$head(
-			A2(
-				$elm$core$List$filter,
-				function (_v3) {
-					var name = _v3.a;
-					return _Utils_eq(name, selectedVariantName);
-				},
-				variantWidgets));
-		if (selectedWidget.$ === 'Just') {
-			var _v1 = selectedWidget.a;
-			var widget = _v1.b;
-			var decodedValue = A2(
-				$elm$json$Json$Decode$decodeValue,
-				widget.decoderModel,
-				A2($author$project$Form$read, selectedVariantName, model.state));
-			if (decodedValue.$ === 'Ok') {
-				var v = decodedValue.a;
-				return widget.value(v);
-			} else {
-				return widget.value(widget.init);
-			}
-		} else {
-			return _Debug_todo(
-				'Form',
-				{
-					start: {line: 923, column: 17},
-					end: {line: 923, column: 27}
-				})('selected variant not found');
-		}
-	});
-var $author$project$Form$vWbyName = F2(
-	function (variantWidgets, variantName) {
-		return $elm$core$List$head(
-			A2(
-				$elm$core$List$map,
-				function (_v1) {
-					var widget = _v1.b;
-					return widget;
-				},
+		var selectedVariantName = A2($author$project$Widgets$VariantSelect$value, variantSelectWidget, model);
+		var selectedWidget = A2(
+			$elm$core$Maybe$withDefault,
+			$coreygirard$elm_nonempty_list$List$Nonempty$head(variantWidgets),
+			$elm$core$List$head(
 				A2(
-					$elm$core$List$filter,
+					$coreygirard$elm_nonempty_list$List$Nonempty$filter,
 					function (_v0) {
 						var name = _v0.a;
-						return _Utils_eq(name, variantName);
+						return _Utils_eq(name, selectedVariantName);
 					},
-					variantWidgets)));
+					variantWidgets))).b;
+		return A2(
+			$elm$core$Result$withDefault,
+			selectedWidget.value(selectedWidget.init),
+			A2(
+				$elm$core$Result$map,
+				selectedWidget.value,
+				A2(
+					$elm$json$Json$Decode$decodeValue,
+					selectedWidget.decoderModel,
+					A2($author$project$FormState$read, selectedVariantName, model))));
 	});
-var $author$project$Form$vWupdate = F4(
+var $author$project$FormState$encodedUpdate = F4(
+	function (widget, subfieldId, operation, modelVal) {
+		var decoderMsg = widget.decoderMsg;
+		var decoderModel = widget.decoderModel;
+		var encodeModel = widget.encodeModel;
+		var encodeSubfield = function (updatedModel) {
+			if (subfieldId.$ === 'SingleValue') {
+				return encodeModel(updatedModel);
+			} else {
+				var i = subfieldId.a;
+				return A2(
+					$elm$json$Json$Encode$list,
+					encodeModel,
+					A2(
+						$elm$core$List$indexedMap,
+						F2(
+							function (idx, e) {
+								return _Utils_eq(idx, i) ? updatedModel : e;
+							}),
+						A2(
+							$elm$core$Result$withDefault,
+							A2($elm$core$List$repeat, i + 1, widget.init),
+							A2(
+								$elm$json$Json$Decode$decodeValue,
+								$elm$json$Json$Decode$list(decoderModel),
+								modelVal))));
+			}
+		};
+		var decodeSubfield = function () {
+			if (subfieldId.$ === 'SingleValue') {
+				return decoderModel;
+			} else {
+				var i = subfieldId.a;
+				return A2($elm$json$Json$Decode$index, i, decoderModel);
+			}
+		}();
+		var _v0 = A2(
+			$elm$core$Debug$log,
+			'encodedUpdate',
+			function () {
+				switch (operation.$) {
+					case 'Add':
+						return 'add';
+					case 'Remove':
+						return 'remove';
+					default:
+						var uv = operation.a;
+						return A2($elm$json$Json$Encode$encode, -1, uv);
+				}
+			}());
+		var _v2 = _Utils_Tuple2(operation, subfieldId);
+		_v2$3:
+		while (true) {
+			switch (_v2.a.$) {
+				case 'Add':
+					if (_v2.b.$ === 'ArrayElement') {
+						var _v3 = _v2.a;
+						return function (list) {
+							return A2(
+								$elm$json$Json$Encode$list,
+								encodeModel,
+								_Utils_ap(
+									list,
+									_List_fromArray(
+										[
+											A2($elm$core$Debug$log, 'adding', widget.init)
+										])));
+						}(
+							A2(
+								$elm$core$Result$withDefault,
+								_List_Nil,
+								A2(
+									$elm$json$Json$Decode$decodeValue,
+									$elm$json$Json$Decode$list(decoderModel),
+									modelVal)));
+					} else {
+						break _v2$3;
+					}
+				case 'Remove':
+					if (_v2.b.$ === 'ArrayElement') {
+						var _v4 = _v2.a;
+						var i = _v2.b.a;
+						return A2(
+							$elm$json$Json$Encode$list,
+							encodeModel,
+							function (list) {
+								return _Utils_ap(
+									A2($elm$core$List$take, i, list),
+									A2($elm$core$List$drop, i + 1, list));
+							}(
+								A2(
+									$elm$core$Result$withDefault,
+									_List_Nil,
+									A2(
+										$elm$json$Json$Decode$decodeValue,
+										$elm$json$Json$Decode$list(decoderModel),
+										modelVal))));
+					} else {
+						break _v2$3;
+					}
+				default:
+					var msgVal = _v2.a.a;
+					var _v5 = _Utils_Tuple2(
+						A2($elm$json$Json$Decode$decodeValue, decoderMsg, msgVal),
+						A2($elm$json$Json$Decode$decodeValue, decodeSubfield, modelVal));
+					if (_v5.a.$ === 'Ok') {
+						if (_v5.b.$ === 'Ok') {
+							var msg = _v5.a.a;
+							var model = _v5.b.a;
+							return encodeSubfield(
+								A2(widget.update, msg, model));
+						} else {
+							var msg = _v5.a.a;
+							return encodeSubfield(
+								A2(widget.update, msg, widget.init));
+						}
+					} else {
+						var e1 = _v5.a;
+						var _v6 = A2(
+							$elm$core$Debug$log,
+							'invalde',
+							_Utils_Tuple3(
+								e1,
+								A2($elm$json$Json$Encode$encode, -1, msgVal),
+								modelVal));
+						return modelVal;
+					}
+			}
+		}
+		var _v7 = A2($elm$core$Debug$log, 'unknown operation', operation);
+		return modelVal;
+	});
+var $author$project$Widgets$VariantSelect$widgetByName = F2(
+	function (variantWidgets, variantName) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			$coreygirard$elm_nonempty_list$List$Nonempty$head(variantWidgets).b,
+			$elm$core$List$head(
+				A2(
+					$elm$core$List$map,
+					$elm$core$Tuple$second,
+					A2(
+						$coreygirard$elm_nonempty_list$List$Nonempty$filter,
+						function (_v0) {
+							var name = _v0.a;
+							return _Utils_eq(name, variantName);
+						},
+						variantWidgets))));
+	});
+var $author$project$FormState$toKey = F2(
+	function (fieldId, subfieldId) {
+		if (subfieldId.$ === 'SingleValue') {
+			return fieldId;
+		} else {
+			var i = subfieldId.a;
+			return fieldId + ('-' + $elm$core$String$fromInt(i));
+		}
+	});
+var $author$project$FormState$write = F4(
+	function (fieldId, subfieldId, _v0, value) {
+		var formState = _v0.a;
+		return $author$project$FormState$FormState(
+			_Utils_update(
+				formState,
+				{
+					values: A3(
+						$elm$core$Dict$insert,
+						A2($author$project$FormState$toKey, fieldId, subfieldId),
+						value,
+						formState.values)
+				}));
+	});
+var $author$project$Widgets$VariantSelect$update = F4(
 	function (variantSelector, variantWidgets, msg, model) {
 		if (msg.$ === 'ForVariant') {
 			var variantName = msg.a;
 			var subMsgVal = msg.b;
-			var _v1 = A2($author$project$Form$vWbyName, variantWidgets, variantName);
-			if (_v1.$ === 'Nothing') {
-				return model;
-			} else {
-				var subWidget = _v1.a;
-				var subMsg_ = A2($elm$json$Json$Decode$decodeValue, subWidget.decoderMsg, subMsgVal);
-				var subModel_ = A2(
-					$elm$json$Json$Decode$decodeValue,
-					subWidget.decoderModel,
-					A2($author$project$Form$read, variantName, model.state));
-				var _v2 = _Utils_Tuple2(subModel_, subMsg_);
-				if ((_v2.a.$ === 'Ok') && (_v2.b.$ === 'Ok')) {
-					var subModel = _v2.a.a;
-					var subMsg = _v2.b.a;
-					var _v3 = model.state;
-					var state_ = _v3.a;
-					var values = A3(
-						$elm$core$Dict$insert,
-						variantName,
-						subWidget.encodeModel(
-							A2(subWidget.update, subMsg, subModel)),
-						state_.values);
-					var state = $author$project$Form$FormState(
-						_Utils_update(
-							state_,
-							{values: values}));
-					return _Utils_update(
-						model,
-						{state: state});
-				} else {
-					return model;
-				}
-			}
+			return A4(
+				$author$project$FormState$write,
+				variantName,
+				$author$project$FormState$SingleValue,
+				model,
+				A4(
+					$author$project$FormState$encodedUpdate,
+					A2($author$project$Widgets$VariantSelect$widgetByName, variantWidgets, variantName),
+					$author$project$FormState$SingleValue,
+					$author$project$FormState$Update(subMsgVal),
+					A2($author$project$FormState$read, variantName, model)));
 		} else {
 			var subMsgVal = msg.a;
-			var selectorValue = A2($author$project$Form$read, $author$project$Form$vWselectorFieldId, model.state);
-			var decodedSelectorMsg = A2($elm$json$Json$Decode$decodeValue, variantSelector.decoderMsg, subMsgVal);
-			var decodedSelectorModel = A2($elm$json$Json$Decode$decodeValue, variantSelector.decoderModel, selectorValue);
-			var _v4 = model.state;
-			var state_ = _v4.a;
-			var values = function () {
-				var _v5 = _Utils_Tuple2(decodedSelectorModel, decodedSelectorMsg);
-				if ((_v5.a.$ === 'Ok') && (_v5.b.$ === 'Ok')) {
-					var subMsg = _v5.a.a;
-					var subModel = _v5.b.a;
-					return A3(
-						$elm$core$Dict$insert,
-						$author$project$Form$vWselectorFieldId,
-						variantSelector.encodeModel(
-							A2(variantSelector.update, subModel, subMsg)),
-						state_.values);
-				} else {
-					var e1 = _v5.a;
-					var e2 = _v5.b;
-					var _v6 = A2(
-						$elm$core$Debug$log,
-						'could not decode submodel or submsg',
-						_Utils_Tuple2(e1, e2));
-					return state_.values;
-				}
-			}();
-			var state = $author$project$Form$FormState(
-				_Utils_update(
-					state_,
-					{values: values}));
-			return _Utils_update(
+			return A4(
+				$author$project$FormState$write,
+				$author$project$Widgets$VariantSelect$selectorFieldId,
+				$author$project$FormState$SingleValue,
 				model,
-				{state: state});
+				A4(
+					$author$project$FormState$encodedUpdate,
+					variantSelector,
+					$author$project$FormState$SingleValue,
+					$author$project$FormState$Update(subMsgVal),
+					A2($author$project$FormState$read, $author$project$Widgets$VariantSelect$selectorFieldId, model)));
 		}
-	});
-var $author$project$Form$vWview = F4(
-	function (variantSelectWidget, variantWidgets, domId, model) {
-		var variantView = function (_v2) {
-			var variantName = _v2.a;
-			var variantW = _v2.b;
-			var _v1 = A2(
-				$elm$json$Json$Decode$decodeValue,
-				variantW.decoderModel,
-				A2($author$project$Form$read, variantName, model.state));
-			if (_v1.$ === 'Ok') {
-				var variantModel = _v1.a;
-				return A2(
-					$elm$core$List$map,
-					function (html) {
-						return A2(
-							$elm$html$Html$map,
-							function (m) {
-								return A2(
-									$author$project$Form$ForVariant,
-									variantName,
-									variantW.encodeMsg(m));
-							},
-							html);
-					},
-					A2(
-						variantW.view,
-						_Utils_ap(domId, variantName),
-						variantModel));
-			} else {
-				return _List_fromArray(
-					[
-						$elm$html$Html$text('something went wrong')
-					]);
-			}
-		};
-		var selectedVariantName = A2($author$project$Form$vWvalue, variantSelectWidget, model);
-		return _Utils_ap(
-			A2(
-				$elm$core$List$map,
-				$elm$html$Html$map(
-					function (msg) {
-						return $author$project$Form$ForVariantSelect(
-							variantSelectWidget.encodeMsg(msg));
-					}),
-				A2(variantSelectWidget.view, 'todo', selectedVariantName)),
-			$elm$core$List$concat(
-				A2(
-					$elm$core$List$map,
-					variantView,
-					A2(
-						$elm$core$List$filter,
-						function (_v0) {
-							var name = _v0.a;
-							return _Utils_eq(name, selectedVariantName);
-						},
-						variantWidgets))));
 	});
 var $elm$core$Dict$singleton = F2(
 	function (key, value) {
 		return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
 	});
-var $author$project$Form$variantWidgetInit = F2(
+var $author$project$Widgets$VariantSelect$variantWidgetInit = F2(
 	function (_default, variantWidgets) {
 		var variantInit = F2(
 			function (_v0, dict) {
@@ -6248,82 +6368,143 @@ var $author$project$Form$variantWidgetInit = F2(
 			});
 		var values = A2(
 			$elm$core$Dict$singleton,
-			$author$project$Form$vWselectorFieldId,
+			$author$project$Widgets$VariantSelect$selectorFieldId,
 			$elm$json$Json$Encode$string(_default));
-		var values_ = A3($elm$core$List$foldl, variantInit, values, variantWidgets);
-		return {
-			state: $author$project$Form$FormState(
-				{parentDomId: '0', values: values_})
-		};
+		var values_ = A3(
+			$elm$core$List$foldl,
+			variantInit,
+			values,
+			$coreygirard$elm_nonempty_list$List$Nonempty$toList(variantWidgets));
+		return $author$project$FormState$FormState(
+			{parentDomId: '0', values: values_});
 	});
-var $author$project$Form$variantWidget = F3(
+var $author$project$FormState$subId = F3(
+	function (parentDomId, fieldId, subfieldId) {
+		return A2(
+			$elm$core$String$join,
+			'-',
+			_List_fromArray(
+				[
+					parentDomId,
+					A2($author$project$FormState$toKey, fieldId, subfieldId)
+				]));
+	});
+var $author$project$Widgets$VariantSelect$view = F4(
+	function (variantSelectWidget, variantWidgets, domId, model) {
+		var variantView = function (_v1) {
+			var variantName = _v1.a;
+			var variantW = _v1.b;
+			return A2(
+				$elm$core$Result$withDefault,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Could not decode variant')
+					]),
+				A2(
+					$elm$core$Result$map,
+					function (variantModel) {
+						return A2(
+							$elm$core$List$map,
+							function (html) {
+								return A2(
+									$elm$html$Html$map,
+									function (m) {
+										return A2(
+											$author$project$Widgets$VariantSelect$ForVariant,
+											variantName,
+											variantW.encodeMsg(m));
+									},
+									html);
+							},
+							A2(
+								variantW.view,
+								_Utils_ap(domId, variantName),
+								variantModel));
+					},
+					A2(
+						$elm$json$Json$Decode$decodeValue,
+						variantW.decoderModel,
+						A2($author$project$FormState$read, variantName, model))));
+		};
+		var selectedVariantName = A2($author$project$Widgets$VariantSelect$value, variantSelectWidget, model);
+		var variantSelectorHtml = A2(
+			$elm$core$List$map,
+			$elm$html$Html$map(
+				function (msg) {
+					return $author$project$Widgets$VariantSelect$ForVariantSelect(
+						variantSelectWidget.encodeMsg(msg));
+				}),
+			A2(
+				variantSelectWidget.view,
+				A3($author$project$FormState$subId, domId, $author$project$Widgets$VariantSelect$selectorFieldId, $author$project$FormState$SingleValue),
+				selectedVariantName));
+		var variantsHtml = $elm$core$List$concat(
+			A2(
+				$elm$core$List$map,
+				variantView,
+				A2(
+					$elm$core$List$filter,
+					function (_v0) {
+						var name = _v0.a;
+						return _Utils_eq(name, selectedVariantName);
+					},
+					variantWidgets)));
+		return _Utils_ap(variantSelectorHtml, variantsHtml);
+	});
+var $author$project$Widgets$VariantSelect$variantWidget = F3(
 	function (variantSelector, defaultVariantName, variantWidgets) {
 		return {
-			decoderModel: A2(
-				$elm$json$Json$Decode$andThen,
-				function (d) {
-					return $elm$json$Json$Decode$succeed(
-						{state: d});
-				},
-				$author$project$Form$formStateDecoder),
-			decoderMsg: $author$project$Form$vWdecoderMsg,
-			encodeModel: function (_v0) {
-				var state = _v0.state;
-				return $author$project$Form$formStateEncode(state);
-			},
-			encodeMsg: $author$project$Form$vWencodeMsg,
-			init: A2($author$project$Form$variantWidgetInit, defaultVariantName, variantWidgets),
-			update: A2($author$project$Form$vWupdate, variantSelector, variantWidgets),
-			validate: $author$project$Form$alwaysValid,
-			value: A2($author$project$Form$vWselectedValue, variantSelector, variantWidgets),
-			view: A2($author$project$Form$vWview, variantSelector, variantWidgets)
+			decoderModel: $author$project$FormState$formStateDecoder,
+			decoderMsg: $author$project$Widgets$VariantSelect$decoderMsg,
+			encodeModel: $author$project$FormState$formStateEncode,
+			encodeMsg: $author$project$Widgets$VariantSelect$encodeMsg,
+			init: A2($author$project$Widgets$VariantSelect$variantWidgetInit, defaultVariantName, variantWidgets),
+			update: A2($author$project$Widgets$VariantSelect$update, variantSelector, variantWidgets),
+			validate: $author$project$FormState$alwaysValid,
+			value: A2($author$project$Widgets$VariantSelect$selectedValue, variantSelector, variantWidgets),
+			view: A2(
+				$author$project$Widgets$VariantSelect$view,
+				variantSelector,
+				$coreygirard$elm_nonempty_list$List$Nonempty$toList(variantWidgets))
 		};
 	});
-var $author$project$Form$fieldWithVariants = F3(
-	function (variantSelector, variantsWithWidgets, _v0) {
+var $author$project$Form$fieldWithVariants = F4(
+	function (variantSelector, defaultVariant, otherVariants, _v0) {
 		var fn = _v0.fn;
 		var count = _v0.count;
 		var updates = _v0.updates;
 		var fieldWithErrors = _v0.fieldWithErrors;
 		var validator = _v0.validator;
 		var defaults = _v0.defaults;
-		if (!variantsWithWidgets.b) {
-			return _Debug_todo(
-				'Form',
-				{
-					start: {line: 260, column: 13},
-					end: {line: 260, column: 23}
-				})('How to handle empty list of variants?');
-		} else {
-			var first = variantsWithWidgets.a;
-			var rest = variantsWithWidgets.b;
-			var mkVar = function (tpl) {
-				return {id: tpl.a, label: tpl.a, value: tpl.a};
-			};
-			var variants = _Utils_Tuple2(
-				mkVar(first),
-				A2($elm$core$List$map, mkVar, rest));
-			var selectorWidget = variantSelector(variants);
-			var widget = A3($author$project$Form$variantWidget, selectorWidget, first.a, variantsWithWidgets);
-			var fieldId = $elm$core$String$fromInt(count);
-			var field_ = A3($author$project$Form$mkField, fieldWithErrors, fieldId, widget);
-			return {
-				count: count + 1,
-				defaults: A3(
-					$elm$core$Dict$insert,
-					fieldId,
-					widget.encodeModel(widget.init),
-					defaults),
-				fieldWithErrors: fieldWithErrors,
-				fn: fn(field_),
-				updates: A3(
-					$elm$core$Dict$insert,
-					$elm$core$String$fromInt(count),
-					$author$project$Form$encodedUpdate(widget),
-					updates),
-				validator: validator
-			};
-		}
+		var variantsWithWidgets = _Utils_Tuple2(defaultVariant, otherVariants);
+		var mkVariant = function (_v1) {
+			var name = _v1.a;
+			return {id: name, label: name, value: name};
+		};
+		var widget = A3(
+			$author$project$Widgets$VariantSelect$variantWidget,
+			variantSelector(
+				A2($coreygirard$elm_nonempty_list$List$Nonempty$map, mkVariant, variantsWithWidgets)),
+			$coreygirard$elm_nonempty_list$List$Nonempty$head(variantsWithWidgets).a,
+			variantsWithWidgets);
+		var fieldId = $elm$core$String$fromInt(count);
+		return {
+			count: count + 1,
+			defaults: A3(
+				$elm$core$Dict$insert,
+				fieldId,
+				widget.encodeModel(widget.init),
+				defaults),
+			fieldWithErrors: fieldWithErrors,
+			fn: fn(
+				A3($author$project$Form$mkField, fieldWithErrors, fieldId, widget)),
+			updates: A3(
+				$elm$core$Dict$insert,
+				fieldId,
+				$author$project$Form$encodedUpdate(widget),
+				updates),
+			validator: validator
+		};
 	});
 var $author$project$Form$form = F3(
 	function (validator, fieldWithErrors, fn) {
@@ -6331,6 +6512,16 @@ var $author$project$Form$form = F3(
 	});
 var $author$project$Main$Liquid = function (a) {
 	return {$: 'Liquid', a: a};
+};
+var $elm$html$Html$Attributes$classList = function (classes) {
+	return $elm$html$Html$Attributes$class(
+		A2(
+			$elm$core$String$join,
+			' ',
+			A2(
+				$elm$core$List$map,
+				$elm$core$Tuple$first,
+				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
 };
 var $author$project$Form$field = F2(
 	function (widget, _v0) {
@@ -6353,7 +6544,7 @@ var $author$project$Form$field = F2(
 				A3($author$project$Form$mkField, fieldWithErrors, fieldId, widget)),
 			updates: A3(
 				$elm$core$Dict$insert,
-				$elm$core$String$fromInt(count),
+				fieldId,
 				$author$project$Form$encodedUpdate(widget),
 				updates),
 			validator: validator
@@ -6406,7 +6597,7 @@ var $author$project$Widgets$Int$integerInput = function (attrs) {
 						},
 						$elm$core$String$toInt(msg)));
 			}),
-		validate: $author$project$Form$alwaysValid,
+		validate: $author$project$FormState$alwaysValid,
 		value: function ($) {
 			return $.parsedValue;
 		},
@@ -6430,6 +6621,11 @@ var $author$project$Widgets$Int$integerInput = function (attrs) {
 			})
 	};
 };
+var $author$project$FormState$MustNotBeBlank = {$: 'MustNotBeBlank'};
+var $author$project$Widgets$Text$notBlank = function (model) {
+	return (model === '') ? _List_fromArray(
+		[$author$project$FormState$MustNotBeBlank]) : _List_Nil;
+};
 var $author$project$Widgets$Text$textInput = function (attrs) {
 	return {
 		decoderModel: $elm$json$Json$Decode$string,
@@ -6441,7 +6637,7 @@ var $author$project$Widgets$Text$textInput = function (attrs) {
 			function (msg, _v0) {
 				return msg;
 			}),
-		validate: $author$project$Form$alwaysValid,
+		validate: $author$project$FormState$alwaysValid,
 		value: $elm$core$Basics$identity,
 		view: F2(
 			function (domId, model) {
@@ -6462,6 +6658,24 @@ var $author$project$Widgets$Text$textInput = function (attrs) {
 			})
 	};
 };
+var $author$project$Form$concatValidators = F2(
+	function (validators, model) {
+		return $elm$core$List$concat(
+			A2(
+				$elm$core$List$map,
+				function (validator) {
+					return validator(model);
+				},
+				validators));
+	});
+var $author$project$Form$validate = F2(
+	function (validators, widget) {
+		return _Utils_update(
+			widget,
+			{
+				validate: $author$project$Form$concatValidators(validators)
+			});
+	});
 var $author$project$Main$CentiLiter = {$: 'CentiLiter'};
 var $author$project$Main$Liter = {$: 'Liter'};
 var $author$project$Main$Milliliter = {$: 'Milliliter'};
@@ -6525,16 +6739,17 @@ var $author$project$Main$liquidForm = A2(
 		A2(
 			$author$project$Form$field,
 			A2(
-				$author$project$Main$withLabel,
-				'name',
-				$author$project$Widgets$Text$textInput(_List_Nil)),
+				$author$project$Form$validate,
+				_List_fromArray(
+					[$author$project$Widgets$Text$notBlank]),
+				A2(
+					$author$project$Main$withLabel,
+					'name',
+					$author$project$Widgets$Text$textInput(_List_Nil))),
 			A3(
 				$author$project$Form$form,
-				$author$project$Form$alwaysValid,
-				F2(
-					function (_v0, html) {
-						return html;
-					}),
+				$author$project$FormState$alwaysValid,
+				$author$project$Main$fieldWithErrors,
 				F3(
 					function (name, amount, unit) {
 						return {
@@ -6547,38 +6762,66 @@ var $author$project$Main$liquidForm = A2(
 									});
 							},
 							view: F2(
-								function (formState, _v1) {
-									return $elm$core$List$concat(
-										_List_fromArray(
-											[
-												name.view(formState),
-												amount.view(formState),
-												unit.view(formState)
-											]));
+								function (formState, errors) {
+									return _List_fromArray(
+										[
+											A2(
+											$elm$html$Html$div,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$classList(
+													_List_fromArray(
+														[
+															_Utils_Tuple2(
+															'has-error',
+															$elm$core$List$isEmpty(errors))
+														]))
+												]),
+											$elm$core$List$concat(
+												_List_fromArray(
+													[
+														_List_fromArray(
+														[
+															A2(
+															$elm$html$Html$div,
+															_List_fromArray(
+																[
+																	$elm$html$Html$Attributes$class('errors')
+																]),
+															_List_fromArray(
+																[
+																	$author$project$Main$viewErrors(errors)
+																]))
+														]),
+														name.view(formState),
+														amount.view(formState),
+														unit.view(formState)
+													])))
+										]);
 								})
 						};
 					})))));
-var $author$project$Form$Add = {$: 'Add'};
-var $author$project$Form$Remove = {$: 'Remove'};
+var $author$project$FormState$Add = {$: 'Add'};
+var $author$project$FormState$Remove = {$: 'Remove'};
 var $author$project$Form$decoderFieldOperation = A2(
 	$elm$json$Json$Decode$andThen,
 	function (kind) {
 		switch (kind) {
 			case 'add':
-				return $elm$json$Json$Decode$succeed($author$project$Form$Add);
+				return $elm$json$Json$Decode$succeed($author$project$FormState$Add);
 			case 'remove':
-				return $elm$json$Json$Decode$succeed($author$project$Form$Remove);
+				return $elm$json$Json$Decode$succeed($author$project$FormState$Remove);
 			case 'update':
 				return A2(
 					$elm$json$Json$Decode$map,
-					$author$project$Form$Update,
+					$author$project$FormState$Update,
 					A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$value));
 			default:
 				return $elm$json$Json$Decode$fail('unknown kind');
 		}
 	},
 	A2($elm$json$Json$Decode$field, 'kind', $elm$json$Json$Decode$string));
-var $author$project$Form$ArrayElement = function (a) {
+var $author$project$FormState$ArrayElement = function (a) {
 	return {$: 'ArrayElement', a: a};
 };
 var $elm$json$Json$Decode$null = _Json_decodeNull;
@@ -6590,10 +6833,10 @@ var $author$project$Form$decoderSubFieldId = $elm$json$Json$Decode$oneOf(
 			$elm$json$Json$Decode$andThen,
 			function (i) {
 				return $elm$json$Json$Decode$succeed(
-					$author$project$Form$ArrayElement(i));
+					$author$project$FormState$ArrayElement(i));
 			},
 			$elm$json$Json$Decode$int),
-			$elm$json$Json$Decode$null($author$project$Form$SingleValue)
+			$elm$json$Json$Decode$null($author$project$FormState$SingleValue)
 		]));
 var $elm$json$Json$Decode$map3 = _Json_map3;
 var $author$project$Form$decoderFormMsg = A4(
@@ -6670,9 +6913,9 @@ var $author$project$Form$updateField = F5(
 					return modelValue_;
 				}),
 			A2($elm$core$Dict$get, fieldId, updates));
-		var modelValue = A2($author$project$Form$read, fieldId, fs);
+		var modelValue = A2($author$project$FormState$read, fieldId, fs);
 		var updatedModelValue = A3(updateFn, subfieldId, operation, modelValue);
-		return $author$project$Form$FormState(
+		return $author$project$FormState$FormState(
 			_Utils_update(
 				formState,
 				{
@@ -6685,11 +6928,11 @@ var $author$project$Form$toWidget = function (f) {
 			f.fn.combine(formState));
 	};
 	return {
-		decoderModel: $author$project$Form$formStateDecoder,
+		decoderModel: $author$project$FormState$formStateDecoder,
 		decoderMsg: $author$project$Form$decoderFormMsg,
-		encodeModel: $author$project$Form$formStateEncode,
+		encodeModel: $author$project$FormState$formStateEncode,
 		encodeMsg: $author$project$Form$encodeFormMsg,
-		init: $author$project$Form$FormState(
+		init: $author$project$FormState$FormState(
 			{parentDomId: '', values: f.defaults}),
 		update: F2(
 			function (_v0, model) {
@@ -6709,7 +6952,7 @@ var $author$project$Form$toWidget = function (f) {
 				var model = fs.a;
 				return A2(
 					f.fn.view,
-					$author$project$Form$FormState(
+					$author$project$FormState$FormState(
 						_Utils_update(
 							model,
 							{parentDomId: domId})),
@@ -6720,30 +6963,6 @@ var $author$project$Form$toWidget = function (f) {
 var $author$project$Main$Whole = function (a) {
 	return {$: 'Whole', a: a};
 };
-var $elm$html$Html$div = _VirtualDom_node('div');
-var $author$project$Form$MustNotBeBlank = {$: 'MustNotBeBlank'};
-var $author$project$Widgets$Text$notBlank = function (model) {
-	return (model === '') ? _List_fromArray(
-		[$author$project$Form$MustNotBeBlank]) : _List_Nil;
-};
-var $author$project$Form$concatValidators = F2(
-	function (validators, model) {
-		return $elm$core$List$concat(
-			A2(
-				$elm$core$List$map,
-				function (validator) {
-					return validator(model);
-				},
-				validators));
-	});
-var $author$project$Form$validate = F2(
-	function (validators, widget) {
-		return _Utils_update(
-			widget,
-			{
-				validate: $author$project$Form$concatValidators(validators)
-			});
-	});
 var $author$project$Main$wholeForm = A2(
 	$author$project$Form$field,
 	A2(
@@ -6762,7 +6981,7 @@ var $author$project$Main$wholeForm = A2(
 				$author$project$Widgets$Text$textInput(_List_Nil))),
 		A3(
 			$author$project$Form$form,
-			$author$project$Form$alwaysValid,
+			$author$project$FormState$alwaysValid,
 			F2(
 				function (_v0, html) {
 					return html;
@@ -6793,32 +7012,29 @@ var $author$project$Main$wholeForm = A2(
 							})
 					};
 				}))));
-var $author$project$Main$ingredientForm = A3(
+var $author$project$Main$ingredientForm = A4(
 	$author$project$Form$fieldWithVariants,
 	$author$project$Widgets$Dropdown$dropdown,
+	_Utils_Tuple2(
+		'Liquid ingredient',
+		$author$project$Form$toWidget($author$project$Main$liquidForm)),
 	_List_fromArray(
 		[
-			_Utils_Tuple2(
-			'Liquid ingredient',
-			$author$project$Form$toWidget($author$project$Main$liquidForm)),
 			_Utils_Tuple2(
 			'Whole ingredient',
 			$author$project$Form$toWidget($author$project$Main$wholeForm))
 		]),
 	A3(
 		$author$project$Form$form,
-		$author$project$Form$alwaysValid,
-		F2(
-			function (_v0, html) {
-				return html;
-			}),
+		$author$project$FormState$alwaysValid,
+		$author$project$Main$fieldWithErrors,
 		function (ingredient) {
 			return {
 				combine: function (formState) {
 					return ingredient.value(formState);
 				},
 				view: F2(
-					function (formState, _v1) {
+					function (formState, _v0) {
 						return $elm$core$List$concat(
 							_List_fromArray(
 								[
@@ -6830,7 +7046,7 @@ var $author$project$Main$ingredientForm = A3(
 var $author$project$Main$currentForm = $author$project$Main$ingredientForm;
 var $author$project$Form$init = function (_v0) {
 	var defaults = _v0.defaults;
-	return $author$project$Form$FormState(
+	return $author$project$FormState$FormState(
 		{parentDomId: '', values: defaults});
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;

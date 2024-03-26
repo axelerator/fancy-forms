@@ -1,11 +1,13 @@
 module Widgets.Checkbox exposing (checkbox)
 
-import Form exposing (Msg, Widget, alwaysValid)
+import Form exposing (Msg)
 import Html exposing (Attribute, input)
 import Html.Attributes exposing (checked, id, type_)
 import Html.Events exposing (onInput)
 import Json.Decode as D
 import Json.Encode as E
+import FormState exposing (Widget)
+import FormState exposing (alwaysValid)
 
 
 type alias Msg =
