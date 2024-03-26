@@ -1,4 +1,4 @@
-module Widgets.Dropdown exposing (Variant, Variants, dropdown)
+module Widgets.Dropdown exposing (dropdown)
 
 import Form exposing (DomId, Error(..), Msg, Widget, alwaysValid)
 import Html exposing (Html, a, option, select, text)
@@ -7,6 +7,8 @@ import Html.Events exposing (onInput)
 import Json.Decode as D
 import Json.Encode as E
 import Maybe exposing (withDefault)
+import Form exposing (Variants)
+import Form exposing (Variant)
 
 
 type alias Msg =
@@ -17,15 +19,6 @@ type alias Model =
     String
 
 
-type alias Variant a =
-    { value : a
-    , id : String
-    , label : String
-    }
-
-
-type alias Variants a =
-    ( Variant a, List (Variant a) )
 
 
 dropdown : Variants a -> Widget String Msg a customError

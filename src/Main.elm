@@ -1,7 +1,7 @@
 module Main exposing (main)
 
 import Browser
-import Form exposing (Error(..), FieldWithErrors, FieldWithRemoveButton, Form, FormState, ListWithAddButton, Widget, alwaysValid, debugFormState, extract, field, listField, toWidget, validate)
+import Form exposing (Variants,fieldWithVariants, Error(..), FieldWithErrors, FieldWithRemoveButton, Form, FormState, ListWithAddButton, Widget, alwaysValid, debugFormState, extract, field, listField, toWidget, validate)
 import Html exposing (Html, article, button, div, footer, label, text)
 import Html.Attributes exposing (attribute, class, classList, for)
 import Html.Events exposing (onClick)
@@ -10,7 +10,7 @@ import MultiColorPicker
 import String exposing (fromInt)
 import WebColor exposing (WebColor, asStr)
 import Widgets.Checkbox exposing (checkbox)
-import Widgets.Dropdown exposing (Variants, dropdown)
+import Widgets.Dropdown exposing (dropdown)
 import Widgets.Int exposing (integerInput)
 import Widgets.Text exposing (notBlank, textInput)
 
@@ -23,7 +23,7 @@ type alias Model =
 
 type Msg
     = ForForm Form.Msg
-    | Submit MyFormData
+    | Submit Ingredient
 
 
 main : Program () Model Msg
@@ -46,7 +46,7 @@ init _ =
 
 
 currentForm =
-    liquidForm
+    ingredientForm
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -58,7 +58,11 @@ update msg model =
             )
 
         Submit formData ->
-            ( { model | submitted = Just formData }
+            let
+                _ = Debug.log "submitted form" formData
+            in
+            
+            ( model
             , Cmd.none
             )
 
@@ -80,7 +84,7 @@ view model =
         [ styles
         , article [] <|
             Form.render ForForm currentForm model.formState
-                ++ [ footer [] [ button [ onClick <| Submit <| extract myForm model.formState ] [ text "Submit" ] ]
+                ++ [ footer [] [ button [ onClick <| Submit <| extract currentForm model.formState ] [ text "Submit" ] ]
                    ]
         , model.submitted
             |> Maybe.map displayFormData
@@ -264,7 +268,7 @@ type VolumeUnit
 
 volumeUnitVariants : Variants VolumeUnit
 volumeUnitVariants =
-    ( { value = Milliliter, id = "ml", label = "milliliter" } 
+    ( { value = Milliliter, id = "ml", label = "milliliter" }
     , [ { value = CentiLiter, id = "cl", label = "centiliter" }
       , { value = Liter, id = "l", label = "liter" }
       ]
@@ -278,7 +282,7 @@ type alias LiquidIngredient =
     }
 
 
-liquidForm : Form LiquidIngredient ()
+liquidForm : Form Ingredient ()
 liquidForm =
     Form.form
         alwaysValid
@@ -293,6 +297,7 @@ liquidForm =
                         ]
             , combine =
                 \formState ->
+                    Liquid
                     { name = name.value formState
                     , amount = amount.value formState
                     , unit = unit.value formState
@@ -302,6 +307,69 @@ liquidForm =
         |> field (textInput [] |> withLabel "name")
         |> field (integerInput [] |> withLabel "amount")
         |> field (dropdown volumeUnitVariants |> withLabel "unit")
+
+
+type alias WholeIngredient =
+    { name : String
+    , amount : Int
+    }
+
+
+type Ingredient
+    = Liquid LiquidIngredient
+    | Whole WholeIngredient
+
+
+wholeForm : Form Ingredient ()
+wholeForm =
+    Form.form
+        alwaysValid
+        (\_ html -> html)
+        (\name amount ->
+            { view =
+                \formState _ ->
+                    [ div [] <| name.view formState
+                    , div [] <| amount.view formState
+                    ]
+            , combine =
+                \formState ->
+                    Whole
+                        { name = name.value formState
+                        , amount = amount.value formState
+                        }
+            }
+        )
+        |> field
+            (textInput []
+                |> withLabel "name"
+                |> validate [ notBlank ]
+            )
+        |> field
+            (integerInput []
+                |> withLabel "amount name"
+            )
+
+
+ingredientForm : Form Ingredient ()
+ingredientForm =
+    Form.form
+        alwaysValid
+        (\_ html -> html)
+        (\ingredient ->
+            { view =
+                \formState _ ->
+                    List.concat
+                        [ ingredient.view formState
+                        ]
+            , combine =
+                \formState ->
+                      ingredient.value formState
+            }
+        )
+        |> fieldWithVariants dropdown
+            [ ("Liquid ingredient", liquidForm |> toWidget)
+            , ("Whole ingredient", wholeForm |> toWidget)
+            ]
 
 
 role : String -> Html.Attribute msg
