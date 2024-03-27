@@ -1,4 +1,4 @@
-module Widgets.Checkbox exposing (checkbox)
+module FancyForms.Widgets.Checkbox exposing (checkbox)
 
 import Form exposing (Msg)
 import Html exposing (Attribute, input)

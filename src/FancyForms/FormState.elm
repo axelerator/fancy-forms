@@ -1,10 +1,9 @@
-module FormState exposing (..)
+module FancyForms.FormState exposing (..)
 
 import Dict exposing (Dict)
 import Html exposing (Html)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E exposing (Value)
-import List exposing (all)
 import Maybe exposing (withDefault)
 import String exposing (fromInt)
 

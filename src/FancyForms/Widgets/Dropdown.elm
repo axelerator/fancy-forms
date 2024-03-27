@@ -1,14 +1,12 @@
-module Widgets.Dropdown exposing (dropdown)
+module FancyForms.Widgets.Dropdown exposing (dropdown)
 
-import Form exposing (Msg, Variant, Variants)
-import FormState exposing (DomId, Widget, alwaysValid)
+import FancyForms.Form exposing (Msg, Variant, Variants)
+import FancyForms.FormState exposing (DomId, UpdateResult, Widget, alwaysValid, justChanged)
 import Html exposing (Html, option, select, text)
 import Html.Attributes exposing (checked, class, id, value)
 import Html.Events exposing (onInput)
 import Json.Decode as D
 import Json.Encode as E
-import FormState exposing (justChanged)
-import FormState exposing (UpdateResult)
 
 
 type alias Msg =

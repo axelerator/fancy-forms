@@ -1,7 +1,7 @@
-module Widgets.Text exposing (notBlank, textInput)
+module FancyForms.Widgets.Text exposing (notBlank, textInput)
 
-import Form exposing (Msg)
-import FormState exposing (Error(..), Validator, Widget, alwaysValid, justChanged, withBlur, withFocus)
+import FancyForms.Form exposing (Msg)
+import FancyForms.FormState exposing (Error(..), Validator, Widget, alwaysValid, justChanged, withBlur, withFocus)
 import Html exposing (Attribute, input)
 import Html.Attributes exposing (id, value)
 import Html.Events exposing (onBlur, onFocus, onInput)

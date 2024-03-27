@@ -1,7 +1,7 @@
-module Widgets.Int exposing (greaterThan, integerInput)
+module FancyForms.Widgets.Int exposing (greaterThan, integerInput)
 
-import Form exposing (Msg)
-import FormState exposing (Error(..), Validator, Widget, alwaysValid, justChanged, withBlur, withFocus)
+import FancyForms.Form exposing (Msg)
+import FancyForms.FormState exposing (Error(..), Validator, Widget, alwaysValid, justChanged, withBlur, withFocus)
 import Html exposing (Attribute, input)
 import Html.Attributes exposing (id, type_, value)
 import Html.Events exposing (onBlur, onFocus, onInput)

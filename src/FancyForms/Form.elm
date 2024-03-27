@@ -1,7 +1,8 @@
-module Form exposing (..)
+module FancyForms.Form exposing (..)
 
 import Dict exposing (Dict)
-import FormState exposing (DomId, Error, FieldId, FieldOperation(..), FormState(..), SubfieldId(..), Validator, Widget, formStateDecoder, formStateEncode, read)
+import FancyForms.FormState as FormState exposing (DomId, Effect(..), Error, FieldId, FieldOperation(..), FieldStatus(..), FormState(..), SubfieldId(..), Validator, Widget, blurAll, blurChildren, formStateDecoder, formStateEncode, justChanged, read, updateFieldStatus, wasAtLeast)
+import FancyForms.Widgets.VariantSelect exposing (variantWidget)
 import Html exposing (Html)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E exposing (Value)
@@ -9,15 +10,6 @@ import List.Nonempty exposing (ListNonempty)
 import Maybe exposing (withDefault)
 import String exposing (fromInt, toInt)
 import Tuple
-import Widgets.VariantSelect exposing (variantWidget)
-import FormState exposing (justChanged)
-import FormState exposing (Effect)
-import FormState exposing (Effect(..))
-import FormState exposing (FieldStatus(..))
-import FormState exposing (updateFieldStatus)
-import FormState exposing (wasAtLeast)
-import FormState exposing (blurAll)
-import FormState exposing (blurChildren)
 
 
 type Msg
@@ -40,32 +32,33 @@ update form_ (FormMsg fieldId subfieldId op) formState =
 updateField : FormInternal a customError data -> FieldId -> SubfieldId -> FieldOperation -> FormState -> FormState
 updateField { updates } fieldId subfieldId operation ((FormState formState) as fs) =
     let
-        updateFn : SubfieldId -> FieldOperation -> Value -> (Value, Effect)
+        updateFn : SubfieldId -> FieldOperation -> Value -> ( Value, Effect )
         updateFn =
             Dict.get fieldId updates
-                |> withDefault (\_ _ modelValue_ -> (modelValue_, NoEffect))
+                |> withDefault (\_ _ modelValue_ -> ( modelValue_, NoEffect ))
 
         modelValue =
             read fieldId fs
 
-        (updatedModelValue, effect) =
+        ( updatedModelValue, effect ) =
             updateFn subfieldId operation modelValue
+
         fieldStatus =
             let
                 currentStatus =
                     case Dict.get fieldId formState.fieldStatus of
-                        Nothing -> NotVisited
-                        Just status -> status
+                        Nothing ->
+                            NotVisited
 
-            
+                        Just status ->
+                            status
             in
-                Dict.insert fieldId (updateFieldStatus currentStatus effect) formState.fieldStatus
-            
+            Dict.insert fieldId (updateFieldStatus currentStatus effect) formState.fieldStatus
     in
-    FormState 
-        { formState 
-        | values = Dict.insert fieldId updatedModelValue formState.values 
-        , fieldStatus = fieldStatus
+    FormState
+        { formState
+            | values = Dict.insert fieldId updatedModelValue formState.values
+            , fieldStatus = fieldStatus
         }
 
 
@@ -94,13 +87,12 @@ mkField fieldWithErrors fieldId widget =
                     widget.encodeMsg msg
                         |> (\v -> FormMsg fieldId SingleValue (Update v))
 
-
                 fieldErrors =
                     if wasAtLeast Blurred fieldId formState then
                         errors_ formState
+
                     else
                         []
-
 
                 inputHtml : List (Html Msg)
                 inputHtml =
@@ -150,13 +142,14 @@ debugFormState ((FormState { values }) as fs) =
 
 
 init : Form data customError -> FormState
-init { defaults } = FormState.init defaults
+init { defaults } =
+    FormState.init defaults
 
 
 type alias FormInternal f customError data =
     { fn : f
     , count : Int
-    , updates : Dict FieldId (SubfieldId -> FieldOperation -> Value -> (Value, Effect))
+    , updates : Dict FieldId (SubfieldId -> FieldOperation -> Value -> ( Value, Effect ))
     , fieldWithErrors : FieldWithErrors customError
     , validator : Validator data customError
     , defaults : Dict FieldId Value
@@ -187,6 +180,7 @@ form validator fieldWithErrors fn =
     , blur = blurAll
     }
 
+
 field :
     Widget widgetModel msg value customError
     -> FormInternal (Field value customError -> c) customError data
@@ -208,6 +202,7 @@ field widget { fn, count, updates, fieldWithErrors, validator, defaults, blur } 
     , defaults = Dict.insert fieldId (widget.encodeModel widget.init) defaults
     , blur = blur >> blurChildren fieldId widget
     }
+
 
 type alias Variant a =
     { value : a
@@ -300,6 +295,7 @@ mkListField fieldWithErrors listWithAddButton fieldWithRemoveButton fieldId widg
                 fieldErrors =
                     if wasAtLeast Blurred fieldId formState then
                         errors_ formState
+
                     else
                         []
 
@@ -387,7 +383,7 @@ encodedUpdate :
     -> SubfieldId
     -> FieldOperation
     -> Value
-    -> (Value, Effect)
+    -> ( Value, Effect )
 encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId operation modelVal =
     let
         decodeSubfield =
@@ -418,7 +414,7 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
     in
     case ( operation, subfieldId ) of
         ( Add, ArrayElement _ ) ->
-            (D.decodeValue (D.list decoderModel) modelVal
+            ( D.decodeValue (D.list decoderModel) modelVal
                 |> Result.withDefault []
                 |> (\list ->
                         list
@@ -429,7 +425,7 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
             )
 
         ( Remove, ArrayElement i ) ->
-            (D.decodeValue (D.list decoderModel) modelVal
+            ( D.decodeValue (D.list decoderModel) modelVal
                 |> Result.withDefault []
                 |> (\list -> List.take i list ++ List.drop (i + 1) list)
                 |> E.list encodeModel
@@ -440,17 +436,19 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
             case ( D.decodeValue decoderMsg msgVal, D.decodeValue decodeSubfield modelVal ) of
                 ( Ok msg, Ok model ) ->
                     let
-                        updateResult = widget.update msg model
+                        updateResult =
+                            widget.update msg model
                     in
-                        (encodeSubfield updateResult.model
-                        , updateResult.effect
-                        )
+                    ( encodeSubfield updateResult.model
+                    , updateResult.effect
+                    )
 
                 ( Ok msg, _ ) ->
                     let
-                        updateResult = widget.update msg widget.init
+                        updateResult =
+                            widget.update msg widget.init
                     in
-                    (encodeSubfield updateResult.model
+                    ( encodeSubfield updateResult.model
                     , updateResult.effect
                     )
 
@@ -464,7 +462,7 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
                     )
 
         _ ->
-            (modelVal
+            ( modelVal
             , NoEffect
             )
 
@@ -490,6 +488,7 @@ toWidget f =
     , decoderModel = formStateDecoder
     , blur = blurAll
     }
+
 
 encodeFormMsg : Msg -> Value
 encodeFormMsg (FormMsg fieldId subfieldId operation) =
@@ -583,8 +582,8 @@ validate validators widget =
 concatValidators : List (Validator model customError) -> Validator model customError
 concatValidators validators model =
     validators
-    |> List.map (\validator -> validator model) 
-    |> List.concat
+        |> List.map (\validator -> validator model)
+        |> List.concat
 
 
 extract : Form data customError -> FormState -> data
