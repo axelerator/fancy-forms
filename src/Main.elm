@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Form exposing (FieldWithErrors, FieldWithRemoveButton, Form, ListWithAddButton, Variants, debugFormState, extract, field, fieldWithVariants, listField, toWidget, validate)
-import FormState exposing (Error(..), FormState, Widget, alwaysValid)
+import FormState exposing (Error(..), FormState, Widget, alwaysValid, blurAll)
 import Html exposing (Html, article, button, div, footer, label, text)
 import Html.Attributes exposing (attribute, class, classList, for)
 import Html.Events exposing (onClick)
@@ -63,7 +63,9 @@ update msg model =
                 _ =
                     Debug.log "submitted form" formData
             in
-            ( model
+            ( { model
+                | formState = blurAll model.formState
+              }
             , Cmd.none
             )
 
@@ -112,7 +114,7 @@ type alias Fullname =
 fieldWithErrors : FieldWithErrors MyError
 fieldWithErrors errors html =
     [ div
-        (if List.isEmpty errors then
+        (if List.isEmpty (Debug.log "errors:" errors) then
             []
 
          else
@@ -158,6 +160,28 @@ validateFullName { first, last } =
 
     else
         []
+
+
+stringForm : Form String MyError
+stringForm =
+    Form.form
+        alwaysValid
+        fieldWithErrors
+        (\name ->
+            { view =
+                \formState errors ->
+                    [ div [] <| name.view formState
+                    , div [] <| [ viewErrors errors ]
+                    ]
+            , combine =
+                \formState -> name.value formState
+            }
+        )
+        |> field
+            (textInput []
+                |> withLabel "name"
+                |> validate [ notBlank ]
+            )
 
 
 nameForm : Form Fullname MyError

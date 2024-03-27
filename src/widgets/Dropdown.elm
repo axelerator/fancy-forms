@@ -7,6 +7,8 @@ import Html.Attributes exposing (checked, class, id, value)
 import Html.Events exposing (onInput)
 import Json.Decode as D
 import Json.Encode as E
+import FormState exposing (justChanged)
+import FormState exposing (UpdateResult)
 
 
 type alias Msg =
@@ -31,9 +33,9 @@ dropdown (( default, _ ) as variants) =
     }
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> UpdateResult Model
 update id _ =
-    id
+    justChanged id
 
 
 fromString : Variants a -> String -> a

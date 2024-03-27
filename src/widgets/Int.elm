@@ -7,6 +7,7 @@ import Html.Attributes exposing (id, type_, value)
 import Html.Events exposing (onInput)
 import Json.Decode as D
 import Json.Encode as E
+import FormState exposing (justChanged)
 
 
 type alias Msg =
@@ -32,6 +33,7 @@ integerInput attrs =
             String.toInt msg
                 |> Maybe.map (\i -> { model | parsedValue = i, value = msg })
                 |> Maybe.withDefault { model | value = msg }
+                |> justChanged
     , encodeMsg = E.string
     , decoderMsg = D.string
     , encodeModel =

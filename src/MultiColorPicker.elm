@@ -8,6 +8,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Encode as E exposing (Value)
 import String exposing (toLower)
 import WebColor exposing (WebColor, asStr)
+import FormState exposing (justChanged)
 
 
 widget : Widget Model Msg (List WebColor) customError
@@ -16,7 +17,7 @@ widget =
     , value = .selected
     , validate = alwaysValid
     , view = view
-    , update = update
+    , update = (\msg model -> update msg model |> justChanged)
     , encodeMsg = encodeMsg
     , decoderMsg = decoderMsg
     , encodeModel = encodeModel

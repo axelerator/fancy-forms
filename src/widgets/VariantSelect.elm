@@ -1,7 +1,7 @@
 module Widgets.VariantSelect exposing (variantWidget)
 
 import Dict
-import FormState exposing (DomId, FieldId, FieldOperation(..), FormState(..), SubfieldId(..), Widget, alwaysValid, encodedUpdate, formStateDecoder, formStateEncode, read, subId, write)
+import FormState exposing (DomId, FieldId, FieldOperation(..), FormState(..), SubfieldId(..), Widget, alwaysValid, encodedUpdate, formStateDecoder, formStateEncode, justChanged, read, subId, write)
 import Html exposing (Html, text)
 import Json.Decode as D exposing (Decoder, Error(..))
 import Json.Encode as E exposing (Value)
@@ -26,9 +26,9 @@ variantWidget :
 variantWidget variantSelector defaultVariantName variantWidgets =
     { init = variantWidgetInit defaultVariantName variantWidgets
     , value = selectedValue variantSelector variantWidgets
-    , validate = alwaysValid
+    , validate = alwaysValid -- Delegate: Include validation result of currently selected variant
     , view = view variantSelector (List.Nonempty.toList variantWidgets)
-    , update = update variantSelector variantWidgets
+    , update = \msg model -> update variantSelector variantWidgets msg model |> justChanged
     , encodeMsg = encodeMsg
     , decoderMsg = decoderMsg
     , encodeModel = formStateEncode
@@ -122,7 +122,7 @@ variantWidgetInit default variantWidgets =
             List.Nonempty.toList variantWidgets
                 |> List.foldl variantInit values
     in
-    FormState { parentDomId = "0", values = values_, fieldStatus = Dict.empty }
+    FormState { parentDomId = "0", values = values_, fieldStatus = Dict.empty, allBlurred = False }
 
 
 selectorFieldId : FieldId
@@ -180,9 +180,11 @@ view :
     -> List (Html Msg)
 view variantSelectWidget variantWidgets domId model =
     let
+        selectedVariantName : String
         selectedVariantName =
             value variantSelectWidget model
 
+        variantSelectorHtml : List (Html Msg)
         variantSelectorHtml =
             selectedVariantName
                 |> variantSelectWidget.view (subId domId selectorFieldId SingleValue)
@@ -200,6 +202,7 @@ view variantSelectWidget variantWidgets domId model =
                 |> Result.withDefault
                     [ text "Could not decode variant" ]
 
+        variantsHtml : List (Html Msg)
         variantsHtml =
             variantWidgets
                 |> List.filter (\( name, _ ) -> name == selectedVariantName)

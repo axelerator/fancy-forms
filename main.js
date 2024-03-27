@@ -5235,9 +5235,13 @@ var $author$project$Widgets$Dropdown$fromString = F2(
 	});
 var $elm$json$Json$Decode$string = _Json_decodeString;
 var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$FormState$WasChanged = {$: 'WasChanged'};
+var $author$project$FormState$justChanged = function (model) {
+	return {effect: $author$project$FormState$WasChanged, model: model};
+};
 var $author$project$Widgets$Dropdown$update = F2(
 	function (id, _v0) {
-		return id;
+		return $author$project$FormState$justChanged(id);
 	});
 var $author$project$Widgets$Dropdown$all = function (_v0) {
 	var first = _v0.a;
@@ -5356,6 +5360,7 @@ var $elm$core$List$isEmpty = function (xs) {
 		return false;
 	}
 };
+var $elm$core$Debug$log = _Debug_log;
 var $author$project$Main$errorToString = function (e) {
 	if (e.$ === 'MustNotBeBlank') {
 		return 'must not be blank';
@@ -5390,7 +5395,8 @@ var $author$project$Main$fieldWithErrors = F2(
 			[
 				A2(
 				$elm$html$Html$div,
-				$elm$core$List$isEmpty(errors) ? _List_Nil : _List_fromArray(
+				$elm$core$List$isEmpty(
+					A2($elm$core$Debug$log, 'errors:', errors)) ? _List_Nil : _List_fromArray(
 					[
 						$elm$html$Html$Attributes$class('has-error')
 					]),
@@ -5402,6 +5408,7 @@ var $author$project$Main$fieldWithErrors = F2(
 						])))
 			]);
 	});
+var $author$project$FormState$NoEffect = {$: 'NoEffect'};
 var $elm$json$Json$Decode$decodeValue = _Json_run;
 var $elm$core$List$drop = F2(
 	function (n, list) {
@@ -5435,7 +5442,6 @@ var $elm$json$Json$Encode$list = F2(
 				_Json_emptyArray(_Utils_Tuple0),
 				entries));
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Basics$negate = function (n) {
 	return -n;
 };
@@ -5638,36 +5644,15 @@ var $author$project$Form$encodedUpdate = F4(
 				case 'Add':
 					if (_v0.b.$ === 'ArrayElement') {
 						var _v1 = _v0.a;
-						return function (list) {
-							return A2(
-								$elm$json$Json$Encode$list,
-								encodeModel,
-								_Utils_ap(
-									list,
-									_List_fromArray(
-										[widget.init])));
-						}(
-							A2(
-								$elm$core$Result$withDefault,
-								_List_Nil,
-								A2(
-									$elm$json$Json$Decode$decodeValue,
-									$elm$json$Json$Decode$list(decoderModel),
-									modelVal)));
-					} else {
-						break _v0$3;
-					}
-				case 'Remove':
-					if (_v0.b.$ === 'ArrayElement') {
-						var _v2 = _v0.a;
-						var i = _v0.b.a;
-						return A2(
-							$elm$json$Json$Encode$list,
-							encodeModel,
+						return _Utils_Tuple2(
 							function (list) {
-								return _Utils_ap(
-									A2($elm$core$List$take, i, list),
-									A2($elm$core$List$drop, i + 1, list));
+								return A2(
+									$elm$json$Json$Encode$list,
+									encodeModel,
+									_Utils_ap(
+										list,
+										_List_fromArray(
+											[widget.init])));
 							}(
 								A2(
 									$elm$core$Result$withDefault,
@@ -5675,7 +5660,32 @@ var $author$project$Form$encodedUpdate = F4(
 									A2(
 										$elm$json$Json$Decode$decodeValue,
 										$elm$json$Json$Decode$list(decoderModel),
-										modelVal))));
+										modelVal))),
+							$author$project$FormState$WasChanged);
+					} else {
+						break _v0$3;
+					}
+				case 'Remove':
+					if (_v0.b.$ === 'ArrayElement') {
+						var _v2 = _v0.a;
+						var i = _v0.b.a;
+						return _Utils_Tuple2(
+							A2(
+								$elm$json$Json$Encode$list,
+								encodeModel,
+								function (list) {
+									return _Utils_ap(
+										A2($elm$core$List$take, i, list),
+										A2($elm$core$List$drop, i + 1, list));
+								}(
+									A2(
+										$elm$core$Result$withDefault,
+										_List_Nil,
+										A2(
+											$elm$json$Json$Decode$decodeValue,
+											$elm$json$Json$Decode$list(decoderModel),
+											modelVal)))),
+							$author$project$FormState$WasChanged);
 					} else {
 						break _v0$3;
 					}
@@ -5688,12 +5698,16 @@ var $author$project$Form$encodedUpdate = F4(
 						if (_v3.b.$ === 'Ok') {
 							var msg = _v3.a.a;
 							var model = _v3.b.a;
-							return encodeSubfield(
-								A2(widget.update, msg, model));
+							var updateResult = A2(widget.update, msg, model);
+							return _Utils_Tuple2(
+								encodeSubfield(updateResult.model),
+								updateResult.effect);
 						} else {
 							var msg = _v3.a.a;
-							return encodeSubfield(
-								A2(widget.update, msg, widget.init));
+							var updateResult = A2(widget.update, msg, widget.init);
+							return _Utils_Tuple2(
+								encodeSubfield(updateResult.model),
+								updateResult.effect);
 						}
 					} else {
 						var e1 = _v3.a;
@@ -5704,11 +5718,11 @@ var $author$project$Form$encodedUpdate = F4(
 								e1,
 								A2($elm$json$Json$Encode$encode, -1, msgVal),
 								modelVal));
-						return modelVal;
+						return _Utils_Tuple2(modelVal, $author$project$FormState$NoEffect);
 					}
 			}
 		}
-		return modelVal;
+		return _Utils_Tuple2(modelVal, $author$project$FormState$NoEffect);
 	});
 var $coreygirard$elm_nonempty_list$List$Nonempty$head = function (_v0) {
 	var a = _v0.a;
@@ -5833,6 +5847,7 @@ var $coreygirard$elm_nonempty_list$List$Nonempty$map = F2(
 			f(a),
 			A2($elm$core$List$map, f, b));
 	});
+var $author$project$FormState$Focused = {$: 'Focused'};
 var $author$project$Form$FormMsg = F3(
 	function (a, b, c) {
 		return {$: 'FormMsg', a: a, b: b, c: c};
@@ -5895,6 +5910,64 @@ var $author$project$FormState$read = F2(
 			$elm$json$Json$Encode$object(_List_Nil),
 			A2($elm$core$Dict$get, fieldId, values));
 	});
+var $author$project$FormState$NotVisited = {$: 'NotVisited'};
+var $author$project$FormState$wasAtLeast = F3(
+	function (goal, fieldId, _v0) {
+		var fieldStatus = _v0.a.fieldStatus;
+		var allBlurred = _v0.a.allBlurred;
+		var tested = A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$FormState$NotVisited,
+			A2($elm$core$Dict$get, fieldId, fieldStatus));
+		if (allBlurred) {
+			return true;
+		} else {
+			var _v1 = _Utils_Tuple2(tested, goal);
+			switch (_v1.a.$) {
+				case 'NotVisited':
+					if (_v1.b.$ === 'NotVisited') {
+						var _v2 = _v1.a;
+						var _v3 = _v1.b;
+						return true;
+					} else {
+						var _v4 = _v1.a;
+						return false;
+					}
+				case 'Focused':
+					switch (_v1.b.$) {
+						case 'NotVisited':
+							var _v5 = _v1.a;
+							var _v6 = _v1.b;
+							return true;
+						case 'Focused':
+							var _v7 = _v1.a;
+							var _v8 = _v1.b;
+							return true;
+						default:
+							var _v9 = _v1.a;
+							return false;
+					}
+				case 'Changed':
+					if (_v1.b.$ === 'Blurred') {
+						var _v10 = _v1.a;
+						var _v11 = _v1.b;
+						return false;
+					} else {
+						var _v12 = _v1.a;
+						return true;
+					}
+				default:
+					if (_v1.b.$ === 'Blurred') {
+						var _v13 = _v1.a;
+						var _v14 = _v1.b;
+						return true;
+					} else {
+						var _v15 = _v1.a;
+						return false;
+					}
+			}
+		}
+	});
 var $author$project$Form$mkField = F3(
 	function (fieldWithErrors, fieldId, widget) {
 		var deserializeModel = function (formState) {
@@ -5933,7 +6006,7 @@ var $author$project$Form$mkField = F3(
 					widget.view,
 					parentDomId + ('f-' + fieldId),
 					deserializeModel(formState)));
-			var fieldErrors = errors_(formState);
+			var fieldErrors = A3($author$project$FormState$wasAtLeast, $author$project$FormState$Focused, fieldId, formState) ? errors_(formState) : _List_Nil;
 			return A2(fieldWithErrors, fieldErrors, inputHtml);
 		};
 		return {errors: errors_, id: fieldId, multiple: false, value: value, view: viewField};
@@ -5998,10 +6071,9 @@ var $author$project$Widgets$VariantSelect$encodeMsg = function (msg) {
 var $author$project$FormState$FormState = function (a) {
 	return {$: 'FormState', a: a};
 };
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $author$project$FormState$Blurred = {$: 'Blurred'};
 var $author$project$FormState$Changed = {$: 'Changed'};
-var $author$project$FormState$Focused = {$: 'Focused'};
-var $author$project$FormState$NotVisited = {$: 'NotVisited'};
 var $author$project$FormState$decoderFieldStatus = A2(
 	$elm$json$Json$Decode$andThen,
 	function (s) {
@@ -6039,13 +6111,15 @@ var $elm$json$Json$Decode$dict = function (decoder) {
 		$elm$core$Dict$fromList,
 		$elm$json$Json$Decode$keyValuePairs(decoder));
 };
-var $author$project$FormState$formStateDecoder = A3(
-	$elm$json$Json$Decode$map2,
-	F2(
-		function (values, fieldStatus) {
+var $elm$json$Json$Decode$map4 = _Json_map4;
+var $author$project$FormState$formStateDecoder = A5(
+	$elm$json$Json$Decode$map4,
+	F4(
+		function (parentDomId, values, fieldStatus, allBlurred) {
 			return $author$project$FormState$FormState(
-				{fieldStatus: fieldStatus, parentDomId: '', values: values});
+				{allBlurred: allBlurred, fieldStatus: fieldStatus, parentDomId: parentDomId, values: values});
 		}),
+	A2($elm$json$Json$Decode$field, 'parentDomId', $elm$json$Json$Decode$string),
 	A2(
 		$elm$json$Json$Decode$field,
 		'values',
@@ -6053,7 +6127,8 @@ var $author$project$FormState$formStateDecoder = A3(
 	A2(
 		$elm$json$Json$Decode$field,
 		'fieldStatus',
-		$elm$json$Json$Decode$dict($author$project$FormState$decoderFieldStatus)));
+		$elm$json$Json$Decode$dict($author$project$FormState$decoderFieldStatus)),
+	A2($elm$json$Json$Decode$field, 'allBlurred', $elm$json$Json$Decode$bool));
 var $elm$core$Dict$foldl = F3(
 	function (func, acc, dict) {
 		foldl:
@@ -6108,17 +6183,25 @@ var $author$project$FormState$encodeFieldStatus = function (status) {
 	}
 };
 var $author$project$FormState$formStateEncode = function (_v0) {
+	var parentDomId = _v0.a.parentDomId;
 	var values = _v0.a.values;
 	var fieldStatus = _v0.a.fieldStatus;
+	var allBlurred = _v0.a.allBlurred;
 	return $elm$json$Json$Encode$object(
 		_List_fromArray(
 			[
+				_Utils_Tuple2(
+				'parentDomId',
+				$elm$json$Json$Encode$string(parentDomId)),
 				_Utils_Tuple2(
 				'values',
 				A3($elm$json$Json$Encode$dict, $elm$core$Basics$identity, $elm$core$Basics$identity, values)),
 				_Utils_Tuple2(
 				'fieldStatus',
-				A3($elm$json$Json$Encode$dict, $elm$core$Basics$identity, $author$project$FormState$encodeFieldStatus, fieldStatus))
+				A3($elm$json$Json$Encode$dict, $elm$core$Basics$identity, $author$project$FormState$encodeFieldStatus, fieldStatus)),
+				_Utils_Tuple2(
+				'allBlurred',
+				$elm$json$Json$Encode$bool(allBlurred))
 			]));
 };
 var $coreygirard$elm_nonempty_list$List$Nonempty$toList = function (_v0) {
@@ -6308,11 +6391,11 @@ var $author$project$FormState$encodedUpdate = F4(
 							var msg = _v5.a.a;
 							var model = _v5.b.a;
 							return encodeSubfield(
-								A2(widget.update, msg, model));
+								A2(widget.update, msg, model).model);
 						} else {
 							var msg = _v5.a.a;
 							return encodeSubfield(
-								A2(widget.update, msg, widget.init));
+								A2(widget.update, msg, widget.init).model);
 						}
 					} else {
 						var e1 = _v5.a;
@@ -6426,7 +6509,7 @@ var $author$project$Widgets$VariantSelect$variantWidgetInit = F2(
 			values,
 			$coreygirard$elm_nonempty_list$List$Nonempty$toList(variantWidgets));
 		return $author$project$FormState$FormState(
-			{fieldStatus: $elm$core$Dict$empty, parentDomId: '0', values: values_});
+			{allBlurred: false, fieldStatus: $elm$core$Dict$empty, parentDomId: '0', values: values_});
 	});
 var $author$project$FormState$subId = F3(
 	function (parentDomId, fieldId, subfieldId) {
@@ -6509,7 +6592,11 @@ var $author$project$Widgets$VariantSelect$variantWidget = F3(
 			encodeModel: $author$project$FormState$formStateEncode,
 			encodeMsg: $author$project$Widgets$VariantSelect$encodeMsg,
 			init: A2($author$project$Widgets$VariantSelect$variantWidgetInit, defaultVariantName, variantWidgets),
-			update: A2($author$project$Widgets$VariantSelect$update, variantSelector, variantWidgets),
+			update: F2(
+				function (msg, model) {
+					return $author$project$FormState$justChanged(
+						A4($author$project$Widgets$VariantSelect$update, variantSelector, variantWidgets, msg, model));
+				}),
 			validate: $author$project$FormState$alwaysValid,
 			value: A2($author$project$Widgets$VariantSelect$selectedValue, variantSelector, variantWidgets),
 			view: A2(
@@ -6633,19 +6720,20 @@ var $author$project$Widgets$Int$integerInput = function (attrs) {
 		init: {parsedValue: 0, value: ''},
 		update: F2(
 			function (msg, model) {
-				return A2(
-					$elm$core$Maybe$withDefault,
-					_Utils_update(
-						model,
-						{value: msg}),
+				return $author$project$FormState$justChanged(
 					A2(
-						$elm$core$Maybe$map,
-						function (i) {
-							return _Utils_update(
-								model,
-								{parsedValue: i, value: msg});
-						},
-						$elm$core$String$toInt(msg)));
+						$elm$core$Maybe$withDefault,
+						_Utils_update(
+							model,
+							{value: msg}),
+						A2(
+							$elm$core$Maybe$map,
+							function (i) {
+								return _Utils_update(
+									model,
+									{parsedValue: i, value: msg});
+							},
+							$elm$core$String$toInt(msg))));
 			}),
 		validate: $author$project$FormState$alwaysValid,
 		value: function ($) {
@@ -6673,19 +6761,77 @@ var $author$project$Widgets$Int$integerInput = function (attrs) {
 };
 var $author$project$FormState$MustNotBeBlank = {$: 'MustNotBeBlank'};
 var $author$project$Widgets$Text$notBlank = function (model) {
-	return (model === '') ? _List_fromArray(
+	return A2($elm$core$Debug$log, 'not blank', model === '') ? _List_fromArray(
 		[$author$project$FormState$MustNotBeBlank]) : _List_Nil;
+};
+var $author$project$Widgets$Text$Changed = function (a) {
+	return {$: 'Changed', a: a};
+};
+var $author$project$Widgets$Text$Focused = {$: 'Focused'};
+var $elm$json$Json$Decode$oneOf = _Json_oneOf;
+var $author$project$Widgets$Text$decoderMsg = $elm$json$Json$Decode$oneOf(
+	_List_fromArray(
+		[
+			A2(
+			$elm$json$Json$Decode$andThen,
+			function (s) {
+				return (s === 'Focused') ? $elm$json$Json$Decode$succeed($author$project$Widgets$Text$Focused) : $elm$json$Json$Decode$fail('');
+			},
+			$elm$json$Json$Decode$string),
+			A2(
+			$elm$json$Json$Decode$map,
+			$author$project$Widgets$Text$Changed,
+			A2($elm$json$Json$Decode$field, 'Changed', $elm$json$Json$Decode$string))
+		]));
+var $author$project$Widgets$Text$encodeMsg = function (msg) {
+	if (msg.$ === 'Changed') {
+		var s = msg.a;
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'Changed',
+					$elm$json$Json$Encode$string(s))
+				]));
+	} else {
+		return $elm$json$Json$Encode$string('Focused');
+	}
+};
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onFocus = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'focus',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $author$project$FormState$WasFocused = {$: 'WasFocused'};
+var $author$project$FormState$withFocus = function (model) {
+	return {effect: $author$project$FormState$WasFocused, model: model};
 };
 var $author$project$Widgets$Text$textInput = function (attrs) {
 	return {
 		decoderModel: $elm$json$Json$Decode$string,
-		decoderMsg: $elm$json$Json$Decode$string,
+		decoderMsg: $author$project$Widgets$Text$decoderMsg,
 		encodeModel: $elm$json$Json$Encode$string,
-		encodeMsg: $elm$json$Json$Encode$string,
+		encodeMsg: $author$project$Widgets$Text$encodeMsg,
 		init: '',
 		update: F2(
-			function (msg, _v0) {
-				return msg;
+			function (msg, model) {
+				if (msg.$ === 'Focused') {
+					return $author$project$FormState$withFocus(model);
+				} else {
+					var s = msg.a;
+					return $author$project$FormState$justChanged(s);
+				}
 			}),
 		validate: $author$project$FormState$alwaysValid,
 		value: $elm$core$Basics$identity,
@@ -6700,7 +6846,8 @@ var $author$project$Widgets$Text$textInput = function (attrs) {
 							_List_fromArray(
 								[
 									$elm$html$Html$Attributes$id(domId),
-									$elm$html$Html$Events$onInput($elm$core$Basics$identity),
+									$elm$html$Html$Events$onInput($author$project$Widgets$Text$Changed),
+									$elm$html$Html$Events$onFocus($author$project$Widgets$Text$Focused),
 									$elm$html$Html$Attributes$value(model)
 								])),
 						_List_Nil)
@@ -6875,7 +7022,6 @@ var $author$project$FormState$ArrayElement = function (a) {
 	return {$: 'ArrayElement', a: a};
 };
 var $elm$json$Json$Decode$null = _Json_decodeNull;
-var $elm$json$Json$Decode$oneOf = _Json_oneOf;
 var $author$project$Form$decoderSubFieldId = $elm$json$Json$Decode$oneOf(
 	_List_fromArray(
 		[
@@ -6952,6 +7098,70 @@ var $author$project$Form$encodeFormMsg = function (_v0) {
 				$author$project$Form$encodeFieldOperation(operation))
 			]));
 };
+var $author$project$FormState$init = function (values) {
+	return $author$project$FormState$FormState(
+		{allBlurred: false, fieldStatus: $elm$core$Dict$empty, parentDomId: '', values: values});
+};
+var $author$project$Form$init = function (_v0) {
+	var defaults = _v0.defaults;
+	return $author$project$FormState$init(defaults);
+};
+var $author$project$FormState$updateFieldStatus = F2(
+	function (status, effect) {
+		var _v0 = _Utils_Tuple2(status, effect);
+		switch (_v0.a.$) {
+			case 'NotVisited':
+				switch (_v0.b.$) {
+					case 'NoEffect':
+						var _v1 = _v0.a;
+						var _v2 = _v0.b;
+						return $author$project$FormState$NotVisited;
+					case 'WasChanged':
+						var _v3 = _v0.a;
+						var _v4 = _v0.b;
+						return $author$project$FormState$Changed;
+					case 'WasFocused':
+						var _v5 = _v0.a;
+						var _v6 = _v0.b;
+						return $author$project$FormState$Focused;
+					default:
+						var _v7 = _v0.a;
+						var _v8 = _v0.b;
+						return $author$project$FormState$Blurred;
+				}
+			case 'Focused':
+				switch (_v0.b.$) {
+					case 'NoEffect':
+						var _v9 = _v0.a;
+						var _v10 = _v0.b;
+						return $author$project$FormState$Focused;
+					case 'WasChanged':
+						var _v11 = _v0.a;
+						var _v12 = _v0.b;
+						return $author$project$FormState$Changed;
+					case 'WasFocused':
+						var _v13 = _v0.a;
+						var _v14 = _v0.b;
+						return $author$project$FormState$Focused;
+					default:
+						var _v15 = _v0.a;
+						var _v16 = _v0.b;
+						return $author$project$FormState$Blurred;
+				}
+			case 'Changed':
+				if (_v0.b.$ === 'WasBlurred') {
+					var _v17 = _v0.a;
+					var _v18 = _v0.b;
+					return $author$project$FormState$Blurred;
+				} else {
+					var _v19 = _v0.a;
+					return $author$project$FormState$Changed;
+				}
+			default:
+				var _v20 = _v0.a;
+				return $author$project$FormState$Blurred;
+		}
+	});
 var $author$project$Form$updateField = F5(
 	function (_v0, fieldId, subfieldId, operation, fs) {
 		var updates = _v0.updates;
@@ -6959,16 +7169,35 @@ var $author$project$Form$updateField = F5(
 		var updateFn = A2(
 			$elm$core$Maybe$withDefault,
 			F3(
-				function (_v1, _v2, modelValue_) {
-					return modelValue_;
+				function (_v3, _v4, modelValue_) {
+					return _Utils_Tuple2(modelValue_, $author$project$FormState$NoEffect);
 				}),
 			A2($elm$core$Dict$get, fieldId, updates));
 		var modelValue = A2($author$project$FormState$read, fieldId, fs);
-		var updatedModelValue = A3(updateFn, subfieldId, operation, modelValue);
+		var _v1 = A3(updateFn, subfieldId, operation, modelValue);
+		var updatedModelValue = _v1.a;
+		var effect = _v1.b;
+		var fieldStatus = function () {
+			var currentStatus = function () {
+				var _v2 = A2($elm$core$Dict$get, fieldId, formState.fieldStatus);
+				if (_v2.$ === 'Nothing') {
+					return $author$project$FormState$NotVisited;
+				} else {
+					var status = _v2.a;
+					return status;
+				}
+			}();
+			return A3(
+				$elm$core$Dict$insert,
+				fieldId,
+				A2($author$project$FormState$updateFieldStatus, currentStatus, effect),
+				formState.fieldStatus);
+		}();
 		return $author$project$FormState$FormState(
 			_Utils_update(
 				formState,
 				{
+					fieldStatus: fieldStatus,
 					values: A3($elm$core$Dict$insert, fieldId, updatedModelValue, formState.values)
 				}));
 	});
@@ -6982,14 +7211,14 @@ var $author$project$Form$toWidget = function (f) {
 		decoderMsg: $author$project$Form$decoderFormMsg,
 		encodeModel: $author$project$FormState$formStateEncode,
 		encodeMsg: $author$project$Form$encodeFormMsg,
-		init: $author$project$FormState$FormState(
-			{fieldStatus: $elm$core$Dict$empty, parentDomId: '', values: f.defaults}),
+		init: $author$project$Form$init(f),
 		update: F2(
 			function (_v0, model) {
 				var fieldId = _v0.a;
 				var subfieldId = _v0.b;
 				var value = _v0.c;
-				return A5($author$project$Form$updateField, f, fieldId, subfieldId, value, model);
+				return $author$project$FormState$justChanged(
+					A5($author$project$Form$updateField, f, fieldId, subfieldId, value, model));
 			}),
 		validate: function (formState) {
 			return widgetErrors(formState);
@@ -7094,11 +7323,6 @@ var $author$project$Main$ingredientForm = A4(
 			};
 		}));
 var $author$project$Main$currentForm = $author$project$Main$ingredientForm;
-var $author$project$Form$init = function (_v0) {
-	var defaults = _v0.defaults;
-	return $author$project$FormState$FormState(
-		{fieldStatus: $elm$core$Dict$empty, parentDomId: '', values: defaults});
-};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
@@ -7111,6 +7335,13 @@ var $author$project$Main$init = function (_v0) {
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$FormState$blurAll = function (_v0) {
+	var formState = _v0.a;
+	return $author$project$FormState$FormState(
+		_Utils_update(
+			formState,
+			{allBlurred: true}));
+};
 var $author$project$Form$update = F3(
 	function (form_, _v0, formState) {
 		var fieldId = _v0.a;
@@ -7132,7 +7363,13 @@ var $author$project$Main$update = F2(
 		} else {
 			var formData = msg.a;
 			var _v1 = A2($elm$core$Debug$log, 'submitted form', formData);
-			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						formState: $author$project$FormState$blurAll(model.formState)
+					}),
+				$elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Main$ForForm = function (a) {
@@ -7514,16 +7751,6 @@ var $author$project$Form$extract = function (_v0) {
 };
 var $elm$html$Html$footer = _VirtualDom_node('footer');
 var $elm$html$Html$main_ = _VirtualDom_node('main');
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
 var $elm$html$Html$Events$onClick = function (msg) {
 	return A2(
 		$elm$html$Html$Events$on,

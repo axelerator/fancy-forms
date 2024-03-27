@@ -10,6 +10,12 @@ import Maybe exposing (withDefault)
 import String exposing (fromInt, toInt)
 import Tuple
 import Widgets.VariantSelect exposing (variantWidget)
+import FormState exposing (justChanged)
+import FormState exposing (Effect)
+import FormState exposing (Effect(..))
+import FormState exposing (FieldStatus(..))
+import FormState exposing (updateFieldStatus)
+import FormState exposing (wasAtLeast)
 
 
 type Msg
@@ -32,18 +38,33 @@ update form_ (FormMsg fieldId subfieldId op) formState =
 updateField : FormInternal a customError data -> FieldId -> SubfieldId -> FieldOperation -> FormState -> FormState
 updateField { updates } fieldId subfieldId operation ((FormState formState) as fs) =
     let
-        updateFn : SubfieldId -> FieldOperation -> Value -> Value
+        updateFn : SubfieldId -> FieldOperation -> Value -> (Value, Effect)
         updateFn =
             Dict.get fieldId updates
-                |> withDefault (\_ _ modelValue_ -> modelValue_)
+                |> withDefault (\_ _ modelValue_ -> (modelValue_, NoEffect))
 
         modelValue =
             read fieldId fs
 
-        updatedModelValue =
+        (updatedModelValue, effect) =
             updateFn subfieldId operation modelValue
+        fieldStatus =
+            let
+                currentStatus =
+                    case Dict.get fieldId formState.fieldStatus of
+                        Nothing -> NotVisited
+                        Just status -> status
+
+            
+            in
+                Dict.insert fieldId (updateFieldStatus currentStatus effect) formState.fieldStatus
+            
     in
-    FormState { formState | values = Dict.insert fieldId updatedModelValue formState.values }
+    FormState 
+        { formState 
+        | values = Dict.insert fieldId updatedModelValue formState.values 
+        , fieldStatus = fieldStatus
+        }
 
 
 type alias Field a customError =
@@ -71,8 +92,13 @@ mkField fieldWithErrors fieldId widget =
                     widget.encodeMsg msg
                         |> (\v -> FormMsg fieldId SingleValue (Update v))
 
+
                 fieldErrors =
-                    errors_ formState
+                    if wasAtLeast Focused fieldId formState then
+                        errors_ formState
+                    else
+                        []
+
 
                 inputHtml : List (Html Msg)
                 inputHtml =
@@ -122,18 +148,13 @@ debugFormState ((FormState { values }) as fs) =
 
 
 init : Form data customError -> FormState
-init { defaults } =
-    FormState
-        { parentDomId = ""
-        , values = defaults
-        , fieldStatus = Dict.empty
-        }
+init { defaults } = FormState.init defaults
 
 
 type alias FormInternal f customError data =
     { fn : f
     , count : Int
-    , updates : Dict FieldId (SubfieldId -> FieldOperation -> Value -> Value)
+    , updates : Dict FieldId (SubfieldId -> FieldOperation -> Value -> (Value, Effect))
     , fieldWithErrors : FieldWithErrors customError
     , validator : Validator data customError
     , defaults : Dict FieldId Value
@@ -273,7 +294,10 @@ mkListField fieldWithErrors listWithAddButton fieldWithRemoveButton fieldId widg
                         html
 
                 fieldErrors =
-                    errors_ formState
+                    if wasAtLeast Focused fieldId formState then
+                        errors_ formState
+                    else
+                        []
 
                 removeArrayElementMsg : Int -> Msg
                 removeArrayElementMsg x =
@@ -358,7 +382,7 @@ encodedUpdate :
     -> SubfieldId
     -> FieldOperation
     -> Value
-    -> Value
+    -> (Value, Effect)
 encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId operation modelVal =
     let
         decodeSubfield =
@@ -389,37 +413,55 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
     in
     case ( operation, subfieldId ) of
         ( Add, ArrayElement _ ) ->
-            D.decodeValue (D.list decoderModel) modelVal
+            (D.decodeValue (D.list decoderModel) modelVal
                 |> Result.withDefault []
                 |> (\list ->
                         list
                             ++ [ widget.init ]
                             |> E.list encodeModel
                    )
+            , WasChanged
+            )
 
         ( Remove, ArrayElement i ) ->
-            D.decodeValue (D.list decoderModel) modelVal
+            (D.decodeValue (D.list decoderModel) modelVal
                 |> Result.withDefault []
                 |> (\list -> List.take i list ++ List.drop (i + 1) list)
                 |> E.list encodeModel
+            , WasChanged
+            )
 
         ( Update msgVal, _ ) ->
             case ( D.decodeValue decoderMsg msgVal, D.decodeValue decodeSubfield modelVal ) of
                 ( Ok msg, Ok model ) ->
-                    widget.update msg model |> encodeSubfield
+                    let
+                        updateResult = widget.update msg model
+                    in
+                        (encodeSubfield updateResult.model
+                        , updateResult.effect
+                        )
 
                 ( Ok msg, _ ) ->
-                    widget.update msg widget.init |> encodeSubfield
+                    let
+                        updateResult = widget.update msg widget.init
+                    in
+                    (encodeSubfield updateResult.model
+                    , updateResult.effect
+                    )
 
                 ( e1, _ ) ->
                     let
                         _ =
                             Debug.log "invalde" ( e1, E.encode -1 msgVal, modelVal )
                     in
-                    modelVal
+                    ( modelVal
+                    , NoEffect
+                    )
 
         _ ->
-            modelVal
+            (modelVal
+            , NoEffect
+            )
 
 
 toWidget : Form a customError -> Widget FormState Msg a customError
@@ -429,14 +471,14 @@ toWidget f =
             f.fn.combine formState
                 |> f.validator
     in
-    { init = FormState { parentDomId = "", values = f.defaults, fieldStatus = Dict.empty }
+    { init = init f
     , value = \formState -> f.fn.combine formState
     , validate =
         \formState -> widgetErrors formState
     , view =
         \domId ((FormState model) as fs) ->
             f.fn.view (FormState { model | parentDomId = domId }) (widgetErrors fs)
-    , update = \(FormMsg fieldId subfieldId value) model -> updateField f fieldId subfieldId value model
+    , update = \(FormMsg fieldId subfieldId value) model -> updateField f fieldId subfieldId value model |> justChanged
     , encodeMsg = encodeFormMsg
     , decoderMsg = decoderFormMsg
     , encodeModel = formStateEncode

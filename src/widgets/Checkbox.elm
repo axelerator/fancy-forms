@@ -8,6 +8,7 @@ import Json.Decode as D
 import Json.Encode as E
 import FormState exposing (Widget)
 import FormState exposing (alwaysValid)
+import FormState exposing (justChanged)
 
 
 type alias Msg =
@@ -22,7 +23,7 @@ checkbox =
     , view =
         \domId model ->
             [input ([ id domId, type_ "checkbox", onInput (\_ -> ()), checked model ]) []]
-    , update = \_ model -> not model
+    , update = \_ model -> not model |> justChanged
     , encodeMsg = \_ -> E.object []
     , decoderMsg = D.succeed ()
     , encodeModel = E.bool

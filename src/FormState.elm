@@ -4,21 +4,118 @@ import Dict exposing (Dict)
 import Html exposing (Html)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E exposing (Value)
+import List exposing (all)
 import Maybe exposing (withDefault)
 import String exposing (fromInt)
+
 
 type FormState
     = FormState
         { parentDomId : DomId
         , values : Dict FieldId Value
         , fieldStatus : Dict FieldId FieldStatus
+        , allBlurred : Bool
         }
+
 
 type FieldStatus
     = NotVisited
     | Focused
     | Changed
     | Blurred
+
+
+updateFieldStatus : FieldStatus -> Effect -> FieldStatus
+updateFieldStatus status effect =
+    case ( status, effect ) of
+        ( NotVisited, NoEffect ) ->
+            NotVisited
+
+        ( NotVisited, WasChanged ) ->
+            Changed
+
+        ( NotVisited, WasFocused ) ->
+            Focused
+
+        ( NotVisited, WasBlurred ) ->
+            Blurred
+
+        ( Focused, NoEffect ) ->
+            Focused
+
+        ( Focused, WasChanged ) ->
+            Changed
+
+        ( Focused, WasFocused ) ->
+            Focused
+
+        ( Focused, WasBlurred ) ->
+            Blurred
+
+        ( Changed, WasBlurred ) ->
+            Blurred
+
+        ( Changed, _ ) ->
+            Changed
+
+        ( Blurred, _ ) ->
+            Blurred
+
+
+blurAll : FormState -> FormState
+blurAll (FormState formState) =
+    FormState
+        { formState
+            | allBlurred = True
+        }
+
+
+wasAtLeast : FieldStatus -> FieldId -> FormState -> Bool
+wasAtLeast goal fieldId (FormState { fieldStatus, allBlurred }) =
+    let
+        tested =
+            Dict.get fieldId fieldStatus
+                |> withDefault NotVisited
+    in
+    if allBlurred then
+        True
+
+    else
+        case ( tested, goal ) of
+            ( NotVisited, NotVisited ) ->
+                True
+
+            ( NotVisited, _ ) ->
+                False
+
+            ( Focused, NotVisited ) ->
+                True
+
+            ( Focused, Focused ) ->
+                True
+
+            ( Focused, _ ) ->
+                False
+
+            ( Changed, Blurred ) ->
+                False
+
+            ( Changed, _ ) ->
+                True
+
+            ( Blurred, Blurred ) ->
+                True
+
+            ( Blurred, _ ) ->
+                False
+
+
+type Effect
+    = NoEffect
+    | WasFocused
+    | WasChanged
+    | WasBlurred
+
 
 type FieldOperation
     = Add
@@ -42,12 +139,46 @@ type alias FieldId =
     String
 
 
+type alias UpdateResult model =
+    { model : model
+    , effect : Effect
+    }
+
+
+justChanged : model -> UpdateResult model
+justChanged model =
+    { model = model
+    , effect = WasChanged
+    }
+
+
+justChangedInternally : model -> UpdateResult model
+justChangedInternally model =
+    { model = model
+    , effect = NoEffect
+    }
+
+
+withBlur : model -> UpdateResult model
+withBlur model =
+    { model = model
+    , effect = WasBlurred
+    }
+
+
+withFocus : model -> UpdateResult model
+withFocus model =
+    { model = model
+    , effect = WasFocused
+    }
+
+
 type alias Widget model msg value customError =
     { init : model
     , value : model -> value
     , validate : Validator model customError
     , view : DomId -> model -> List (Html msg)
-    , update : msg -> model -> model
+    , update : msg -> model -> UpdateResult model
     , encodeMsg : msg -> Value
     , decoderMsg : Decoder msg
     , encodeModel : model -> Value
@@ -64,45 +195,78 @@ type Error customError
     | CustomError customError
 
 
-
-
 type alias DomId =
     String
 
+init : Dict FieldId Value -> FormState
+init values =
+    FormState
+        { parentDomId = ""
+        , values = values
+        , fieldStatus = Dict.empty
+        , allBlurred = False
+        }
 
 formStateEncode : FormState -> Value
-formStateEncode (FormState { values, fieldStatus }) =
+formStateEncode (FormState { parentDomId, values, fieldStatus, allBlurred }) =
     E.object
-        [("values", E.dict identity identity values)
-        , ("fieldStatus", E.dict identity encodeFieldStatus fieldStatus)
+        [ ( "parentDomId", E.string parentDomId )
+        , ( "values", E.dict identity identity values )
+        , ( "fieldStatus", E.dict identity encodeFieldStatus fieldStatus )
+        , ( "allBlurred", E.bool allBlurred )
         ]
 
 
 formStateDecoder : Decoder FormState
 formStateDecoder =
-    D.map2 (\values fieldStatus -> FormState { values = values, fieldStatus = fieldStatus, parentDomId = "" })
+    D.map4
+        (\parentDomId values fieldStatus allBlurred ->
+            FormState { parentDomId = parentDomId, values = values, fieldStatus = fieldStatus, allBlurred = allBlurred }
+        )
+        (D.field "parentDomId" D.string)
         (D.field "values" <| D.dict D.value)
         (D.field "fieldStatus" <| D.dict decoderFieldStatus)
+        (D.field "allBlurred" D.bool)
+
 
 encodeFieldStatus : FieldStatus -> Value
 encodeFieldStatus status =
     case status of
-        NotVisited -> E.string "NotVisited"
-        Focused -> E.string "Focused"
-        Changed -> E.string "Changed"
-        Blurred -> E.string "Blurred"
+        NotVisited ->
+            E.string "NotVisited"
+
+        Focused ->
+            E.string "Focused"
+
+        Changed ->
+            E.string "Changed"
+
+        Blurred ->
+            E.string "Blurred"
+
 
 decoderFieldStatus : Decoder FieldStatus
 decoderFieldStatus =
     D.string
         |> D.andThen
-            (\s  -> case s of
-                "NotVisited" -> D.succeed NotVisited
-                "Focused" -> D.succeed Focused
-                "Changed" -> D.succeed Changed
-                "Blurred" -> D.succeed Blurred
-                _ -> D.fail "invalid field status"
+            (\s ->
+                case s of
+                    "NotVisited" ->
+                        D.succeed NotVisited
+
+                    "Focused" ->
+                        D.succeed Focused
+
+                    "Changed" ->
+                        D.succeed Changed
+
+                    "Blurred" ->
+                        D.succeed Blurred
+
+                    _ ->
+                        D.fail "invalid field status"
             )
+
 
 read : FieldId -> FormState -> Value
 read fieldId (FormState { values }) =
@@ -206,10 +370,10 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
         ( Update msgVal, _ ) ->
             case ( D.decodeValue decoderMsg msgVal, D.decodeValue decodeSubfield modelVal ) of
                 ( Ok msg, Ok model ) ->
-                    widget.update msg model |> encodeSubfield
+                    widget.update msg model |> .model |> encodeSubfield
 
-                ( Ok msg, _) ->
-                    widget.update msg widget.init |> encodeSubfield
+                ( Ok msg, _ ) ->
+                    widget.update msg widget.init |> .model |> encodeSubfield
 
                 ( e1, _ ) ->
                     let
