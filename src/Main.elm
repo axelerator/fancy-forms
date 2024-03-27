@@ -12,7 +12,7 @@ import String exposing (fromInt)
 import WebColor exposing (WebColor, asStr)
 import Widgets.Checkbox exposing (checkbox)
 import Widgets.Dropdown exposing (dropdown)
-import Widgets.Int exposing (integerInput)
+import Widgets.Int exposing (greaterThan, integerInput)
 import Widgets.Text exposing (notBlank, textInput)
 
 
@@ -64,7 +64,7 @@ update msg model =
                     Debug.log "submitted form" formData
             in
             ( { model
-                | formState = blurAll model.formState
+                | formState = currentForm.blur model.formState
               }
             , Cmd.none
             )
@@ -138,6 +138,9 @@ errorToString e =
     case e of
         FormState.MustNotBeBlank ->
             "must not be blank"
+
+        FormState.MustBeGreaterThan n ->
+            "must be greater than " ++ String.fromInt n
 
         FormState.CustomError myError ->
             case myError of
@@ -333,7 +336,7 @@ liquidForm =
             }
         )
         |> field (textInput [] |> withLabel "name" |> validate [ notBlank ])
-        |> field (integerInput [] |> withLabel "amount")
+        |> field (integerInput [] |> withLabel "amount" |> validate [ greaterThan 0 ])
         |> field (dropdown volumeUnitVariants |> withLabel "unit")
 
 

@@ -28,4 +28,5 @@ checkbox =
     , decoderMsg = D.succeed ()
     , encodeModel = E.bool
     , decoderModel = D.bool
+    , blur = identity
     }

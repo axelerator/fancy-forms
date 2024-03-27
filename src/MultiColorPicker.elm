@@ -22,6 +22,7 @@ widget =
     , decoderMsg = decoderMsg
     , encodeModel = encodeModel
     , decoderModel = decoderModel
+    , blur = identity
     }
 
 

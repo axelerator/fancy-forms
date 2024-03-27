@@ -7,6 +7,8 @@ import Json.Decode as D exposing (Decoder, Error(..))
 import Json.Encode as E exposing (Value)
 import List.Nonempty exposing (ListNonempty)
 import Maybe exposing (withDefault)
+import FormState exposing (blurAll)
+import FormState exposing (blurChildren)
 
 
 type Msg
@@ -33,8 +35,21 @@ variantWidget variantSelector defaultVariantName variantWidgets =
     , decoderMsg = decoderMsg
     , encodeModel = formStateEncode
     , decoderModel = formStateDecoder
+    , blur = blur variantSelector (List.Nonempty.toList variantWidgets)
     }
 
+blur : 
+    Widget String msg String customError
+    -> List ( String, Widget widgetModel msg2 value customError )
+    -> Model -> Model
+blur variantSelector variantWidgets formState =
+    let
+      withBlurredSelector = 
+          blurChildren selectorFieldId variantSelector formState
+      folder (fieldId, widget) fs =
+          blurChildren (Debug.log "blurring" fieldId) widget fs
+    in
+        List.foldl folder withBlurredSelector variantWidgets
 
 widgetByName :
     ListNonempty ( String, Widget widgetModel msg2 value customError )

@@ -16,6 +16,8 @@ import FormState exposing (Effect(..))
 import FormState exposing (FieldStatus(..))
 import FormState exposing (updateFieldStatus)
 import FormState exposing (wasAtLeast)
+import FormState exposing (blurAll)
+import FormState exposing (blurChildren)
 
 
 type Msg
@@ -94,7 +96,7 @@ mkField fieldWithErrors fieldId widget =
 
 
                 fieldErrors =
-                    if wasAtLeast Focused fieldId formState then
+                    if wasAtLeast Blurred fieldId formState then
                         errors_ formState
                     else
                         []
@@ -158,6 +160,7 @@ type alias FormInternal f customError data =
     , fieldWithErrors : FieldWithErrors customError
     , validator : Validator data customError
     , defaults : Dict FieldId Value
+    , blur : FormState -> FormState
     }
 
 
@@ -181,14 +184,14 @@ form validator fieldWithErrors fn =
     , fieldWithErrors = fieldWithErrors
     , validator = validator
     , defaults = Dict.empty
+    , blur = blurAll
     }
-
 
 field :
     Widget widgetModel msg value customError
     -> FormInternal (Field value customError -> c) customError data
     -> FormInternal c customError data
-field widget { fn, count, updates, fieldWithErrors, validator, defaults } =
+field widget { fn, count, updates, fieldWithErrors, validator, defaults, blur } =
     let
         fieldId =
             fromInt count
@@ -203,8 +206,8 @@ field widget { fn, count, updates, fieldWithErrors, validator, defaults } =
     , fieldWithErrors = fieldWithErrors
     , validator = validator
     , defaults = Dict.insert fieldId (widget.encodeModel widget.init) defaults
+    , blur = blur >> blurChildren fieldId widget
     }
-
 
 type alias Variant a =
     { value : a
@@ -223,7 +226,7 @@ fieldWithVariants :
     -> List ( String, Widget widgetModel msg2 value customError )
     -> FormInternal (Field value customError -> c) customError data
     -> FormInternal c customError data
-fieldWithVariants variantSelector defaultVariant otherVariants { fn, count, updates, fieldWithErrors, validator, defaults } =
+fieldWithVariants variantSelector defaultVariant otherVariants { fn, count, updates, fieldWithErrors, validator, defaults, blur } =
     let
         variantsWithWidgets =
             ( defaultVariant
@@ -255,6 +258,7 @@ fieldWithVariants variantSelector defaultVariant otherVariants { fn, count, upda
     , fieldWithErrors = fieldWithErrors
     , validator = validator
     , defaults = Dict.insert fieldId (widget.encodeModel widget.init) defaults
+    , blur = blur >> blurChildren fieldId widget
     }
 
 
@@ -294,7 +298,7 @@ mkListField fieldWithErrors listWithAddButton fieldWithRemoveButton fieldId widg
                         html
 
                 fieldErrors =
-                    if wasAtLeast Focused fieldId formState then
+                    if wasAtLeast Blurred fieldId formState then
                         errors_ formState
                     else
                         []
@@ -349,7 +353,7 @@ mkListField fieldWithErrors listWithAddButton fieldWithRemoveButton fieldId widg
     }
 
 
-listField listWithAddButton fieldWithRemoveButton widget { fn, count, updates, fieldWithErrors, validator, defaults } =
+listField listWithAddButton fieldWithRemoveButton widget { fn, count, updates, fieldWithErrors, validator, defaults, blur } =
     let
         fieldId =
             fromInt count
@@ -364,6 +368,7 @@ listField listWithAddButton fieldWithRemoveButton widget { fn, count, updates, f
     , fieldWithErrors = fieldWithErrors
     , validator = validator
     , defaults = Dict.insert fieldId (E.list widget.encodeModel [ widget.init ]) defaults
+    , blur = blur >> blurChildren fieldId widget
     }
 
 
@@ -483,8 +488,8 @@ toWidget f =
     , decoderMsg = decoderFormMsg
     , encodeModel = formStateEncode
     , decoderModel = formStateDecoder
+    , blur = blurAll
     }
-
 
 encodeFormMsg : Msg -> Value
 encodeFormMsg (FormMsg fieldId subfieldId operation) =

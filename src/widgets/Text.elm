@@ -1,18 +1,18 @@
 module Widgets.Text exposing (notBlank, textInput)
 
 import Form exposing (Msg)
-import FormState exposing (Error(..), Validator, Widget, alwaysValid, justChanged, withFocus)
+import FormState exposing (Error(..), Validator, Widget, alwaysValid, justChanged, withBlur, withFocus)
 import Html exposing (Attribute, input)
 import Html.Attributes exposing (id, value)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onBlur, onFocus, onInput)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E exposing (Value)
-import Html.Events exposing (onFocus)
 
 
 type Msg
     = Changed String
     | Focused
+    | Blurred
 
 
 notBlank : Validator String customError
@@ -31,12 +31,20 @@ textInput attrs =
     , validate = alwaysValid
     , view =
         \domId model ->
-            [ input (attrs ++ [ id domId, onInput Changed, onFocus Focused, value model ]) [] ]
+            [ input
+                (attrs
+                    ++ [ id domId, onInput Changed, onFocus Focused, onBlur Blurred, value model ]
+                )
+                []
+            ]
     , update =
         \msg model ->
             case msg of
                 Focused ->
                     withFocus model
+
+                Blurred ->
+                    withBlur model
 
                 Changed s ->
                     justChanged s
@@ -44,6 +52,7 @@ textInput attrs =
     , decoderMsg = decoderMsg
     , encodeModel = E.string
     , decoderModel = D.string
+    , blur = identity
     }
 
 
@@ -56,6 +65,9 @@ encodeMsg msg =
         Focused ->
             E.string "Focused"
 
+        Blurred ->
+            E.string "Blurred"
+
 
 decoderMsg : Decoder Msg
 decoderMsg =
@@ -63,11 +75,15 @@ decoderMsg =
         [ D.string
             |> D.andThen
                 (\s ->
-                    if s == "Focused" then
-                        D.succeed Focused
+                    case s of
+                        "Focused" ->
+                            D.succeed Focused
 
-                    else
-                        D.fail ""
+                        "Blurred" ->
+                            D.succeed Blurred
+
+                        _ ->
+                            D.fail "Expected 'Focused' or 'Blurred'"
                 )
         , D.field "Changed" D.string |> D.map Changed
         ]

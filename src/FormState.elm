@@ -183,6 +183,7 @@ type alias Widget model msg value customError =
     , decoderMsg : Decoder msg
     , encodeModel : model -> Value
     , decoderModel : Decoder model
+    , blur : model -> model
     }
 
 
@@ -192,6 +193,7 @@ type alias Validator a e =
 
 type Error customError
     = MustNotBeBlank
+    | MustBeGreaterThan Int
     | CustomError customError
 
 
@@ -388,3 +390,21 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
                     Debug.log "unknown operation" operation
             in
             modelVal
+
+
+blurChildren : FieldId -> Widget model msg value customError -> FormState -> FormState
+blurChildren fieldId widget ((FormState ({ values } as formState)) as fs) =
+    let
+        blurredModel =
+            read fieldId fs
+                |> D.decodeValue widget.decoderModel
+                |> Result.map widget.blur
+                |> Result.map widget.encodeModel
+                |> Result.withDefault (widget.encodeModel widget.init)
+    in
+    FormState 
+        { formState 
+        | values = Dict.insert fieldId blurredModel values
+        , allBlurred = True
+        }
+

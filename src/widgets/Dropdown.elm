@@ -30,6 +30,7 @@ dropdown (( default, _ ) as variants) =
     , decoderMsg = D.string
     , encodeModel = E.string
     , decoderModel = D.string
+    , blur = identity
     }
 
 
