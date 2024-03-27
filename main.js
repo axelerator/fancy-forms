@@ -5998,6 +5998,27 @@ var $author$project$Widgets$VariantSelect$encodeMsg = function (msg) {
 var $author$project$FormState$FormState = function (a) {
 	return {$: 'FormState', a: a};
 };
+var $author$project$FormState$Blurred = {$: 'Blurred'};
+var $author$project$FormState$Changed = {$: 'Changed'};
+var $author$project$FormState$Focused = {$: 'Focused'};
+var $author$project$FormState$NotVisited = {$: 'NotVisited'};
+var $author$project$FormState$decoderFieldStatus = A2(
+	$elm$json$Json$Decode$andThen,
+	function (s) {
+		switch (s) {
+			case 'NotVisited':
+				return $elm$json$Json$Decode$succeed($author$project$FormState$NotVisited);
+			case 'Focused':
+				return $elm$json$Json$Decode$succeed($author$project$FormState$Focused);
+			case 'Changed':
+				return $elm$json$Json$Decode$succeed($author$project$FormState$Changed);
+			case 'Blurred':
+				return $elm$json$Json$Decode$succeed($author$project$FormState$Blurred);
+			default:
+				return $elm$json$Json$Decode$fail('invalid field status');
+		}
+	},
+	$elm$json$Json$Decode$string);
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $elm$core$Dict$fromList = function (assocs) {
 	return A3(
@@ -6018,14 +6039,21 @@ var $elm$json$Json$Decode$dict = function (decoder) {
 		$elm$core$Dict$fromList,
 		$elm$json$Json$Decode$keyValuePairs(decoder));
 };
-var $author$project$FormState$formStateDecoder = A2(
-	$elm$json$Json$Decode$andThen,
-	function (d) {
-		return $elm$json$Json$Decode$succeed(
-			$author$project$FormState$FormState(
-				{parentDomId: '', values: d}));
-	},
-	$elm$json$Json$Decode$dict($elm$json$Json$Decode$value));
+var $author$project$FormState$formStateDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	F2(
+		function (values, fieldStatus) {
+			return $author$project$FormState$FormState(
+				{fieldStatus: fieldStatus, parentDomId: '', values: values});
+		}),
+	A2(
+		$elm$json$Json$Decode$field,
+		'values',
+		$elm$json$Json$Decode$dict($elm$json$Json$Decode$value)),
+	A2(
+		$elm$json$Json$Decode$field,
+		'fieldStatus',
+		$elm$json$Json$Decode$dict($author$project$FormState$decoderFieldStatus)));
 var $elm$core$Dict$foldl = F3(
 	function (func, acc, dict) {
 		foldl:
@@ -6067,9 +6095,31 @@ var $elm$json$Json$Encode$dict = F3(
 				_Json_emptyObject(_Utils_Tuple0),
 				dictionary));
 	});
+var $author$project$FormState$encodeFieldStatus = function (status) {
+	switch (status.$) {
+		case 'NotVisited':
+			return $elm$json$Json$Encode$string('NotVisited');
+		case 'Focused':
+			return $elm$json$Json$Encode$string('Focused');
+		case 'Changed':
+			return $elm$json$Json$Encode$string('Changed');
+		default:
+			return $elm$json$Json$Encode$string('Blurred');
+	}
+};
 var $author$project$FormState$formStateEncode = function (_v0) {
 	var values = _v0.a.values;
-	return A3($elm$json$Json$Encode$dict, $elm$core$Basics$identity, $elm$core$Basics$identity, values);
+	var fieldStatus = _v0.a.fieldStatus;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'values',
+				A3($elm$json$Json$Encode$dict, $elm$core$Basics$identity, $elm$core$Basics$identity, values)),
+				_Utils_Tuple2(
+				'fieldStatus',
+				A3($elm$json$Json$Encode$dict, $elm$core$Basics$identity, $author$project$FormState$encodeFieldStatus, fieldStatus))
+			]));
 };
 var $coreygirard$elm_nonempty_list$List$Nonempty$toList = function (_v0) {
 	var a = _v0.a;
@@ -6376,7 +6426,7 @@ var $author$project$Widgets$VariantSelect$variantWidgetInit = F2(
 			values,
 			$coreygirard$elm_nonempty_list$List$Nonempty$toList(variantWidgets));
 		return $author$project$FormState$FormState(
-			{parentDomId: '0', values: values_});
+			{fieldStatus: $elm$core$Dict$empty, parentDomId: '0', values: values_});
 	});
 var $author$project$FormState$subId = F3(
 	function (parentDomId, fieldId, subfieldId) {
@@ -6933,7 +6983,7 @@ var $author$project$Form$toWidget = function (f) {
 		encodeModel: $author$project$FormState$formStateEncode,
 		encodeMsg: $author$project$Form$encodeFormMsg,
 		init: $author$project$FormState$FormState(
-			{parentDomId: '', values: f.defaults}),
+			{fieldStatus: $elm$core$Dict$empty, parentDomId: '', values: f.defaults}),
 		update: F2(
 			function (_v0, model) {
 				var fieldId = _v0.a;
@@ -7047,7 +7097,7 @@ var $author$project$Main$currentForm = $author$project$Main$ingredientForm;
 var $author$project$Form$init = function (_v0) {
 	var defaults = _v0.defaults;
 	return $author$project$FormState$FormState(
-		{parentDomId: '', values: defaults});
+		{fieldStatus: $elm$core$Dict$empty, parentDomId: '', values: defaults});
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);

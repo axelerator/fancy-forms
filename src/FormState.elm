@@ -11,7 +11,14 @@ type FormState
     = FormState
         { parentDomId : DomId
         , values : Dict FieldId Value
+        , fieldStatus : Dict FieldId FieldStatus
         }
+
+type FieldStatus
+    = NotVisited
+    | Focused
+    | Changed
+    | Blurred
 
 type FieldOperation
     = Add
@@ -64,15 +71,38 @@ type alias DomId =
 
 
 formStateEncode : FormState -> Value
-formStateEncode (FormState { values }) =
-    E.dict identity identity values
+formStateEncode (FormState { values, fieldStatus }) =
+    E.object
+        [("values", E.dict identity identity values)
+        , ("fieldStatus", E.dict identity encodeFieldStatus fieldStatus)
+        ]
 
 
 formStateDecoder : Decoder FormState
 formStateDecoder =
-    D.dict D.value
-        |> D.andThen (\d -> D.succeed <| FormState { values = d, parentDomId = "" })
+    D.map2 (\values fieldStatus -> FormState { values = values, fieldStatus = fieldStatus, parentDomId = "" })
+        (D.field "values" <| D.dict D.value)
+        (D.field "fieldStatus" <| D.dict decoderFieldStatus)
 
+encodeFieldStatus : FieldStatus -> Value
+encodeFieldStatus status =
+    case status of
+        NotVisited -> E.string "NotVisited"
+        Focused -> E.string "Focused"
+        Changed -> E.string "Changed"
+        Blurred -> E.string "Blurred"
+
+decoderFieldStatus : Decoder FieldStatus
+decoderFieldStatus =
+    D.string
+        |> D.andThen
+            (\s  -> case s of
+                "NotVisited" -> D.succeed NotVisited
+                "Focused" -> D.succeed Focused
+                "Changed" -> D.succeed Changed
+                "Blurred" -> D.succeed Blurred
+                _ -> D.fail "invalid field status"
+            )
 
 read : FieldId -> FormState -> Value
 read fieldId (FormState { values }) =

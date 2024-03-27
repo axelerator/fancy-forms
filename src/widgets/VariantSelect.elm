@@ -122,7 +122,7 @@ variantWidgetInit default variantWidgets =
             List.Nonempty.toList variantWidgets
                 |> List.foldl variantInit values
     in
-    FormState { parentDomId = "0", values = values_ }
+    FormState { parentDomId = "0", values = values_, fieldStatus = Dict.empty }
 
 
 selectorFieldId : FieldId

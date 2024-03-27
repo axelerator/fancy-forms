@@ -126,6 +126,7 @@ init { defaults } =
     FormState
         { parentDomId = ""
         , values = defaults
+        , fieldStatus = Dict.empty
         }
 
 
@@ -428,7 +429,7 @@ toWidget f =
             f.fn.combine formState
                 |> f.validator
     in
-    { init = FormState { parentDomId = "", values = f.defaults }
+    { init = FormState { parentDomId = "", values = f.defaults, fieldStatus = Dict.empty }
     , value = \formState -> f.fn.combine formState
     , validate =
         \formState -> widgetErrors formState
