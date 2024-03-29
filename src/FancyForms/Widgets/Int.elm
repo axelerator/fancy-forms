@@ -1,4 +1,11 @@
-module FancyForms.Widgets.Int exposing (greaterThan, integerInput)
+module FancyForms.Widgets.Int exposing (greaterThan, integerInput, lesserThan)
+{-| An integer input widget. 
+@docs integerInput
+
+# Validators
+
+@docs greaterThan, lesserThan
+-}
 
 import FancyForms.Form exposing (Msg)
 import FancyForms.FormState exposing (Error(..), Validator, Widget, alwaysValid, justChanged, withBlur, withFocus)
@@ -21,6 +28,8 @@ type alias Model =
     }
 
 
+{-| A validator function that ensures the value is greater than `x`
+-}
 greaterThan : Int -> Validator Model customError
 greaterThan x { parsedValue } =
     if parsedValue <= x then
@@ -29,7 +38,19 @@ greaterThan x { parsedValue } =
     else
         []
 
+{-| A validator function that ensures the value is less than `x`
+-}
+lesserThan : Int -> Validator Model customError
+lesserThan x { parsedValue } =
+    if parsedValue >= x then
+        [ MustBeLesserThan x ]
 
+    else
+        []
+
+
+{-| A widget that collects an `Int`
+-}
 integerInput : List (Attribute Msg) -> Widget Model Msg Int customError
 integerInput attrs =
     { init = { value = "0", parsedValue = 0 }

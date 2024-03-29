@@ -1,5 +1,7 @@
 module FancyForms.Widgets.Dropdown exposing (dropdown)
-
+{-| A dropdown widget.
+@docs dropdown
+-}
 import FancyForms.Form exposing (Msg, Variant, Variants)
 import FancyForms.FormState exposing (DomId, UpdateResult, Widget, alwaysValid, justChanged)
 import Html exposing (Html, option, select, text)
@@ -17,6 +19,9 @@ type alias Model =
     String
 
 
+{-| Returns a widget that lets the user select a value from a list of
+    variants.
+-}
 dropdown : Variants a -> Widget String Msg a customError
 dropdown (( default, _ ) as variants) =
     { init = default.id

@@ -1,4 +1,11 @@
 module FancyForms.Widgets.Text exposing (notBlank, textInput)
+{-| A text input widget 
+@docs textInput
+
+# Validators
+
+@docs notBlank
+-}
 
 import FancyForms.Form exposing (Msg)
 import FancyForms.FormState exposing (Error(..), Validator, Widget, alwaysValid, justChanged, withBlur, withFocus)
@@ -14,16 +21,17 @@ type Msg
     | Focused
     | Blurred
 
-
+{-| A validator function that ensures that the given string is not empty. 
+-}
 notBlank : Validator String customError
 notBlank model =
-    if Debug.log "not blank" (model == "") then
+    if model == "" then
         [ MustNotBeBlank ]
 
     else
         []
 
-
+{-| A text input widget -}
 textInput : List (Attribute Msg) -> Widget String Msg String customError
 textInput attrs =
     { init = ""

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/pico.fuchsia.min.css">
+  <title>Main</title>
+  <script src="main.js"></script>
+  <style>
+    .top-link {
+      float: right;
+    }
+    pre {
+      font-size: 0.7rem;
+    }
+    .elmsh {
+      position: relative;
+    }
+    .elmsh .toggle {
+      position: absolute;
+      top: 0;
+      right: 0;
+      font-size: 0.7em;
+      opacity: 0.5;
+      cursor: pointer;
+      z-index: 10;
+    }
+/* Elm Syntax Highlight CSS */
+pre.elmsh {
+  padding: 10px;
+  margin: 0;
+  text-align: left;
+  overflow: auto;
+}
+
+code.elmsh {
+  padding: 0;
+}
+
+.elmsh-line:before {
+  content: attr(data-elmsh-lc);
+  display: inline-block;
+  text-align: right;
+  width: 40px;
+  padding: 0 20px 0 0;
+  opacity: 0.3;
+}
+  </style>
+</head>
+
+<body>
+  <div id="myapp"></div>
+  <script>
+  var app = Elm.Main.init({
+    node: document.getElementById('myapp')
+  });
+  </script>
+</body>
+</html>

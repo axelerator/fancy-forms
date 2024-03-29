@@ -1,16 +1,14 @@
-# Fancy Forms proof of concept
+# FancyForms
 
-This is a proof of concept for a form builder library that satisfies the following requirements:
+_FancyForms_ is a library for building forms in Elm.
+It is designed with the following goals in mind:
 
-- a form can collect data into a proper custom type
-- only one msg/model field for the whole form
-- custom, reusable "3rd party" input widgets can be created without forking the lib
-
-# Demo
-
-Just clone and open `index.html`
-
-![](./fancy-forms.mov)
+1. **Type saftey**: Data collected in the forms will be returned directly into a user provided type.
+1. **Ease of use**: No matter how complex the form is, it will only need **one** `Msg` and **one** field on the model.
+1. **Customization**: Users can provide their own widgets and custom validations.
+1. **CSS Agnostic**: Adapts to any CSS framework.
+1. **Composable**: Smaller forms can be combined into larger forms.
+1. **I18n**: Internationalization is supported by avoiding hard coded strings.
 
 # Decisions
 
