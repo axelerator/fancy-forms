@@ -204,7 +204,8 @@ isExpanded example model =
 
 minimalMarkdown =
     """
-A form is declared by creating a expression of type `Form data error`.
+A form is declared by calling [`Form.form`](https://package.elm-lang.org/packages/axelerator/fancy-forms/1.0.0/FancyForms-Form#form)
+to create an expression of type `Form data error`.
 The `data` type parameter declares what type of data the form inputs will be converted to.
 The `error` type parameter allows you to name your own error type for custom validations.
 
@@ -218,7 +219,8 @@ It returns a record with two fields: `view` and `combine`.
 The `view` function is used to render the field.
 The `combine` function is used to extract the value from the form state.
 
-We add fields to the form by "piping" the result of the `form` call into the `field` function.
+We add fields to the form by "piping" the result of the `form` call into the [`field`](https://package.elm-lang.org/packages/axelerator/fancy-forms/1.0.0/FancyForms-Form#field)
+function.
 
 Here we only have a single `Int` input field. The `view` function can use the `amount` field to render the input widget.
 The `combine` function can use the `amount` field to extract the value from the form state.
@@ -453,7 +455,7 @@ intro =
     Markdown.toHtml [ class "content" ] """
 # FancyForms
 
-_FancyForms_ is a library for building forms in Elm.
+[_FancyForms_ is a library](https://package.elm-lang.org/packages/axelerator/fancy-forms/1.0.0/) for building forms in Elm.
 It is designed with the following goals in mind:
 
 1. **Type saftey**: Data collected in the forms will be returned directly into a user provided type.

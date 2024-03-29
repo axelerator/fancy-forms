@@ -1,6 +1,6 @@
 # FancyForms
 
-_FancyForms_ is a library for building forms in Elm.
+[_FancyForms_](https://blog.axelerator.de/fancy-forms/) is a library for building forms in Elm.
 It is designed with the following goals in mind:
 
 1. **Type saftey**: Data collected in the forms will be returned directly into a user provided type.
@@ -9,6 +9,14 @@ It is designed with the following goals in mind:
 1. **CSS Agnostic**: Adapts to any CSS framework.
 1. **Composable**: Smaller forms can be combined into larger forms.
 1. **I18n**: Internationalization is supported by avoiding hard coded strings.
+
+## Documentation
+
+https://blog.axelerator.de/fancy-forms/
+
+I have not invested heavily into the [Package Docs](https://package.elm-lang.org/packages/axelerator/fancy-forms) yet.
+But there are some detailed examples with explanations in the dedicated docs
+
 
 ## 🚧 Work in progress 🚧
 
@@ -29,12 +37,6 @@ Checklist:
     - [x] Widget to select variant can be specified
     - [x] Any widget can be used as variant input
 
-## Documentation
-
-I have not invested heavily into the [Package Docs](https://package.elm-lang.org/packages/axelerator/fancy-forms) yet.
-But there are some detailed examples with explanations in the dedicated docs
-
-https://blog.axelerator.de/fancy-forms/
 
 ## Decisions
 
