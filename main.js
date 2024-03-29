@@ -7578,7 +7578,6 @@ var $coreygirard$elm_nonempty_list$List$Nonempty$map = F2(
 			f(a),
 			A2($elm$core$List$map, f, b));
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$FancyForms$Widgets$VariantSelect$selectorFieldId = 'selectorValue';
 var $author$project$FancyForms$Widgets$VariantSelect$blur = F3(
 	function (variantSelector, variantWidgets, formState) {
@@ -7587,11 +7586,7 @@ var $author$project$FancyForms$Widgets$VariantSelect$blur = F3(
 			function (_v0, fs) {
 				var fieldId = _v0.a;
 				var widget = _v0.b;
-				return A3(
-					$author$project$FancyForms$FormState$blurChildren,
-					A2($elm$core$Debug$log, 'blurring', fieldId),
-					widget,
-					fs);
+				return A3($author$project$FancyForms$FormState$blurChildren, fieldId, widget, fs);
 			});
 		return A3($elm$core$List$foldl, folder, withBlurredSelector, variantWidgets);
 	});
@@ -7710,9 +7705,6 @@ var $author$project$FancyForms$Widgets$VariantSelect$selectedValue = F3(
 					selectedWidget.decoderModel,
 					A2($author$project$FancyForms$FormState$read, selectedVariantName, model))));
 	});
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var $author$project$FancyForms$FormState$encodedUpdate = F4(
 	function (widget, subfieldId, operation, modelVal) {
 		var decoderMsg = widget.decoderMsg;
@@ -7749,27 +7741,13 @@ var $author$project$FancyForms$FormState$encodedUpdate = F4(
 				return A2($elm$json$Json$Decode$index, i, decoderModel);
 			}
 		}();
-		var _v0 = A2(
-			$elm$core$Debug$log,
-			'encodedUpdate',
-			function () {
-				switch (operation.$) {
-					case 'Add':
-						return 'add';
-					case 'Remove':
-						return 'remove';
-					default:
-						var uv = operation.a;
-						return A2($elm$json$Json$Encode$encode, -1, uv);
-				}
-			}());
-		var _v2 = _Utils_Tuple2(operation, subfieldId);
-		_v2$3:
+		var _v0 = _Utils_Tuple2(operation, subfieldId);
+		_v0$3:
 		while (true) {
-			switch (_v2.a.$) {
+			switch (_v0.a.$) {
 				case 'Add':
-					if (_v2.b.$ === 'ArrayElement') {
-						var _v3 = _v2.a;
+					if (_v0.b.$ === 'ArrayElement') {
+						var _v1 = _v0.a;
 						return function (list) {
 							return A2(
 								$elm$json$Json$Encode$list,
@@ -7777,9 +7755,7 @@ var $author$project$FancyForms$FormState$encodedUpdate = F4(
 								_Utils_ap(
 									list,
 									_List_fromArray(
-										[
-											A2($elm$core$Debug$log, 'adding', widget.init)
-										])));
+										[widget.init])));
 						}(
 							A2(
 								$elm$core$Result$withDefault,
@@ -7789,12 +7765,12 @@ var $author$project$FancyForms$FormState$encodedUpdate = F4(
 									$elm$json$Json$Decode$list(decoderModel),
 									modelVal)));
 					} else {
-						break _v2$3;
+						break _v0$3;
 					}
 				case 'Remove':
-					if (_v2.b.$ === 'ArrayElement') {
-						var _v4 = _v2.a;
-						var i = _v2.b.a;
+					if (_v0.b.$ === 'ArrayElement') {
+						var _v2 = _v0.a;
+						var i = _v0.b.a;
 						return A2(
 							$elm$json$Json$Encode$list,
 							encodeModel,
@@ -7811,38 +7787,29 @@ var $author$project$FancyForms$FormState$encodedUpdate = F4(
 										$elm$json$Json$Decode$list(decoderModel),
 										modelVal))));
 					} else {
-						break _v2$3;
+						break _v0$3;
 					}
 				default:
-					var msgVal = _v2.a.a;
-					var _v5 = _Utils_Tuple2(
+					var msgVal = _v0.a.a;
+					var _v3 = _Utils_Tuple2(
 						A2($elm$json$Json$Decode$decodeValue, decoderMsg, msgVal),
 						A2($elm$json$Json$Decode$decodeValue, decodeSubfield, modelVal));
-					if (_v5.a.$ === 'Ok') {
-						if (_v5.b.$ === 'Ok') {
-							var msg = _v5.a.a;
-							var model = _v5.b.a;
+					if (_v3.a.$ === 'Ok') {
+						if (_v3.b.$ === 'Ok') {
+							var msg = _v3.a.a;
+							var model = _v3.b.a;
 							return encodeSubfield(
 								A2(widget.update, msg, model).model);
 						} else {
-							var msg = _v5.a.a;
+							var msg = _v3.a.a;
 							return encodeSubfield(
 								A2(widget.update, msg, widget.init).model);
 						}
 					} else {
-						var e1 = _v5.a;
-						var _v6 = A2(
-							$elm$core$Debug$log,
-							'invalde',
-							_Utils_Tuple3(
-								e1,
-								A2($elm$json$Json$Encode$encode, -1, msgVal),
-								modelVal));
 						return modelVal;
 					}
 			}
 		}
-		var _v7 = A2($elm$core$Debug$log, 'unknown operation', operation);
 		return modelVal;
 	});
 var $author$project$FancyForms$Widgets$VariantSelect$widgetByName = F2(
@@ -9768,6 +9735,9 @@ var $elm$parser$Parser$Advanced$fromState = F2(
 			A4($elm$parser$Parser$Advanced$DeadEnd, s.row, s.col, x, s.context));
 	});
 var $elm$parser$Parser$Advanced$isSubString = _Parser_isSubString;
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
 var $elm$parser$Parser$Advanced$token = function (_v0) {
 	var str = _v0.a;
 	var expecting = _v0.b;
