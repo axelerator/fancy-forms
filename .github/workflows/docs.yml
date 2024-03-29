@@ -1,0 +1,21 @@
+name: Documentation
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build and Test
+    steps:
+    - uses: actions/checkout@v2
+      name: Check out repository
+    - name: Install Elm compiler
+      run: |
+        cd fancy-forms/bin
+        curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz
+        gunzip elm.gz
+        chmod +x elm
+        pwd >> $GITHUB_PATH
+    - name: Run elm
+      run: elm --help
