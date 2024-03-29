@@ -10,15 +10,40 @@ It is designed with the following goals in mind:
 1. **Composable**: Smaller forms can be combined into larger forms.
 1. **I18n**: Internationalization is supported by avoiding hard coded strings.
 
+## 🚧 Work in progress 🚧
+
+The library is still under active development and is still missing some features to be production ready.
+
+Checklist:
+
+ - [x] Type saftey
+ - [x] Custom widget support
+ - [ ] Form can be initialized with custom values
+ - [ ] Validation errors aggregate to the top
+ - Lists fields:
+    - [x] Any widget can be used as list item
+    - [x] User can add and remove list items
+    - [ ] User can reorder list items
+    - [ ] User can add list item **at specified index**
+ - Variant fields:
+    - [x] Widget to select variant can be specified
+    - [x] Any widget can be used as variant input
+
 ## Documentation
 
 I have not invested heavily into the [Package Docs](https://package.elm-lang.org/packages/axelerator/fancy-forms) yet.
-
 But there are some detailed examples with explanations in the dedicated docs
 
 https://blog.axelerator.de/fancy-forms/
 
 ## Decisions
+
+### Focus on extendability
+
+The API is heavily inspired by [dillonkearns/elm-form](https://package.elm-lang.org/packages/dillonkearns/elm-form/3.0.0/) 🙏
+But contrary to `elm-form` I did not aim for compatibilty with [elm-pages](https://elm-pages.com) and [lamdera](https://lamdera.com).
+So I do blatanlty store functions in the `Model` for example.
+
 
 ### `List (Html msg)` over `Html msg` as return type
 
