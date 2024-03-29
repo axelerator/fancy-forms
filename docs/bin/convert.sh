@@ -31,4 +31,3 @@ TEMPLATE="module Examples.Code.$MODULE_NAME exposing (code)\n\ncode =\"\"\"\n$CO
 # Writing the template to the output file
 echo -e "$TEMPLATE" > "$OUTPUT_FILE"
 
-echo "Conversion completed. Output written to $OUTPUT_FILE."

@@ -1,6 +1,0 @@
-module $MODULE exposing (code)
-
-code ="""
-$CONTENT
-"""
-
