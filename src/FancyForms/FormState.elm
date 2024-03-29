@@ -385,18 +385,6 @@ encodedUpdate :
     -> Value
 encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId operation modelVal =
     let
-        _ =
-            Debug.log "encodedUpdate" <|
-                case operation of
-                    Add ->
-                        "add"
-
-                    Remove ->
-                        "remove"
-
-                    Update uv ->
-                        E.encode -1 uv
-
         decodeSubfield =
             case subfieldId of
                 SingleValue ->
@@ -429,7 +417,7 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
                 |> Result.withDefault []
                 |> (\list ->
                         list
-                            ++ [ Debug.log "adding" widget.init ]
+                            ++ [ widget.init ]
                             |> E.list encodeModel
                    )
 
@@ -447,18 +435,10 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
                 ( Ok msg, _ ) ->
                     widget.update msg widget.init |> .model |> encodeSubfield
 
-                ( e1, _ ) ->
-                    let
-                        _ =
-                            Debug.log "invalde" ( e1, E.encode -1 msgVal, modelVal )
-                    in
+                _ ->
                     modelVal
 
         _ ->
-            let
-                _ =
-                    Debug.log "unknown operation" operation
-            in
             modelVal
 
 

@@ -48,7 +48,7 @@ blur variantSelector variantWidgets formState =
             blurChildren selectorFieldId variantSelector formState
 
         folder ( fieldId, widget ) fs =
-            blurChildren (Debug.log "blurring" fieldId) widget fs
+            blurChildren fieldId widget fs
     in
     List.foldl folder withBlurredSelector variantWidgets
 
