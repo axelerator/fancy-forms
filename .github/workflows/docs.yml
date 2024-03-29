@@ -8,14 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Test
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       name: Check out repository
     - name: Install Elm compiler
       run: |
-        cd $GITHUB_WORKSPACE/fancy-forms/bin
-        curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz
-        gunzip elm.gz
-        chmod +x elm
-        pwd >> $GITHUB_PATH
+        cd $GITHUB_WORKSPACE 
+        ls
     - name: Run elm
       run: elm --help
