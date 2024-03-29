@@ -10,10 +10,17 @@ It is designed with the following goals in mind:
 1. **Composable**: Smaller forms can be combined into larger forms.
 1. **I18n**: Internationalization is supported by avoiding hard coded strings.
 
-# Decisions
+## Documentation
 
+I have not invested heavily into the [Package Docs](https://package.elm-lang.org/packages/axelerator/fancy-forms) yet.
 
-## `List (Html msg)` over `Html msg` as return type
+But there are some detailed examples with explanations in the dedicated docs
+
+https://blog.axelerator.de/fancy-forms/
+
+## Decisions
+
+### `List (Html msg)` over `Html msg` as return type
 
 Functions that return `List (Html msg)` are more composable. Specifically when nesting
 the "wrapping" component can decide whether to concatenate the list or not.
@@ -24,7 +31,7 @@ by certain CSS frameworks like Bootstrap.
 Instead of having labels and errors in different containers they can all live next to each
 other.
 
-## Custom error type
+### Custom error type
 
 Having to proivde a custom error type might seem like it adds unnecessary complexity.
 The primary motivation is to allow to keep error messages translatable without having to
