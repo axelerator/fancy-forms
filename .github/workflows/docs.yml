@@ -17,5 +17,8 @@ jobs:
         gunzip elm.gz
         chmod +x elm
         pwd >> $GITHUB_PATH
-    - name: Run elm
-      run: elm --help
+    - name: Build
+      run: |
+        cd docs
+        ./bin/build.sh
+        ls main.js
