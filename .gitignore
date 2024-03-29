@@ -4,3 +4,4 @@
 /docs.json
 /docs/main.js
 /docs/src/Examples/Code/*.elm
+/docs/dist/
