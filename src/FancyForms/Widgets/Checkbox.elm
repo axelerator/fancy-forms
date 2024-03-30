@@ -24,6 +24,7 @@ checkbox =
     { init = False
     , value = identity
     , validate = alwaysValid
+    , isConsistent = (\_ -> True)
     , view =
         \domId model ->
             [ input [ id domId, type_ "checkbox", onInput (\_ -> ()), checked model ] [] ]

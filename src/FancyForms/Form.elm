@@ -4,6 +4,7 @@ module FancyForms.Form exposing
     , listField, FieldWithRemoveButton, ListWithAddButton
     , fieldWithVariants, Variant, Variants
     , toWidget, wrap
+    , isConsistentTmp
     )
 
 {-| FancyForms is a library for building forms in Elm. It is designed with the following goals in mind:
@@ -242,8 +243,29 @@ type alias FormInternal f customError data =
     , defaults : Dict FieldId Value
     , blur : FormState -> FormState
     , domId : DomId
+    , isConsistent : FormState -> Bool
     }
 
+isConsistentTmp : FormInternal f customError data -> FormState -> Bool
+isConsistentTmp { isConsistent } formState =
+    isConsistent formState
+
+extractConsistencyCheck : Widget model msg value customError -> FieldId -> FormState -> Bool
+extractConsistencyCheck widget fieldId formState =
+    let
+       model =  
+            read fieldId formState
+            |> D.decodeValue widget.decoderModel
+            |> Result.withDefault widget.init
+    in
+    
+     (widget.isConsistent model) && (List.isEmpty <| widget.validate model)
+
+extendConsistencyCheck : (FormState -> Bool) -> (FormState -> Bool) -> FormState -> Bool
+extendConsistencyCheck previousChecks newCheck formState =
+    previousChecks formState
+    && newCheck formState
+    
 
 {-| A function that recieves the markup of a field and combines with a list of errors.
 -}
@@ -294,6 +316,7 @@ form domId validator fieldWithErrors fn =
     , defaults = Dict.empty
     , blur = blurAll
     , domId = domId
+    , isConsistent = \_ -> True
     }
 
 
@@ -303,7 +326,7 @@ field :
     Widget widgetModel msg value customError
     -> FormInternal (Field value customError -> c) customError data
     -> FormInternal c customError data
-field widget { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId } =
+field widget { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId, isConsistent } =
     let
         fieldId =
             fromInt count
@@ -320,6 +343,7 @@ field widget { fn, count, updates, fieldWithErrors, validator, defaults, blur, d
     , defaults = Dict.insert fieldId (widget.encodeModel widget.init) defaults
     , blur = blur >> blurChildren fieldId widget
     , domId = domId
+    , isConsistent = extendConsistencyCheck isConsistent (extractConsistencyCheck widget fieldId)
     }
 
 
@@ -354,7 +378,7 @@ fieldWithVariants :
     -> List ( String, Form value customError )
     -> FormInternal (Field value customError -> c) customError data
     -> FormInternal c customError data
-fieldWithVariants variantSelector defaultVariant otherVariants { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId } =
+fieldWithVariants variantSelector defaultVariant otherVariants { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId, isConsistent } =
     let
         toWidgetVariant ( n, f ) =
             ( n, toWidget f )
@@ -391,6 +415,7 @@ fieldWithVariants variantSelector defaultVariant otherVariants { fn, count, upda
     , defaults = Dict.insert fieldId (widget.encodeModel widget.init) defaults
     , blur = blur >> blurChildren fieldId widget
     , domId = domId
+    , isConsistent = extendConsistencyCheck isConsistent (extractConsistencyCheck widget fieldId)
     }
 
 
@@ -495,13 +520,7 @@ The second argument is a `FieldWithRemoveButton` function that combines one item
 The third argument is the widget to use for each element in the list.
 
 -}
-listField :
-    ListWithAddButton Msg
-    -> FieldWithRemoveButton Msg
-    -> Widget model msg value customError
-    -> { a | fn : Field (List value) customError -> b, count : Int, updates : Dict String (SubfieldId -> FieldOperation -> Value -> ( Value, Effect )), fieldWithErrors : FieldWithErrors customError, validator : e, defaults : Dict String Value, blur : c -> FormState, domId : h }
-    -> { fn : b, count : Int, updates : Dict String (SubfieldId -> FieldOperation -> Value -> ( Value, Effect )), fieldWithErrors : FieldWithErrors customError, validator : e, defaults : Dict String Value, blur : c -> FormState, domId : h }
-listField listWithAddButton fieldWithRemoveButton widget { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId } =
+listField listWithAddButton fieldWithRemoveButton widget { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId, isConsistent } =
     let
         fieldId =
             fromInt count
@@ -518,6 +537,7 @@ listField listWithAddButton fieldWithRemoveButton widget { fn, count, updates, f
     , defaults = Dict.insert fieldId (E.list widget.encodeModel [ widget.init ]) defaults
     , blur = blur >> blurChildren fieldId widget
     , domId = domId
+    , isConsistent = extendConsistencyCheck isConsistent (extractConsistencyCheck widget fieldId)
     }
 
 
@@ -631,6 +651,7 @@ toWidget f =
     , value = \formState -> f.fn.combine formState
     , validate =
         \formState -> widgetErrors formState
+    , isConsistent = f.isConsistent 
     , view =
         \domId ((FormState model) as fs) ->
             f.fn.view (FormState { model | parentDomId = domId }) (widgetErrors fs)

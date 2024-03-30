@@ -56,6 +56,7 @@ integerInput attrs =
     { init = { value = "0", parsedValue = 0 }
     , value = .parsedValue
     , validate = alwaysValid
+    , isConsistent = (\{ parsedValue, value } -> String.toInt value == Just parsedValue)
     , view =
         \domId model ->
             [ input

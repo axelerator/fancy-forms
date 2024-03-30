@@ -27,6 +27,7 @@ dropdown (( default, _ ) as variants) =
     { init = default.id
     , value = fromString variants
     , validate = alwaysValid
+    , isConsistent = (\_ -> True)
     , view = view variants
     , update = update
     , encodeMsg = E.string

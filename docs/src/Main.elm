@@ -113,9 +113,6 @@ init _ =
     )
 
 
-currentForm : Form Ingredient MyError
-currentForm =
-    ingredientForm
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -180,7 +177,6 @@ view model =
         [ styles
         , SH.useTheme SH.monokai
         , a [name "top"] []
-        --, div [] <| Form.render ForForm currentForm model.formState
         , viewToc
         , viewMinimal model
         , viewValidation model
@@ -477,177 +473,6 @@ viewToc =
             ,   ul [] <|  List.map viewTocEntry examples
             ]
         ]
-
-
-fieldWithErrors : FieldWithErrors MyError
-fieldWithErrors errors html =
-    [ div
-        (if List.isEmpty errors then
-            []
-
-         else
-            [ class "has-error" ]
-        )
-        (html ++ [ viewErrors errors ])
-    ]
-
-
-viewErrors : List (Error MyError) -> Html msg
-viewErrors errors =
-    if List.isEmpty errors then
-        text ""
-
-    else
-        div [ class "errors" ] [ text <| String.join " " <| List.map errorToString errors ]
-
-
-errorToString : Error MyError -> String
-errorToString e =
-    case e of
-        FormState.MustNotBeBlank ->
-            "must not be blank"
-
-        FormState.MustBeGreaterThan n ->
-            "must be greater than " ++ String.fromInt n
-
-        FormState.MustBeLesserThan n ->
-            "must be lesser than " ++ String.fromInt n
-
-        FormState.CustomError myError ->
-            case myError of
-                FirstNameMustNotBeSameAsLastName ->
-                    "first name must not be the same as last name"
-
-                SelectedColorMustMatchCounter ->
-                    "amount of color must match counter"
-
-
-type MyError
-    = FirstNameMustNotBeSameAsLastName
-    | SelectedColorMustMatchCounter
-
-
-withLabel : String -> Widget widgetModel msg value customError -> Widget widgetModel msg value customError
-withLabel labelText wrapped =
-    (\domId content ->
-        label [ for domId ] [ text labelText ]
-            :: content
-    )
-        |> Form.wrap wrapped
-
-
-type VolumeUnit
-    = Milliliter
-    | CentiLiter
-    | Liter
-
-
-volumeUnitVariants : Variants VolumeUnit
-volumeUnitVariants =
-    ( { value = Milliliter, id = "ml", label = "milliliter" }
-    , [ { value = CentiLiter, id = "cl", label = "centiliter" }
-      , { value = Liter, id = "l", label = "liter" }
-      ]
-    )
-
-
-type alias LiquidIngredient =
-    { name : String
-    , amount : Int
-    , unit : VolumeUnit
-    }
-
-
-liquidForm : Form Ingredient MyError
-liquidForm =
-    Form.form "liquid-form"
-        alwaysValid
-        fieldWithErrors
-        (\name amount unit ->
-            { view =
-                \formState errors ->
-                    [ div [ classList [ ( "has-error", List.isEmpty errors ) ] ] <|
-                        List.concat
-                            [ [ div [ class "errors" ] <| [ viewErrors errors ] ]
-                            , name.view formState
-                            , amount.view formState
-                            , unit.view formState
-                            ]
-                    ]
-            , combine =
-                \formState ->
-                    Liquid
-                        { name = name.value formState
-                        , amount = amount.value formState
-                        , unit = unit.value formState
-                        }
-            }
-        )
-        |> field (textInput [] |> withLabel "name" |> validate [ notBlank ])
-        |> field (integerInput [] |> withLabel "amount" |> validate [ greaterThan 0 ])
-        |> field (dropdown volumeUnitVariants |> withLabel "unit")
-
-
-type alias WholeIngredient =
-    { name : String
-    , amount : Int
-    }
-
-
-type Ingredient
-    = Liquid LiquidIngredient
-    | Whole WholeIngredient
-
-
-wholeForm : Form Ingredient MyError
-wholeForm =
-    Form.form "whole-form"
-        alwaysValid
-        (\_ html -> html)
-        (\name amount ->
-            { view =
-                \formState _ ->
-                    [ div [] <| name.view formState
-                    , div [] <| amount.view formState
-                    ]
-            , combine =
-                \formState ->
-                    Whole
-                        { name = name.value formState
-                        , amount = amount.value formState
-                        }
-            }
-        )
-        |> field
-            (textInput []
-                |> withLabel "name"
-                |> validate [ notBlank ]
-            )
-        |> field
-            (integerInput []
-                |> withLabel "amount name"
-            )
-
-
-ingredientForm : Form Ingredient MyError
-ingredientForm =
-    Form.form "ingredient-form"
-        alwaysValid
-        fieldWithErrors
-        (\ingredient ->
-            { view =
-                \formState _ ->
-                    List.concat
-                        [ ingredient.view formState
-                        ]
-            , combine =
-                \formState ->
-                    ingredient.value formState
-            }
-        )
-        |> fieldWithVariants dropdown
-            ( "Liquid ingredient", liquidForm )
-            [ ( "Whole ingredient", wholeForm ) ]
 
 
 type alias HighlightModel =

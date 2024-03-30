@@ -223,6 +223,7 @@ type alias Widget model msg value customError =
     { init : model
     , value : model -> value
     , validate : Validator model customError
+    , isConsistent : model -> Bool
     , view : DomId -> model -> List (Html msg)
     , update : msg -> model -> UpdateResult model
     , encodeMsg : msg -> Value

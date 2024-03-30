@@ -37,6 +37,7 @@ textInput attrs =
     { init = ""
     , value = identity
     , validate = alwaysValid
+    , isConsistent = (\_ -> True)
     , view =
         \domId model ->
             [ input

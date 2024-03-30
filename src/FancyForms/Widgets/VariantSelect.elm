@@ -27,6 +27,7 @@ variantWidget variantSelector defaultVariantName variantWidgets =
     { init = variantWidgetInit defaultVariantName variantWidgets
     , value = selectedValue variantSelector variantWidgets
     , validate = alwaysValid -- Delegate: Include validation result of currently selected variant
+    , isConsistent = (\_ -> True)
     , view = view variantSelector (List.Nonempty.toList variantWidgets)
     , update = \msg model -> update variantSelector variantWidgets msg model |> justChanged
     , encodeMsg = encodeMsg

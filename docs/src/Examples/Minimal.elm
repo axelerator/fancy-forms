@@ -3,8 +3,10 @@ module Examples.Minimal exposing (..)
 import FancyForms.Form as Form exposing (Form, field)
 import FancyForms.FormState exposing (FormState, alwaysValid)
 import FancyForms.Widgets.Int exposing (integerInput)
-import Html exposing (div, p, text)
+import Html exposing (div, p, text, br)
 import String exposing (fromInt)
+import FancyForms.Form exposing (validate)
+import FancyForms.Widgets.Int exposing (greaterThan)
 
 
 type alias Model =
@@ -23,7 +25,7 @@ myForm =
             , combine = \formState -> amount.value formState
             }
         )
-        |> field (integerInput [])
+        |> field (integerInput [] |> validate [greaterThan 0])
 
 view model =
     div []
@@ -31,6 +33,9 @@ view model =
         , p []
             [ text "The user entered: "
             , text <| fromInt <| Form.extract myForm model.formState
+            , br [] []
+            , text "consistent: "
+            , text <| if Form.isConsistentTmp myForm model.formState then "yes" else "no"
             ]
         ]
 
