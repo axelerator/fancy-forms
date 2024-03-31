@@ -313,18 +313,27 @@ extractListInit widget fieldId valueExtractor formModel formState =
 extractVariantInit :
     List.Nonempty.ListNonempty ( String, Widget model msg value customError )
     -> FieldId
-    -> (formModel -> (String, value))
-    -> formModel
+    -> (value -> (String, value))
+    -> value
     -> FormState
     -> FormState
 extractVariantInit variantsWithWidgets fieldId valueExtractor formModel formState =
     let
         (variantName, value) =
             valueExtractor formModel
+        _ = Debug.log "extractVariantInit" (variantName, value)
+
+        variantNameExtractor : value -> String
+        variantNameExtractor v =
+            let
+                (variantName_, _) = valueExtractor v
+            in
+            variantName_
+            
 
         encodedValue : Value
         encodedValue =
-            variantWidgetInit variantName variantsWithWidgets (Just value)
+            variantWidgetInit variantName variantsWithWidgets variantNameExtractor (Just value)
             |> FormState.formStateEncode
     in
     write fieldId SingleValue formState encodedValue
@@ -456,10 +465,10 @@ The function takes the following arguments:
 -}
 fieldWithVariants :
     (Variants String -> Widget String msg String customError)
-    -> ( String, Form value customError )
-    -> List ( String, Form value customError )
-    -> (data -> ( String, value ))
-    -> FormInternal (Field value customError -> c) customError data
+    -> ( String, Form data customError )
+    -> List ( String, Form data customError )
+    -> (data -> ( String, data ))
+    -> FormInternal (Field data customError -> c) customError data
     -> FormInternal c customError data
 fieldWithVariants variantSelector defaultVariant otherVariants extractDefault { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId, isConsistent, initWithData } =
     let
@@ -479,10 +488,13 @@ fieldWithVariants variantSelector defaultVariant otherVariants extractDefault { 
 
         fieldId =
             fromInt count
+        variantNameExtractor data =
+            extractDefault data |> Tuple.first
 
         widget =
             variantWidget
                 (variantSelector <| List.Nonempty.map mkVariant variantsWithWidgets)
+                variantNameExtractor
                 (Tuple.first <| List.Nonempty.head variantsWithWidgets)
                 variantsWithWidgets
     in

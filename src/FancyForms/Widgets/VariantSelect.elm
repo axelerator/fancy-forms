@@ -20,12 +20,13 @@ type alias Model =
 
 variantWidget :
     Widget String msg String customError
+    -> (value -> String)
     -> String
     -> ListNonempty ( String, Widget widgetModel msg2 value customError )
     -> Widget Model Msg value customError
-variantWidget variantSelector defaultVariantName variantWidgets =
+variantWidget variantSelector variantNameExtractor defaultVariantName variantWidgets =
     -- TODO: init from given value
-    { init = \v -> variantWidgetInit defaultVariantName variantWidgets v
+    { init = \v -> variantWidgetInit (withDefault defaultVariantName <| Maybe.map variantNameExtractor v) variantWidgets variantNameExtractor v
     , value = selectedValue variantSelector variantWidgets
     , validate = alwaysValid -- Delegate: Include validation result of currently selected variant
     , isConsistent = \_ -> True
@@ -126,12 +127,13 @@ encodeMsg msg =
 variantWidgetInit :
     String
     -> ListNonempty ( String, Widget widgetModel msg2 value customError )
+    -> (value -> String)
     -> Maybe value
     -> Model
-variantWidgetInit default variantWidgets mbValue =
+variantWidgetInit default variantWidgets extractVariantName mbValue =
     let
         values =
-            Dict.singleton selectorFieldId (E.string default)
+            Dict.singleton selectorFieldId (E.string <| withDefault default <| Maybe.map extractVariantName mbValue)
 
         variantInit ( variantName, variantW ) dict =
             variantW.init mbValue
@@ -141,7 +143,6 @@ variantWidgetInit default variantWidgets mbValue =
         values_ =
             List.Nonempty.toList variantWidgets
                 |> List.foldl variantInit values
-        _ = Debug.log "variant values" default
     in
     FormState { parentDomId = "0", values = values_, fieldStatus = Dict.empty, allBlurred = False }
 
