@@ -28,6 +28,8 @@ Checklist:
  - [x] Custom widget support
  - [ ] Form can be initialized with custom values
  - [ ] Validation errors aggregate to the top
+ - [ ] set "external" errors for fields (failed backend validation)
+ - [ ] Lock/Disable fields when rendering
  - Lists fields:
     - [x] Any widget can be used as list item
     - [x] User can add and remove list items

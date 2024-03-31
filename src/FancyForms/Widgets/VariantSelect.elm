@@ -1,4 +1,4 @@
-module FancyForms.Widgets.VariantSelect exposing (variantWidget)
+module FancyForms.Widgets.VariantSelect exposing (variantWidget, variantWidgetInit)
 
 import Dict
 import FancyForms.FormState exposing (DomId, FieldId, FieldOperation(..), FormState(..), SubfieldId(..), Widget, alwaysValid, blurChildren, encodedUpdate, formStateDecoder, formStateEncode, justChanged, read, subId, write)
@@ -24,10 +24,11 @@ variantWidget :
     -> ListNonempty ( String, Widget widgetModel msg2 value customError )
     -> Widget Model Msg value customError
 variantWidget variantSelector defaultVariantName variantWidgets =
-    { init = variantWidgetInit defaultVariantName variantWidgets
+    -- TODO: init from given value
+    { init = \v -> variantWidgetInit defaultVariantName variantWidgets v
     , value = selectedValue variantSelector variantWidgets
     , validate = alwaysValid -- Delegate: Include validation result of currently selected variant
-    , isConsistent = (\_ -> True)
+    , isConsistent = \_ -> True
     , view = view variantSelector (List.Nonempty.toList variantWidgets)
     , update = \msg model -> update variantSelector variantWidgets msg model |> justChanged
     , encodeMsg = encodeMsg
@@ -125,20 +126,22 @@ encodeMsg msg =
 variantWidgetInit :
     String
     -> ListNonempty ( String, Widget widgetModel msg2 value customError )
+    -> Maybe value
     -> Model
-variantWidgetInit default variantWidgets =
+variantWidgetInit default variantWidgets mbValue =
     let
         values =
             Dict.singleton selectorFieldId (E.string default)
 
         variantInit ( variantName, variantW ) dict =
-            variantW.init
+            variantW.init mbValue
                 |> variantW.encodeModel
                 |> (\v -> Dict.insert variantName v dict)
 
         values_ =
             List.Nonempty.toList variantWidgets
                 |> List.foldl variantInit values
+        _ = Debug.log "variant values" default
     in
     FormState { parentDomId = "0", values = values_, fieldStatus = Dict.empty, allBlurred = False }
 
@@ -155,7 +158,7 @@ deserializeModel :
 deserializeModel widget formState =
     D.decodeValue widget.decoderModel (read selectorFieldId formState)
         |> Result.toMaybe
-        |> withDefault widget.init
+        |> withDefault (widget.init Nothing)
 
 
 value :
@@ -187,7 +190,7 @@ selectedValue variantSelectWidget variantWidgets model =
     read selectedVariantName model
         |> D.decodeValue selectedWidget.decoderModel
         |> Result.map selectedWidget.value
-        |> Result.withDefault (selectedWidget.value selectedWidget.init)
+        |> Result.withDefault (selectedWidget.value (selectedWidget.init Nothing))
 
 
 view :

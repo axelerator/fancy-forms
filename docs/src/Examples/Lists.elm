@@ -28,7 +28,7 @@ myForm =
             , combine = \formState -> todos.value formState
             }
         )
-        |> listField listWithAddButton fieldWithRemoveButton (textInput [])
+        |> listField listWithAddButton fieldWithRemoveButton identity  (textInput [])
 
 
 fieldWithRemoveButton removeMsg input =
@@ -56,7 +56,7 @@ view model =
 
 
 init =
-    { formState = Form.init myForm }
+    { formState = Form.init myForm <| Just ["yay!"]}
 
 
 update : Msg -> Model -> Model

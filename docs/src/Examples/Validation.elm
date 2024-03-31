@@ -1,6 +1,6 @@
 module Examples.Validation exposing (..)
 
-import FancyForms.Form as Form exposing (Form, field, validate)
+import FancyForms.Form as Form exposing (Form, field, validate, field)
 import FancyForms.FormState exposing (FormState, Error)
 import FancyForms.Widgets.Int exposing (greaterThan, integerInput, lesserThan)
 import Html exposing (div, p, text, label)
@@ -74,9 +74,9 @@ myForm =
                 }
             }
         )
-        |> field (integerInput [] |> validate [greaterThan 0]) -- |> initWith takeDay)
-        |> field (integerInput [] |> validate [greaterThan 0, lesserThan 13])
-        |> field (integerInput [] |> validate [greaterThan 1900])
+        |> field .day (integerInput [] |> validate [greaterThan 0])
+        |> field .month (integerInput [] |> validate [greaterThan 0, lesserThan 13])
+        |> field .year (integerInput [] |> validate [greaterThan 1900])
 
 takeDay : Date -> Int
 takeDay { day } = day
@@ -108,7 +108,7 @@ view model =
         , viewDate <| Form.extract myForm model.formState
         ]
 
-init = { formState = Form.init myForm }
+init = { formState = Form.init myForm <| Just { day = 1, month = 1, year = 2000 } }
 
 update : Msg -> Model -> Model
 update msg model =

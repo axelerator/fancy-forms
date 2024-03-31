@@ -4,7 +4,7 @@ module FancyForms.Form exposing
     , listField, FieldWithRemoveButton, ListWithAddButton
     , fieldWithVariants, Variant, Variants
     , toWidget, wrap
-    , isConsistentTmp
+    , default, isConsistentTmp
     )
 
 {-| FancyForms is a library for building forms in Elm. It is designed with the following goals in mind:
@@ -44,7 +44,7 @@ module FancyForms.Form exposing
 -}
 
 import Dict exposing (Dict)
-import FancyForms.FormState as FormState exposing (DomId, Effect(..), Error, FieldId, FieldOperation(..), FieldStatus(..), FormState(..), SubfieldId(..), Validator, Widget, blurAll, blurChildren, formStateDecoder, formStateEncode, justChanged, read, updateFieldStatus, wasAtLeast)
+import FancyForms.FormState as FormState exposing (DomId, Effect(..), Error, FieldId, FieldOperation(..), FieldStatus(..), FormState(..), SubfieldId(..), Validator, Widget, blurAll, blurChildren, formStateDecoder, formStateEncode, justChanged, read, updateFieldStatus, wasAtLeast, write)
 import FancyForms.Widgets.VariantSelect exposing (variantWidget)
 import Html exposing (Html)
 import Json.Decode as D exposing (Decoder)
@@ -53,6 +53,7 @@ import List.Nonempty exposing (ListNonempty)
 import Maybe exposing (withDefault)
 import String exposing (fromInt, toInt)
 import Tuple
+import FancyForms.Widgets.VariantSelect exposing (variantWidgetInit)
 
 
 {-| The message type for the form.
@@ -159,7 +160,7 @@ mkField fieldWithErrors fieldId widget =
         deserializeModel : FormState -> model
         deserializeModel formState =
             D.decodeValue widget.decoderModel (read fieldId formState)
-                |> Result.withDefault widget.init
+                |> Result.withDefault (widget.init Nothing)
 
         viewField : FormState -> List (Html Msg)
         viewField ((FormState { parentDomId }) as formState) =
@@ -225,13 +226,17 @@ debugFormState ((FormState { values }) as fs) =
     fs
 
 
-
-{-|
-   Initializes a form state with the default values
+{-| Initializes a form state with the default values
 -}
-init : Form data customError -> FormState
-init { defaults, domId } =
-    FormState.init defaults domId
+init : Form data customError -> Maybe data -> FormState
+init { defaults, domId, initWithData } mbData =
+    case mbData of
+        Just data ->
+            FormState.init defaults domId
+                |> initWithData data
+
+        Nothing ->
+            FormState.init defaults domId
 
 
 type alias FormInternal f customError data =
@@ -244,28 +249,92 @@ type alias FormInternal f customError data =
     , blur : FormState -> FormState
     , domId : DomId
     , isConsistent : FormState -> Bool
+    , initWithData : data -> FormState -> FormState
     }
+
 
 isConsistentTmp : FormInternal f customError data -> FormState -> Bool
 isConsistentTmp { isConsistent } formState =
     isConsistent formState
 
+
 extractConsistencyCheck : Widget model msg value customError -> FieldId -> FormState -> Bool
 extractConsistencyCheck widget fieldId formState =
     let
-       model =  
+        model =
             read fieldId formState
-            |> D.decodeValue widget.decoderModel
-            |> Result.withDefault widget.init
+                |> D.decodeValue widget.decoderModel
+                |> Result.withDefault (widget.init Nothing)
     in
-    
-     (widget.isConsistent model) && (List.isEmpty <| widget.validate model)
+    widget.isConsistent model && (List.isEmpty <| widget.validate model)
+
 
 extendConsistencyCheck : (FormState -> Bool) -> (FormState -> Bool) -> FormState -> Bool
 extendConsistencyCheck previousChecks newCheck formState =
     previousChecks formState
-    && newCheck formState
-    
+        && newCheck formState
+
+
+extractInit : Widget model msg value customError -> FieldId -> (formModel -> value) -> formModel -> FormState -> FormState
+extractInit widget fieldId valueExtractor formModel formState =
+    let
+        value : value
+        value =
+            valueExtractor formModel
+
+        encodedValue : Value
+        encodedValue =
+            widget.encodeModel <| widget.init <| Just value
+    in
+    write fieldId SingleValue formState encodedValue
+
+
+extractListInit : Widget model msg value customError -> FieldId -> (formModel -> List value) -> formModel -> FormState -> FormState
+extractListInit widget fieldId valueExtractor formModel formState =
+    let
+        values : List value
+        values =
+            valueExtractor formModel
+
+        encodedValues : List Value
+        encodedValues =
+            List.map widget.encodeModel <|
+                List.map widget.init <|
+                    List.map Just <|
+                        Debug.log "extractListInit" values
+
+        encodedListValue : Value
+        encodedListValue =
+            E.list identity encodedValues
+    in
+    write fieldId SingleValue formState encodedListValue
+
+
+extractVariantInit :
+    List.Nonempty.ListNonempty ( String, Widget model msg value customError )
+    -> FieldId
+    -> (formModel -> (String, value))
+    -> formModel
+    -> FormState
+    -> FormState
+extractVariantInit variantsWithWidgets fieldId valueExtractor formModel formState =
+    let
+        (variantName, value) =
+            valueExtractor formModel
+
+        encodedValue : Value
+        encodedValue =
+            variantWidgetInit variantName variantsWithWidgets (Just value)
+            |> FormState.formStateEncode
+    in
+    write fieldId SingleValue formState encodedValue
+
+
+extendInit : (data -> FormState -> FormState) -> (data -> FormState -> FormState) -> data -> FormState -> FormState
+extendInit previousInit nextInit data formState =
+    previousInit data formState
+        |> nextInit data
+
 
 {-| A function that recieves the markup of a field and combines with a list of errors.
 -}
@@ -285,26 +354,28 @@ type alias ListWithAddButton msg =
     msg -> List (Html msg) -> List (Html msg)
 
 
+{-| Defines a new form that fields can be added to.
+Takes four arguments:
+1, A unique id for the form to be used as id in the DOM
 
-{-|
-   Defines a new form that fields can be added to.
-   Takes four arguments:
-     1, A unique id for the form to be used as id in the DOM
-     1. A validator function that takes the form data and returns a list of errors
-     1. A function that receives the fields and returns the `view` and `combine` functions
-     1. A function that receives the markup of a field and combines it with a list of errors
+1.  A validator function that takes the form data and returns a list of errors
 
-       myForm : Form Int ()
-       myForm =
-           Form.form "minimal-example"
-               (\data -> [])
-               (\errors_ html -> html)
-               (\amount ->
-                   { view = \formState _ -> amount.view formState
-                   , combine = \formState -> amount.value formState
-                   }
-               )
-               |> field (integerInput [])
+2.  A function that receives the fields and returns the `view` and `combine` functions
+
+3.  A function that receives the markup of a field and combines it with a list of errors
+
+        myForm : Form Int ()
+        myForm =
+            Form.form "minimal-example"
+                (\data -> [])
+                (\errors_ html -> html)
+                (\amount ->
+                    { view = \formState _ -> amount.view formState
+                    , combine = \formState -> amount.value formState
+                    }
+                )
+                |> field (integerInput [])
+
 -}
 form : DomId -> Validator data customError -> FieldWithErrors customError -> a -> FormInternal a customError data
 form domId validator fieldWithErrors fn =
@@ -317,16 +388,23 @@ form domId validator fieldWithErrors fn =
     , blur = blurAll
     , domId = domId
     , isConsistent = \_ -> True
+    , initWithData = \_ fs -> fs
     }
+
+
+default : a -> ignored -> a
+default a _ =
+    a
 
 
 {-| Adds a new field with the given widget to the form
 -}
 field :
-    Widget widgetModel msg value customError
+    (data -> value)
+    -> Widget widgetModel msg value customError
     -> FormInternal (Field value customError -> c) customError data
     -> FormInternal c customError data
-field widget { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId, isConsistent } =
+field extractDefault widget { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId, isConsistent, initWithData } =
     let
         fieldId =
             fromInt count
@@ -340,10 +418,14 @@ field widget { fn, count, updates, fieldWithErrors, validator, defaults, blur, d
             updates
     , fieldWithErrors = fieldWithErrors
     , validator = validator
-    , defaults = Dict.insert fieldId (widget.encodeModel widget.init) defaults
+    , defaults = Dict.insert fieldId (widget.encodeModel (widget.init Nothing)) defaults
     , blur = blur >> blurChildren fieldId widget
     , domId = domId
     , isConsistent = extendConsistencyCheck isConsistent (extractConsistencyCheck widget fieldId)
+    , initWithData =
+        extendInit
+            initWithData
+            (extractInit widget fieldId extractDefault)
     }
 
 
@@ -376,9 +458,10 @@ fieldWithVariants :
     (Variants String -> Widget String msg String customError)
     -> ( String, Form value customError )
     -> List ( String, Form value customError )
+    -> (data -> ( String, value ))
     -> FormInternal (Field value customError -> c) customError data
     -> FormInternal c customError data
-fieldWithVariants variantSelector defaultVariant otherVariants { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId, isConsistent } =
+fieldWithVariants variantSelector defaultVariant otherVariants extractDefault { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId, isConsistent, initWithData } =
     let
         toWidgetVariant ( n, f ) =
             ( n, toWidget f )
@@ -412,10 +495,14 @@ fieldWithVariants variantSelector defaultVariant otherVariants { fn, count, upda
             updates
     , fieldWithErrors = fieldWithErrors
     , validator = validator
-    , defaults = Dict.insert fieldId (widget.encodeModel widget.init) defaults
+    , defaults = Dict.insert fieldId (widget.encodeModel (widget.init Nothing)) defaults
     , blur = blur >> blurChildren fieldId widget
     , domId = domId
     , isConsistent = extendConsistencyCheck isConsistent (extractConsistencyCheck widget fieldId)
+    , initWithData =
+        extendInit
+            initWithData
+            (extractVariantInit variantsWithWidgets fieldId extractDefault)
     }
 
 
@@ -520,7 +607,37 @@ The second argument is a `FieldWithRemoveButton` function that combines one item
 The third argument is the widget to use for each element in the list.
 
 -}
-listField listWithAddButton fieldWithRemoveButton widget { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId, isConsistent } =
+listField :
+    ListWithAddButton Msg
+    -> FieldWithRemoveButton Msg
+    -> (data -> List value)
+    -> Widget model msg value customError
+    ->
+        { a
+            | fn : Field (List value) customError -> b
+            , count : Int
+            , updates : Dict String (SubfieldId -> FieldOperation -> Value -> ( Value, Effect ))
+            , fieldWithErrors : FieldWithErrors customError
+            , validator : e
+            , defaults : Dict String Value
+            , blur : c -> FormState
+            , domId : DomId
+            , isConsistent : FormState -> Bool
+            , initWithData : data -> FormState -> FormState
+        }
+    ->
+        { fn : b
+        , count : Int
+        , updates : Dict String (SubfieldId -> FieldOperation -> Value -> ( Value, Effect ))
+        , fieldWithErrors : FieldWithErrors customError
+        , validator : e
+        , defaults : Dict String Value
+        , blur : c -> FormState
+        , domId : DomId
+        , isConsistent : FormState -> Bool
+        , initWithData : data -> FormState -> FormState
+        }
+listField listWithAddButton fieldWithRemoveButton extractDefault widget { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId, isConsistent, initWithData } =
     let
         fieldId =
             fromInt count
@@ -534,10 +651,14 @@ listField listWithAddButton fieldWithRemoveButton widget { fn, count, updates, f
             updates
     , fieldWithErrors = fieldWithErrors
     , validator = validator
-    , defaults = Dict.insert fieldId (E.list widget.encodeModel [ widget.init ]) defaults
+    , defaults = Dict.insert fieldId (E.list widget.encodeModel [ widget.init Nothing ]) defaults
     , blur = blur >> blurChildren fieldId widget
     , domId = domId
     , isConsistent = extendConsistencyCheck isConsistent (extractConsistencyCheck widget fieldId)
+    , initWithData =
+        extendInit
+            initWithData
+            (extractListInit widget fieldId extractDefault)
     }
 
 
@@ -576,7 +697,7 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
 
                 ArrayElement i ->
                     D.decodeValue (D.list decoderModel) modelVal
-                        |> Result.withDefault (List.repeat (i + 1) widget.init)
+                        |> Result.withDefault (List.repeat (i + 1) (widget.init Nothing))
                         |> List.indexedMap
                             (\idx e ->
                                 if idx == i then
@@ -593,7 +714,7 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
                 |> Result.withDefault []
                 |> (\list ->
                         list
-                            ++ [ widget.init ]
+                            ++ [ widget.init Nothing ]
                             |> E.list encodeModel
                    )
             , WasChanged
@@ -621,7 +742,7 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
                 ( Ok msg, e ) ->
                     let
                         updateResult =
-                            widget.update msg widget.init
+                            widget.update msg (widget.init Nothing)
                     in
                     ( encodeSubfield updateResult.model
                     , updateResult.effect
@@ -647,11 +768,17 @@ toWidget f =
             f.fn.combine formState
                 |> f.validator
     in
-    { init = init f
+    { init =
+        \data ->
+            let
+                _ =
+                    Debug.log "toWidget.init" data
+            in
+            init f data
     , value = \formState -> f.fn.combine formState
     , validate =
         \formState -> widgetErrors formState
-    , isConsistent = f.isConsistent 
+    , isConsistent = f.isConsistent
     , view =
         \domId ((FormState model) as fs) ->
             f.fn.view (FormState { model | parentDomId = domId }) (widgetErrors fs)

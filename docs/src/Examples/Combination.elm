@@ -14,6 +14,7 @@ import Examples.Validation exposing (MyError)
 import Html exposing (hr)
 import String exposing (fromInt)
 import Html exposing (br)
+import FancyForms.Form exposing (default)
 
 
 type alias Model =
@@ -30,7 +31,6 @@ type alias Signup =
     }
 
 loginInput = Form.toWidget Examples.Decoration.myForm
-
 dateInput = Form.toWidget Examples.Validation.myForm
 
 myForm : Form Signup MyError
@@ -52,8 +52,8 @@ myForm =
                     }
             }
         )
-        |> field loginInput
-        |> field (dateInput |> withLabel "birthday")
+        |> field (default emptyLogin) loginInput
+        |> field (default defaultDate) (dateInput |> withLabel "birthday")
 
 
 view model =
@@ -80,8 +80,23 @@ view model =
 
 
 init =
-    { formState = Form.init myForm }
+    { formState = Form.init myForm (Just formDefaults) }
 
+formDefaults =
+    { login = emptyLogin
+    , birthday = defaultDate
+    }
+
+emptyLogin =
+    { username = ""
+    , password = ""
+    }
+
+defaultDate =
+    { day = 1
+    , month = 1
+    , year = 1970
+    }
 
 update : Msg -> Model -> Model
 update msg model =

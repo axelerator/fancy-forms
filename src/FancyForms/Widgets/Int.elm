@@ -1,10 +1,17 @@
-module FancyForms.Widgets.Int exposing (greaterThan, integerInput, lesserThan)
-{-| An integer input widget. 
+module FancyForms.Widgets.Int exposing
+    ( integerInput
+    , greaterThan, lesserThan
+    )
+
+{-| An integer input widget.
+
 @docs integerInput
+
 
 # Validators
 
 @docs greaterThan, lesserThan
+
 -}
 
 import FancyForms.Form exposing (Msg)
@@ -14,6 +21,8 @@ import Html.Attributes exposing (id, type_, value)
 import Html.Events exposing (onBlur, onFocus, onInput)
 import Json.Decode as D exposing (Decoder, Value)
 import Json.Encode as E
+import Maybe exposing (withDefault)
+import String exposing (fromInt)
 
 
 type Msg
@@ -38,6 +47,7 @@ greaterThan x { parsedValue } =
     else
         []
 
+
 {-| A validator function that ensures the value is less than `x`
 -}
 lesserThan : Int -> Validator Model customError
@@ -53,10 +63,13 @@ lesserThan x { parsedValue } =
 -}
 integerInput : List (Attribute Msg) -> Widget Model Msg Int customError
 integerInput attrs =
-    { init = { value = "0", parsedValue = 0 }
+    { init =
+        \x ->
+            Maybe.map (\i -> { value = fromInt i, parsedValue = i }) x
+                |> withDefault { value = "0", parsedValue = 0 }
     , value = .parsedValue
     , validate = alwaysValid
-    , isConsistent = (\{ parsedValue, value } -> String.toInt value == Just parsedValue)
+    , isConsistent = \{ parsedValue, value } -> String.toInt value == Just parsedValue
     , view =
         \domId model ->
             [ input

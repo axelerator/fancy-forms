@@ -12,6 +12,7 @@ import Html.Attributes exposing (checked, id, type_)
 import Html.Events exposing (onInput)
 import Json.Decode as D
 import Json.Encode as E
+import Maybe exposing (withDefault)
 
 
 type alias Msg =
@@ -21,7 +22,7 @@ type alias Msg =
 {-| A checkbox widget the collects a `Bool` value -}
 checkbox : Widget Bool Msg Bool customError
 checkbox =
-    { init = False
+    { init = (\value -> withDefault False value)
     , value = identity
     , validate = alwaysValid
     , isConsistent = (\_ -> True)

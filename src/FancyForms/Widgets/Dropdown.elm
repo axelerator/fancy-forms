@@ -9,6 +9,8 @@ import Html.Attributes exposing (checked, class, id, value)
 import Html.Events exposing (onInput)
 import Json.Decode as D
 import Json.Encode as E
+import Maybe exposing (withDefault)
+import List.Nonempty exposing (ListNonempty)
 
 
 type alias Msg =
@@ -18,13 +20,22 @@ type alias Msg =
 type alias Model =
     String
 
+init : Variants a -> Maybe a -> Model
+init variants initValue =
+    case initValue of
+        Nothing -> List.Nonempty.head variants |> .id
+        Just v ->
+            List.Nonempty.filter (\{ value } -> value == v) variants
+                |> List.head
+                |> Maybe.map .id
+                |> Maybe.withDefault (List.Nonempty.head variants |> .id)
 
 {-| Returns a widget that lets the user select a value from a list of
     variants.
 -}
 dropdown : Variants a -> Widget String Msg a customError
 dropdown (( default, _ ) as variants) =
-    { init = default.id
+    { init = init variants
     , value = fromString variants
     , validate = alwaysValid
     , isConsistent = (\_ -> True)

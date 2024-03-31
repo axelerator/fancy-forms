@@ -35,6 +35,16 @@ myForm =
         |> fieldWithVariants dropdown
             ( "email", emailForm )
             [ ( "phone", phoneForm ) ]
+            fromForm
+
+fromForm : Contact -> (String, Contact)
+fromForm c =
+    let
+      tf =  case c of
+            Email _ -> ("email", c)
+            Phone _ _ -> ("phone", c)
+    in
+        Debug.log "tf" tf
 
 emailForm : Form Contact ()
 emailForm =
@@ -46,7 +56,13 @@ emailForm =
             , combine = \formState -> Email <| email.value formState
             }
         )
-        |> field (textInput [])
+        |> field email_ (textInput [])
+
+email_ : Contact -> String
+email_ c =
+    case c of
+        Email email -> email
+        Phone _ _ -> ""
 
 
 phoneForm : Form Contact ()
@@ -65,10 +81,20 @@ phoneForm =
             , combine = \formState -> Phone (countryCode.value formState) (number.value formState)
             }
         )
-        |> field (integerInput [])
-        |> field (integerInput [])
+        |> field countryCode_ (integerInput [])
+        |> field number_ (integerInput [])
 
+countryCode_ : Contact -> Int
+countryCode_ c =
+    case c of
+        Email _ -> 0
+        Phone cc _ -> cc
 
+number_ : Contact -> Int
+number_ c =
+    case c of
+        Email _ -> 0
+        Phone _ n -> n
 
 view model =
     div []
@@ -84,9 +110,11 @@ view model =
             ]
         ]
 
+default =
+    Phone 1 42234711
 
 init =
-    { formState = Form.init myForm }
+    { formState = Form.init myForm (Just default) }
 
 
 update : Msg -> Model -> Model
