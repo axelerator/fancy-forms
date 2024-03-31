@@ -74,9 +74,12 @@ myForm =
                 }
             }
         )
-        |> field (integerInput [] |> validate [greaterThan 0])
+        |> field (integerInput [] |> validate [greaterThan 0]) -- |> initWith takeDay)
         |> field (integerInput [] |> validate [greaterThan 0, lesserThan 13])
         |> field (integerInput [] |> validate [greaterThan 1900])
+
+takeDay : Date -> Int
+takeDay { day } = day
 
 
 errorToString : Error MyError -> String

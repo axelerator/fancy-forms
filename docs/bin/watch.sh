@@ -18,4 +18,4 @@ dir=$(dirname $0)/..
 
 $dir/bin/build.sh ../src/Main.elm 
 
-fswatch -x --event Updated $dir/src/** | xargs -n1 -I{} $dir/bin/build.sh {}
+fswatch -x --event Updated $dir/src/** $dir/../src/** | xargs -n1 -I{} $dir/bin/build.sh {}
