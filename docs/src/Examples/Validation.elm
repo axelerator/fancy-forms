@@ -108,7 +108,7 @@ view model =
         , viewDate <| Form.extract myForm model.formState
         ]
 
-init = { formState = Form.init myForm <| Just { day = 1, month = 1, year = 2000 } }
+init = { formState = Form.init myForm { day = 1, month = 1, year = 2000 } }
 
 update : Msg -> Model -> Model
 update msg model =

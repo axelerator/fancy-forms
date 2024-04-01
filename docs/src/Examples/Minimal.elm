@@ -7,7 +7,6 @@ import Html exposing (div, p, text, br)
 import String exposing (fromInt)
 import FancyForms.Form exposing (validate)
 import FancyForms.Widgets.Int exposing (greaterThan)
-import FancyForms.Form exposing (default)
 
 
 type alias Model =
@@ -26,7 +25,7 @@ myForm =
             , combine = \formState -> amount.value formState
             }
         )
-        |> field (default 42) (integerInput [] |> validate [greaterThan 0])
+        |> field identity (integerInput [] |> validate [greaterThan 0])
 
 view model =
     div []
@@ -41,7 +40,7 @@ view model =
         ]
 
 init =
-    { formState = Form.init myForm Nothing }
+    { formState = Form.init myForm 42 }
 
 update : Msg -> Model -> Model
 update msg model =

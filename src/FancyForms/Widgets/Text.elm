@@ -14,7 +14,6 @@ import Html.Attributes exposing (id, value)
 import Html.Events exposing (onBlur, onFocus, onInput)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E exposing (Value)
-import Maybe exposing (withDefault)
 
 
 type Msg
@@ -35,8 +34,9 @@ notBlank model =
 {-| A text input widget -}
 textInput : List (Attribute Msg) -> Widget String Msg String customError
 textInput attrs =
-    { init = withDefault ""
+    { init = identity
     , value = identity
+    , default = ""
     , validate = alwaysValid
     , isConsistent = (\_ -> True)
     , view =

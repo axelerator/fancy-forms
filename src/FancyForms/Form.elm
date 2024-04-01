@@ -4,7 +4,7 @@ module FancyForms.Form exposing
     , listField, FieldWithRemoveButton, ListWithAddButton
     , fieldWithVariants, Variant, Variants
     , toWidget, wrap
-    , default, isConsistentTmp
+    , isConsistentTmp
     )
 
 {-| FancyForms is a library for building forms in Elm. It is designed with the following goals in mind:
@@ -157,10 +157,10 @@ type alias Field a customError =
 mkField : FieldWithErrors customError -> FieldId -> Widget model msg value customError -> Field value customError
 mkField fieldWithErrors fieldId widget =
     let
-        deserializeModel : FormState -> model
+        deserializeModel : FormState -> Maybe model
         deserializeModel formState =
             D.decodeValue widget.decoderModel (read fieldId formState)
-                |> Result.withDefault (widget.init Nothing)
+                |> Result.toMaybe
 
         viewField : FormState -> List (Html Msg)
         viewField ((FormState { parentDomId }) as formState) =
@@ -180,7 +180,8 @@ mkField fieldWithErrors fieldId widget =
                 inputHtml : List (Html Msg)
                 inputHtml =
                     deserializeModel formState
-                        |> widget.view (parentDomId ++ "f-" ++ fieldId)
+                        |> Maybe.map (widget.view (parentDomId ++ "f-" ++ fieldId))
+                        |> Maybe.withDefault [] 
                         |> List.map (Html.map toMsg)
             in
             fieldWithErrors fieldErrors inputHtml
@@ -188,12 +189,14 @@ mkField fieldWithErrors fieldId widget =
         value : FormState -> value
         value formState =
             deserializeModel formState
-                |> widget.value
+                |> Maybe.map widget.value
+                |> Maybe.withDefault widget.default
 
         errors_ : FormState -> List (Error customError)
         errors_ formState =
             deserializeModel formState
-                |> widget.validate
+                |> Maybe.map widget.validate
+                |> Maybe.withDefault []
     in
     { id = fieldId
     , value = value
@@ -228,15 +231,11 @@ debugFormState ((FormState { values }) as fs) =
 
 {-| Initializes a form state with the default values
 -}
-init : Form data customError -> Maybe data -> FormState
-init { defaults, domId, initWithData } mbData =
-    case mbData of
-        Just data ->
-            FormState.init defaults domId
+init : Form data customError -> data -> FormState
+init { domId, initWithData } data =
+            FormState.init Dict.empty domId
                 |> initWithData data
 
-        Nothing ->
-            FormState.init defaults domId
 
 
 type alias FormInternal f customError data =
@@ -245,7 +244,6 @@ type alias FormInternal f customError data =
     , updates : Dict FieldId (SubfieldId -> FieldOperation -> Value -> ( Value, Effect ))
     , fieldWithErrors : FieldWithErrors customError
     , validator : Validator data customError
-    , defaults : Dict FieldId Value
     , blur : FormState -> FormState
     , domId : DomId
     , isConsistent : FormState -> Bool
@@ -260,13 +258,11 @@ isConsistentTmp { isConsistent } formState =
 
 extractConsistencyCheck : Widget model msg value customError -> FieldId -> FormState -> Bool
 extractConsistencyCheck widget fieldId formState =
-    let
-        model =
-            read fieldId formState
-                |> D.decodeValue widget.decoderModel
-                |> Result.withDefault (widget.init Nothing)
-    in
-    widget.isConsistent model && (List.isEmpty <| widget.validate model)
+        read fieldId formState
+            |> D.decodeValue widget.decoderModel
+            |> Result.map (\model -> widget.isConsistent model && (List.isEmpty <| widget.validate model))
+            |> Result.withDefault False
+    
 
 
 extendConsistencyCheck : (FormState -> Bool) -> (FormState -> Bool) -> FormState -> Bool
@@ -284,7 +280,8 @@ extractInit widget fieldId valueExtractor formModel formState =
 
         encodedValue : Value
         encodedValue =
-            widget.encodeModel <| widget.init <| Just value
+            widget.init value
+            |> widget.encodeModel 
     in
     write fieldId SingleValue formState encodedValue
 
@@ -298,10 +295,9 @@ extractListInit widget fieldId valueExtractor formModel formState =
 
         encodedValues : List Value
         encodedValues =
-            List.map widget.encodeModel <|
-                List.map widget.init <|
-                    List.map Just <|
-                        Debug.log "extractListInit" values
+            values
+            |> List.map widget.init 
+            |> List.map widget.encodeModel
 
         encodedListValue : Value
         encodedListValue =
@@ -333,10 +329,10 @@ extractVariantInit variantsWithWidgets fieldId valueExtractor formModel formStat
 
         encodedValue : Value
         encodedValue =
-            variantWidgetInit variantName variantsWithWidgets variantNameExtractor (Just value)
+            variantWidgetInit variantsWithWidgets variantNameExtractor value
             |> FormState.formStateEncode
     in
-    write fieldId SingleValue formState encodedValue
+    debugFormState <| write fieldId SingleValue formState encodedValue
 
 
 extendInit : (data -> FormState -> FormState) -> (data -> FormState -> FormState) -> data -> FormState -> FormState
@@ -393,7 +389,6 @@ form domId validator fieldWithErrors fn =
     , updates = Dict.empty
     , fieldWithErrors = fieldWithErrors
     , validator = validator
-    , defaults = Dict.empty
     , blur = blurAll
     , domId = domId
     , isConsistent = \_ -> True
@@ -413,7 +408,7 @@ field :
     -> Widget widgetModel msg value customError
     -> FormInternal (Field value customError -> c) customError data
     -> FormInternal c customError data
-field extractDefault widget { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId, isConsistent, initWithData } =
+field extractDefault widget { fn, count, updates, fieldWithErrors, validator, blur, domId, isConsistent, initWithData } =
     let
         fieldId =
             fromInt count
@@ -423,11 +418,10 @@ field extractDefault widget { fn, count, updates, fieldWithErrors, validator, de
     , updates =
         Dict.insert
             fieldId
-            (encodedUpdate widget)
+            (encodedUpdate widget Nothing)
             updates
     , fieldWithErrors = fieldWithErrors
     , validator = validator
-    , defaults = Dict.insert fieldId (widget.encodeModel (widget.init Nothing)) defaults
     , blur = blur >> blurChildren fieldId widget
     , domId = domId
     , isConsistent = extendConsistencyCheck isConsistent (extractConsistencyCheck widget fieldId)
@@ -470,7 +464,7 @@ fieldWithVariants :
     -> (data -> ( String, data ))
     -> FormInternal (Field data customError -> c) customError data
     -> FormInternal c customError data
-fieldWithVariants variantSelector defaultVariant otherVariants extractDefault { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId, isConsistent, initWithData } =
+fieldWithVariants variantSelector defaultVariant otherVariants extractDefault { fn, count, updates, fieldWithErrors, validator, blur, domId, isConsistent, initWithData } =
     let
         toWidgetVariant ( n, f ) =
             ( n, toWidget f )
@@ -503,11 +497,10 @@ fieldWithVariants variantSelector defaultVariant otherVariants extractDefault { 
     , updates =
         Dict.insert
             fieldId
-            (encodedUpdate widget)
+            (encodedUpdate widget Nothing)
             updates
     , fieldWithErrors = fieldWithErrors
     , validator = validator
-    , defaults = Dict.insert fieldId (widget.encodeModel (widget.init Nothing)) defaults
     , blur = blur >> blurChildren fieldId widget
     , domId = domId
     , isConsistent = extendConsistencyCheck isConsistent (extractConsistencyCheck widget fieldId)
@@ -622,6 +615,7 @@ The third argument is the widget to use for each element in the list.
 listField :
     ListWithAddButton Msg
     -> FieldWithRemoveButton Msg
+    -> value
     -> (data -> List value)
     -> Widget model msg value customError
     ->
@@ -631,7 +625,6 @@ listField :
             , updates : Dict String (SubfieldId -> FieldOperation -> Value -> ( Value, Effect ))
             , fieldWithErrors : FieldWithErrors customError
             , validator : e
-            , defaults : Dict String Value
             , blur : c -> FormState
             , domId : DomId
             , isConsistent : FormState -> Bool
@@ -643,13 +636,12 @@ listField :
         , updates : Dict String (SubfieldId -> FieldOperation -> Value -> ( Value, Effect ))
         , fieldWithErrors : FieldWithErrors customError
         , validator : e
-        , defaults : Dict String Value
         , blur : c -> FormState
         , domId : DomId
         , isConsistent : FormState -> Bool
         , initWithData : data -> FormState -> FormState
         }
-listField listWithAddButton fieldWithRemoveButton extractDefault widget { fn, count, updates, fieldWithErrors, validator, defaults, blur, domId, isConsistent, initWithData } =
+listField listWithAddButton fieldWithRemoveButton template extractDefault widget { fn, count, updates, fieldWithErrors, validator, blur, domId, isConsistent, initWithData } =
     let
         fieldId =
             fromInt count
@@ -659,11 +651,10 @@ listField listWithAddButton fieldWithRemoveButton extractDefault widget { fn, co
     , updates =
         Dict.insert
             (fromInt count)
-            (encodedUpdate widget)
+            (encodedUpdate widget (Just template))
             updates
     , fieldWithErrors = fieldWithErrors
     , validator = validator
-    , defaults = Dict.insert fieldId (E.list widget.encodeModel [ widget.init Nothing ]) defaults
     , blur = blur >> blurChildren fieldId widget
     , domId = domId
     , isConsistent = extendConsistencyCheck isConsistent (extractConsistencyCheck widget fieldId)
@@ -688,11 +679,12 @@ wrap widget container =
 
 encodedUpdate :
     Widget model msg value customError
+    -> Maybe value
     -> SubfieldId
     -> FieldOperation
     -> Value
     -> ( Value, Effect )
-encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId operation modelVal =
+encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) mbTemplate subfieldId operation modelVal =
     let
         decodeSubfield =
             case subfieldId of
@@ -709,7 +701,7 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
 
                 ArrayElement i ->
                     D.decodeValue (D.list decoderModel) modelVal
-                        |> Result.withDefault (List.repeat (i + 1) (widget.init Nothing))
+                        |> Result.withDefault []
                         |> List.indexedMap
                             (\idx e ->
                                 if idx == i then
@@ -726,7 +718,7 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
                 |> Result.withDefault []
                 |> (\list ->
                         list
-                            ++ [ widget.init Nothing ]
+                            ++ [ widget.init <| withDefault widget.default mbTemplate ]
                             |> E.list encodeModel
                    )
             , WasChanged
@@ -754,7 +746,7 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
                 ( Ok msg, e ) ->
                     let
                         updateResult =
-                            widget.update msg (widget.init Nothing)
+                            widget.update msg (widget.init (Debug.todo "???2"))
                     in
                     ( encodeSubfield updateResult.model
                     , updateResult.effect
@@ -788,6 +780,7 @@ toWidget f =
             in
             init f data
     , value = \formState -> f.fn.combine formState
+    , default = f.fn.combine <| FormState.init Dict.empty ""
     , validate =
         \formState -> widgetErrors formState
     , isConsistent = f.isConsistent

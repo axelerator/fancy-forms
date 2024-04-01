@@ -111,10 +111,10 @@ view model =
         ]
 
 default =
-    Phone 1 42234711
+    Phone 1 1234
 
 init =
-    { formState = Form.init myForm (Just default) }
+    { formState = Form.init myForm default }
 
 
 update : Msg -> Model -> Model

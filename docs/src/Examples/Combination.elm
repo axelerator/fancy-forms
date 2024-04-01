@@ -14,7 +14,6 @@ import Examples.Validation exposing (MyError)
 import Html exposing (hr)
 import String exposing (fromInt)
 import Html exposing (br)
-import FancyForms.Form exposing (default)
 
 
 type alias Model =
@@ -52,8 +51,8 @@ myForm =
                     }
             }
         )
-        |> field (default emptyLogin) loginInput
-        |> field (default defaultDate) (dateInput |> withLabel "birthday")
+        |> field .login loginInput
+        |> field .birthday (dateInput |> withLabel "birthday")
 
 
 view model =
@@ -80,7 +79,7 @@ view model =
 
 
 init =
-    { formState = Form.init myForm (Just formDefaults) }
+    { formState = Form.init myForm formDefaults }
 
 formDefaults =
     { login = emptyLogin

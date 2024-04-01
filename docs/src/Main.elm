@@ -178,13 +178,11 @@ view model =
         , SH.useTheme SH.monokai
         , a [name "top"] []
         , viewToc
-        {-
         , viewMinimal model
         , viewValidation model
         , viewDecoration model
         , viewCombination model
         , viewLists model
-        -}
         , viewVariants model
         ]
 

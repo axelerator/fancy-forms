@@ -220,7 +220,8 @@ withFocus model =
 {-| A widget that can be used to create a form field.
 -}
 type alias Widget model msg value customError =
-    { init : Maybe value -> model
+    { init : value -> model
+    , default : value
     , value : model -> value
     , validate : Validator model customError
     , isConsistent : model -> Bool
@@ -401,7 +402,7 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
 
                 ArrayElement i ->
                     D.decodeValue (D.list decoderModel) modelVal
-                        |> Result.withDefault (List.repeat (i + 1) (widget.init Nothing))
+                        |> Result.withDefault []
                         |> List.indexedMap
                             (\idx e ->
                                 if idx == i then
@@ -418,7 +419,7 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
                 |> Result.withDefault []
                 |> (\list ->
                         list
-                            ++ [ widget.init Nothing ]
+                            ++ [ widget.init <| Debug.todo "needs template object" ]
                             |> E.list encodeModel
                    )
 
@@ -434,7 +435,7 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
                     widget.update msg model |> .model |> encodeSubfield
 
                 ( Ok msg, _ ) ->
-                    widget.update msg (widget.init Nothing) |> .model |> encodeSubfield
+                    modelVal
 
                 _ ->
                     modelVal
@@ -453,7 +454,7 @@ blurChildren fieldId widget ((FormState ({ values } as formState)) as fs) =
                 |> D.decodeValue widget.decoderModel
                 |> Result.map widget.blur
                 |> Result.map widget.encodeModel
-                |> Result.withDefault (widget.encodeModel (widget.init Nothing))
+                |> Result.withDefault E.null
     in
     FormState
         { formState

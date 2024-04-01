@@ -26,11 +26,16 @@ variantWidget :
     -> Widget Model Msg value customError
 variantWidget variantSelector variantNameExtractor defaultVariantName variantWidgets =
     -- TODO: init from given value
-    { init = \v -> variantWidgetInit (withDefault defaultVariantName <| Maybe.map variantNameExtractor v) variantWidgets variantNameExtractor v
+    { init = \v -> 
+        variantWidgetInit 
+            variantWidgets 
+            variantNameExtractor 
+            v
     , value = selectedValue variantSelector variantWidgets
+    , default = List.Nonempty.head variantWidgets |> Tuple.second |> .default
     , validate = alwaysValid -- Delegate: Include validation result of currently selected variant
     , isConsistent = \_ -> True
-    , view = view variantSelector (List.Nonempty.toList variantWidgets)
+    , view = view defaultVariantName variantSelector (List.Nonempty.toList variantWidgets)
     , update = \msg model -> update variantSelector variantWidgets msg model |> justChanged
     , encodeMsg = encodeMsg
     , decoderMsg = decoderMsg
@@ -125,18 +130,17 @@ encodeMsg msg =
 
 
 variantWidgetInit :
-    String
-    -> ListNonempty ( String, Widget widgetModel msg2 value customError )
+    ListNonempty ( String, Widget widgetModel msg2 value customError )
     -> (value -> String)
-    -> Maybe value
+    -> value
     -> Model
-variantWidgetInit default variantWidgets extractVariantName mbValue =
+variantWidgetInit variantWidgets extractVariantName value_ =
     let
         values =
-            Dict.singleton selectorFieldId (E.string <| withDefault default <| Maybe.map extractVariantName mbValue)
+            Dict.singleton selectorFieldId (E.string <| extractVariantName value_)
 
         variantInit ( variantName, variantW ) dict =
-            variantW.init mbValue
+            variantW.init value_
                 |> variantW.encodeModel
                 |> (\v -> Dict.insert variantName v dict)
 
@@ -152,23 +156,14 @@ selectorFieldId =
     "selectorValue"
 
 
-deserializeModel :
-    Widget String msg String customError
+value :
+    String
+    -> Widget String msg String customError
     -> FormState
     -> String
-deserializeModel widget formState =
+value defaultVariantName widget formState =
     D.decodeValue widget.decoderModel (read selectorFieldId formState)
-        |> Result.toMaybe
-        |> withDefault (widget.init Nothing)
-
-
-value :
-    Widget String msg String customError
-    -> Model
-    -> String
-value widget state =
-    deserializeModel widget state
-        |> widget.value
+        |> Result.withDefault defaultVariantName
 
 
 selectedValue :
@@ -178,8 +173,9 @@ selectedValue :
     -> value
 selectedValue variantSelectWidget variantWidgets model =
     let
+        defaultVariantName = List.Nonempty.head variantWidgets |> Tuple.first
         selectedVariantName =
-            value variantSelectWidget model
+            value defaultVariantName variantSelectWidget model
 
         selectedWidget =
             variantWidgets
@@ -191,20 +187,21 @@ selectedValue variantSelectWidget variantWidgets model =
     read selectedVariantName model
         |> D.decodeValue selectedWidget.decoderModel
         |> Result.map selectedWidget.value
-        |> Result.withDefault (selectedWidget.value (selectedWidget.init Nothing))
+        |> Result.withDefault (selectedWidget.default)
 
 
 view :
-    Widget String msg String customError
+    String
+    -> Widget String msg String customError
     -> List ( String, Widget widgetModel msg2 value customError )
     -> DomId
     -> Model
     -> List (Html Msg)
-view variantSelectWidget variantWidgets domId model =
+view defaultVariantName variantSelectWidget variantWidgets domId model =
     let
         selectedVariantName : String
         selectedVariantName =
-            value variantSelectWidget model
+            value defaultVariantName variantSelectWidget model
 
         variantSelectorHtml : List (Html Msg)
         variantSelectorHtml =

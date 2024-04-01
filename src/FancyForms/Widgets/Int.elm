@@ -63,11 +63,9 @@ lesserThan x { parsedValue } =
 -}
 integerInput : List (Attribute Msg) -> Widget Model Msg Int customError
 integerInput attrs =
-    { init =
-        \x ->
-            Maybe.map (\i -> { value = fromInt i, parsedValue = i }) x
-                |> withDefault { value = "0", parsedValue = 0 }
+    { init = \i ->{ value = fromInt i, parsedValue = i }
     , value = .parsedValue
+    , default = 0
     , validate = alwaysValid
     , isConsistent = \{ parsedValue, value } -> String.toInt value == Just parsedValue
     , view =

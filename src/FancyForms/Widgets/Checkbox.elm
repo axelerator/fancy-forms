@@ -24,6 +24,7 @@ checkbox : Widget Bool Msg Bool customError
 checkbox =
     { init = (\value -> withDefault False value)
     , value = identity
+    , default = False
     , validate = alwaysValid
     , isConsistent = (\_ -> True)
     , view =

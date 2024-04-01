@@ -1,6 +1,6 @@
 module Examples.Decoration exposing (..)
 
-import FancyForms.Form as Form exposing (Form, field, default)
+import FancyForms.Form as Form exposing (Form, field)
 import FancyForms.FormState exposing (FormState, Widget, alwaysValid)
 import FancyForms.Widgets.Text exposing (textInput)
 import Html exposing (div, p, text)
@@ -55,8 +55,8 @@ myForm =
                     }
             }
         )
-        |> field (default "") (textInputWithLabel "username")
-        |> field (default "") (textInput [ type_ "password" ] |> withLabel "password")
+        |> field .username (textInputWithLabel "username")
+        |> field .password (textInput [ type_ "password" ] |> withLabel "password")
 
 
 view model =
@@ -72,8 +72,12 @@ view model =
 
 
 init =
-    { formState = Form.init myForm Nothing }
+    { formState = Form.init myForm default }
 
+default =
+    { username = ""
+    , password = ""
+    }
 
 update : Msg -> Model -> Model
 update msg model =

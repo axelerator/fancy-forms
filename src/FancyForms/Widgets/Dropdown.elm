@@ -11,6 +11,7 @@ import Json.Decode as D
 import Json.Encode as E
 import Maybe exposing (withDefault)
 import List.Nonempty exposing (ListNonempty)
+import Html.Attributes exposing (selected)
 
 
 type alias Msg =
@@ -20,11 +21,8 @@ type alias Msg =
 type alias Model =
     String
 
-init : Variants a -> Maybe a -> Model
-init variants initValue =
-    case initValue of
-        Nothing -> List.Nonempty.head variants |> .id
-        Just v ->
+init : Variants a -> a -> Model
+init variants v =
             List.Nonempty.filter (\{ value } -> value == v) variants
                 |> List.head
                 |> Maybe.map .id
@@ -34,9 +32,10 @@ init variants initValue =
     variants.
 -}
 dropdown : Variants a -> Widget String Msg a customError
-dropdown (( default, _ ) as variants) =
+dropdown variants =
     { init = init variants
     , value = fromString variants
+    , default = List.Nonempty.head variants |> .value
     , validate = alwaysValid
     , isConsistent = (\_ -> True)
     , view = view variants
@@ -70,11 +69,11 @@ all ( first, others ) =
 view : Variants a -> DomId -> Model -> List (Html Msg)
 view variants _ selectedId =
     let
-        selected =
+        selectedValue =
             fromString variants selectedId
 
         opt { id, label, value } =
-            option [ Html.Attributes.value id, checked <| selected == value ] [ text label ]
+            option [ Html.Attributes.value id, selected <| selectedValue == value ] [ text label ]
     in
     [ select
         [ class "dropdown", onInput identity ]

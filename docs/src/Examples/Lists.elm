@@ -19,16 +19,21 @@ type Msg
 myForm : Form (List String) ()
 myForm =
     Form.form "lists-example"
-        alwaysValid
         -- no custom validations
-        (\_ html -> html)
+        alwaysValid
         -- omitting errors for brevity
+        (\_ html -> html)
         (\todos ->
             { view = \formState _ -> todos.view formState
             , combine = \formState -> todos.value formState
             }
         )
-        |> listField listWithAddButton fieldWithRemoveButton identity  (textInput [])
+        |> listField
+            listWithAddButton
+            fieldWithRemoveButton
+            "a new todo"
+            identity
+            (textInput [])
 
 
 fieldWithRemoveButton removeMsg input =
@@ -56,7 +61,7 @@ view model =
 
 
 init =
-    { formState = Form.init myForm <| Just ["yay!"]}
+    { formState = Form.init myForm [ "yay!" ] }
 
 
 update : Msg -> Model -> Model
