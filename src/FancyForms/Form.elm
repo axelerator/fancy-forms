@@ -4,7 +4,7 @@ module FancyForms.Form exposing
     , listField, FieldWithRemoveButton, ListWithAddButton
     , fieldWithVariants, Variant, Variants
     , toWidget, wrap
-    , isConsistentTmp
+    , isValid
     )
 
 {-| FancyForms is a library for building forms in Elm. It is designed with the following goals in mind:
@@ -19,12 +19,12 @@ module FancyForms.Form exposing
 
 # Definition
 
-@docs Form, form, FieldWithErrors, validate, field
+@docs Form, form, field, isValid, validate, FieldWithErrors
 
 
 # Wiring
 
-@docs Msg, update, extract, init, render
+@docs Msg, init, update, render, extract
 
 
 # List fields
@@ -44,8 +44,8 @@ module FancyForms.Form exposing
 -}
 
 import Dict exposing (Dict)
-import FancyForms.FormState as FormState exposing (DomId, Effect(..), Error, FieldId, FieldOperation(..), FieldStatus(..), FormState(..), SubfieldId(..), Validator, Widget, blurAll, blurChildren, formStateDecoder, formStateEncode, justChanged, read, updateFieldStatus, wasAtLeast, write)
-import FancyForms.Widgets.VariantSelect exposing (variantWidget)
+import FancyForms.FormState as FormState exposing (DomId, Effect(..), Error(..), FieldId, FieldOperation(..), FieldStatus(..), FormState(..), SubfieldId(..), Validator, Widget, blurAll, blurChildren, formStateDecoder, formStateEncode, justChanged, read, updateFieldStatus, wasAtLeast, write)
+import FancyForms.Widgets.VariantSelect exposing (variantWidget, variantWidgetInit)
 import Html exposing (Html)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E exposing (Value)
@@ -53,7 +53,6 @@ import List.Nonempty exposing (ListNonempty)
 import Maybe exposing (withDefault)
 import String exposing (fromInt, toInt)
 import Tuple
-import FancyForms.Widgets.VariantSelect exposing (variantWidgetInit)
 
 
 {-| The message type for the form.
@@ -82,8 +81,18 @@ render : (Msg -> msg) -> Form a customError -> FormState -> List (Html msg)
 render toMsg form_ formState =
     form_.fn.combine formState
         |> form_.validator
+        |> addInvalidIfInconsistent form_ formState
         |> form_.fn.view formState
         |> List.map (Html.map toMsg)
+
+
+addInvalidIfInconsistent : Form a customError -> FormState -> List (Error customError) -> List (Error customError)
+addInvalidIfInconsistent form_ formState errors =
+    if form_.isConsistent formState then
+        errors
+
+    else
+        NotValid :: errors
 
 
 
@@ -181,7 +190,7 @@ mkField fieldWithErrors fieldId widget =
                 inputHtml =
                     deserializeModel formState
                         |> Maybe.map (widget.view (parentDomId ++ "f-" ++ fieldId))
-                        |> Maybe.withDefault [] 
+                        |> Maybe.withDefault []
                         |> List.map (Html.map toMsg)
             in
             fieldWithErrors fieldErrors inputHtml
@@ -233,9 +242,8 @@ debugFormState ((FormState { values }) as fs) =
 -}
 init : Form data customError -> data -> FormState
 init { domId, initWithData } data =
-            FormState.init Dict.empty domId
-                |> initWithData data
-
+    FormState.init Dict.empty domId
+        |> initWithData data
 
 
 type alias FormInternal f customError data =
@@ -258,11 +266,10 @@ isConsistentTmp { isConsistent } formState =
 
 extractConsistencyCheck : Widget model msg value customError -> FieldId -> FormState -> Bool
 extractConsistencyCheck widget fieldId formState =
-        read fieldId formState
-            |> D.decodeValue widget.decoderModel
-            |> Result.map (\model -> widget.isConsistent model && (List.isEmpty <| widget.validate model))
-            |> Result.withDefault False
-    
+    read fieldId formState
+        |> D.decodeValue widget.decoderModel
+        |> Result.map (\model -> widget.isConsistent model && (List.isEmpty <| widget.validate model))
+        |> Result.withDefault False
 
 
 extendConsistencyCheck : (FormState -> Bool) -> (FormState -> Bool) -> FormState -> Bool
@@ -281,7 +288,7 @@ extractInit widget fieldId valueExtractor formModel formState =
         encodedValue : Value
         encodedValue =
             widget.init value
-            |> widget.encodeModel 
+                |> widget.encodeModel
     in
     write fieldId SingleValue formState encodedValue
 
@@ -296,8 +303,8 @@ extractListInit widget fieldId valueExtractor formModel formState =
         encodedValues : List Value
         encodedValues =
             values
-            |> List.map widget.init 
-            |> List.map widget.encodeModel
+                |> List.map widget.init
+                |> List.map widget.encodeModel
 
         encodedListValue : Value
         encodedListValue =
@@ -309,28 +316,30 @@ extractListInit widget fieldId valueExtractor formModel formState =
 extractVariantInit :
     List.Nonempty.ListNonempty ( String, Widget model msg value customError )
     -> FieldId
-    -> (value -> (String, value))
+    -> (value -> ( String, value ))
     -> value
     -> FormState
     -> FormState
 extractVariantInit variantsWithWidgets fieldId valueExtractor formModel formState =
     let
-        (variantName, value) =
+        ( variantName, value ) =
             valueExtractor formModel
-        _ = Debug.log "extractVariantInit" (variantName, value)
+
+        _ =
+            Debug.log "extractVariantInit" ( variantName, value )
 
         variantNameExtractor : value -> String
         variantNameExtractor v =
             let
-                (variantName_, _) = valueExtractor v
+                ( variantName_, _ ) =
+                    valueExtractor v
             in
             variantName_
-            
 
         encodedValue : Value
         encodedValue =
             variantWidgetInit variantsWithWidgets variantNameExtractor value
-            |> FormState.formStateEncode
+                |> FormState.formStateEncode
     in
     debugFormState <| write fieldId SingleValue formState encodedValue
 
@@ -482,6 +491,7 @@ fieldWithVariants variantSelector defaultVariant otherVariants extractDefault { 
 
         fieldId =
             fromInt count
+
         variantNameExtractor data =
             extractDefault data |> Tuple.first
 
@@ -899,3 +909,12 @@ concatValidators validators model =
 extract : Form data customError -> FormState -> data
 extract { fn } =
     fn.combine
+
+{-| Returns true if the data entered in the form is valid
+-}
+isValid : Form data customError -> FormState -> Bool
+isValid ({ fn, validator } as form_) formState =
+    fn.combine formState
+        |> validator
+        |> addInvalidIfInconsistent form_ formState
+        |> List.isEmpty 

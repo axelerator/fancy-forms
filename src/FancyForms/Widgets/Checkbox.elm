@@ -1,8 +1,9 @@
 module FancyForms.Widgets.Checkbox exposing (checkbox)
-{-|
-    Checkbox widget
 
-    @docs checkbox
+{-| Checkbox widget
+
+@docs checkbox
+
 -}
 
 import FancyForms.Form exposing (Msg)
@@ -12,21 +13,21 @@ import Html.Attributes exposing (checked, id, type_)
 import Html.Events exposing (onInput)
 import Json.Decode as D
 import Json.Encode as E
-import Maybe exposing (withDefault)
 
 
 type alias Msg =
     ()
 
 
-{-| A checkbox widget the collects a `Bool` value -}
+{-| A checkbox widget the collects a `Bool` value
+-}
 checkbox : Widget Bool Msg Bool customError
 checkbox =
-    { init = (\value -> withDefault False value)
+    { init = identity
     , value = identity
     , default = False
     , validate = alwaysValid
-    , isConsistent = (\_ -> True)
+    , isConsistent = \_ -> True
     , view =
         \domId model ->
             [ input [ id domId, type_ "checkbox", onInput (\_ -> ()), checked model ] [] ]

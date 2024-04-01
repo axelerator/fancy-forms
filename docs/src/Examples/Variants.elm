@@ -1,6 +1,6 @@
 module Examples.Variants exposing (..)
 
-import FancyForms.Form as Form exposing (Form, field, fieldWithVariants, toWidget)
+import FancyForms.Form as Form exposing (Form, field, fieldWithVariants)
 import FancyForms.FormState exposing (FormState, alwaysValid)
 import FancyForms.Widgets.Dropdown exposing (dropdown)
 import FancyForms.Widgets.Int exposing (integerInput)
@@ -22,11 +22,14 @@ type Contact
     = Email String
     | Phone Int Int
 
+
 myForm : Form Contact ()
 myForm =
     Form.form "variant-example"
-        alwaysValid -- no custom validations
-        (\errors_ html -> html) -- omitting errors for brevity
+        alwaysValid
+        -- no custom validations
+        (\errors_ html -> html)
+        -- omitting errors for brevity
         (\contact ->
             { view = \formState _ -> contact.view formState
             , combine = \formState -> contact.value formState
@@ -37,20 +40,24 @@ myForm =
             [ ( "phone", phoneForm ) ]
             fromForm
 
-fromForm : Contact -> (String, Contact)
+
+fromForm : Contact -> ( String, Contact )
 fromForm c =
-    let
-      tf =  case c of
-            Email _ -> ("email", c)
-            Phone _ _ -> ("phone", c)
-    in
-        Debug.log "tf" tf
+    case c of
+        Email _ ->
+            ( "email", c )
+
+        Phone _ _ ->
+            ( "phone", c )
+
 
 emailForm : Form Contact ()
 emailForm =
     Form.form "email-form"
-        alwaysValid -- no custom validations
-        (\errors_ html -> html) -- omitting errors for brevity
+        alwaysValid
+        -- no custom validations
+        (\errors_ html -> html)
+        -- omitting errors for brevity
         (\email ->
             { view = \formState _ -> email.view formState
             , combine = \formState -> Email <| email.value formState
@@ -58,18 +65,24 @@ emailForm =
         )
         |> field email_ (textInput [])
 
+
 email_ : Contact -> String
 email_ c =
     case c of
-        Email email -> email
-        Phone _ _ -> ""
+        Email email ->
+            email
+
+        Phone _ _ ->
+            ""
 
 
 phoneForm : Form Contact ()
 phoneForm =
     Form.form "email-form"
-        alwaysValid -- no custom validations
-        (\errors_ html -> html) -- omitting errors for brevity
+        alwaysValid
+        -- no custom validations
+        (\errors_ html -> html)
+        -- omitting errors for brevity
         (\countryCode number ->
             { view =
                 \formState _ ->
@@ -84,17 +97,26 @@ phoneForm =
         |> field countryCode_ (integerInput [])
         |> field number_ (integerInput [])
 
+
 countryCode_ : Contact -> Int
 countryCode_ c =
     case c of
-        Email _ -> 0
-        Phone cc _ -> cc
+        Email _ ->
+            0
+
+        Phone cc _ ->
+            cc
+
 
 number_ : Contact -> Int
 number_ c =
     case c of
-        Email _ -> 0
-        Phone _ n -> n
+        Email _ ->
+            0
+
+        Phone _ n ->
+            n
+
 
 view model =
     div []
@@ -110,8 +132,10 @@ view model =
             ]
         ]
 
+
 default =
     Phone 1 1234
+
 
 init =
     { formState = Form.init myForm default }

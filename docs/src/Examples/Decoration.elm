@@ -1,13 +1,11 @@
 module Examples.Decoration exposing (..)
 
+import Examples.Validation exposing (MyError)
 import FancyForms.Form as Form exposing (Form, field)
 import FancyForms.FormState exposing (FormState, Widget, alwaysValid)
 import FancyForms.Widgets.Text exposing (textInput)
-import Html exposing (div, p, text)
-import Html.Attributes exposing (type_)
-import Html exposing (label)
-import Html.Attributes exposing (for)
-import Examples.Validation exposing (MyError)
+import Html exposing (div, label, p, text)
+import Html.Attributes exposing (for, type_)
 
 
 type alias Model =
@@ -23,8 +21,10 @@ type alias Login =
     , password : String
     }
 
+
 contentWithLabel labelText domId content =
     label [ for domId ] [ text labelText ] :: content
+
 
 withLabel :
     String
@@ -33,8 +33,10 @@ withLabel :
 withLabel labelText wrapped =
     Form.wrap wrapped <| contentWithLabel labelText
 
+
 textInputWithLabel labelText =
     textInput [] |> withLabel labelText
+
 
 myForm : Form Login MyError
 myForm =
@@ -74,10 +76,12 @@ view model =
 init =
     { formState = Form.init myForm default }
 
+
 default =
     { username = ""
     , password = ""
     }
+
 
 update : Msg -> Model -> Model
 update msg model =

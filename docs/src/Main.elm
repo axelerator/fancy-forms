@@ -18,8 +18,8 @@ import FancyForms.FormState as FormState exposing (Error(..), FormState, Widget,
 import FancyForms.Widgets.Dropdown exposing (dropdown)
 import FancyForms.Widgets.Int exposing (greaterThan, integerInput)
 import FancyForms.Widgets.Text exposing (notBlank, textInput)
-import Html exposing (Html, a, article, button, div, footer, h3, label, text, textarea)
-import Html.Attributes exposing (class, classList, for, name, spellcheck, start, style, value)
+import Html exposing (Html, a, article, br, button, div, footer, h2, h3, header, label, li, section, small, text, textarea, ul)
+import Html.Attributes exposing (class, classList, for, href, name, spellcheck, start, style, value)
 import Html.Events exposing (onClick, onInput)
 import Html.Lazy
 import Json.Decode as Decode
@@ -27,14 +27,6 @@ import Markdown
 import Parser
 import Set exposing (Set)
 import SyntaxHighlight as SH
-import Html exposing (li)
-import Html.Attributes exposing (href)
-import Html exposing (br)
-import Html exposing (small)
-import Html exposing (ul)
-import Html exposing (header)
-import Html exposing (section)
-import Html exposing (h2)
 
 
 type alias Model =
@@ -113,8 +105,6 @@ init _ =
     )
 
 
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -173,10 +163,10 @@ styles =
 
 view : Model -> Html Msg
 view model =
-    Html.main_ [class "container-fluid"]
+    Html.main_ [ class "container-fluid" ]
         [ styles
         , SH.useTheme SH.monokai
-        , a [name "top"] []
+        , a [ name "top" ] []
         , viewToc
         , viewMinimal model
         , viewValidation model
@@ -192,12 +182,6 @@ isExpanded example model =
     Set.member (exampleAsStr example) model.expanded
 
 
-
-
-
-
-
-
 minimalMarkdown =
     """
 A form is declared by calling [`Form.form`](https://package.elm-lang.org/packages/axelerator/fancy-forms/1.0.0/FancyForms-Form#form)
@@ -209,6 +193,7 @@ So this form declares a form that collects an `Int` from the user and doesn't ha
 (it usese the unit type `()` as the `error` type parameter).
 
 To track the state of the form we add a `FormState` field to our model and a `Msg` variant to modify it.
+We use the `Form.init` function to create the inital `FormState` with the values we want the form to start with.
 
 The second argument to the form is a function that receives an argument for each field.
 It returns a record with two fields: `view` and `combine`.
@@ -241,37 +226,37 @@ partial model example start end =
 examples =
     [ { example = Minimal
       , code = Minimal.code
-      , range = ( 13, 48 )
+      , range = ( 12, 48 )
       , title = "Getting started"
       , subTitle = "The simplest possible form"
       }
     , { example = Validation
       , code = Validation.code
-      , range = ( 16, 77 )
+      , range = ( 16, 90 )
       , title = "Validations"
       , subTitle = "How to add validations to individual fields and entire forms"
       }
     , { example = Decoration
       , code = Decoration.code
-      , range = ( 20, 59 )
+      , range = ( 19, 61 )
       , title = "Decoration/Wrapping of input widgets"
       , subTitle = "Controlling markup of fields without changing widgets"
       }
     , { example = Combination
       , code = Combination.code
-      , range = ( 27, 56 )
+      , range = ( 19, 53 )
       , title = "Combination: Reusing forms by combining them"
       , subTitle = "How to turn forms into input widgets"
       }
     , { example = Lists
       , code = Lists.code
-      , range = ( 19, 44 )
+      , range = ( 19, 48 )
       , title = "Lists"
       , subTitle = "How to add repeatable elements to a form"
       }
     , { example = Variants
       , code = Variants.code
-      , range = ( 21, 69 )
+      , range = ( 13, 41 )
       , title = "Variants"
       , subTitle = "Letting the user choose between multiple sub forms"
       }
@@ -291,7 +276,7 @@ validationMarkdown =
 Sometimes whether the data in the form is valid or not can't be determined
 based on the input of a single field.
 
-The first argument (`line 56`) to the `form` call is a function that returns errors based on
+The first argument to the `form` call is a function that returns errors based on
 what would otherwise be returned as data from the **entire form**.
 
 In this example we make sure that the selected day is in the correct range. To do so
@@ -299,7 +284,10 @@ we need to know which month and year the user has selected.
 
 To display the errors that that occurr "per-form" we use the **second** argument that gets passed into our
 `view` function. They are a `List (Error MyError)` and we have to convert them into human readable Html and
-place them somewhere in our view (`line 60,64`)
+place them somewhere in our view
+
+To assess whether to for example submit the value entered by the user we can use
+the `isValid` predicate. This will return `False` if any of the forms or it's fields have an error.
 
 #### Per-field validation
 
@@ -307,7 +295,7 @@ Per-field validations validate the input independently of the other fields
 and display an error next to the input widget of that field.
 
 The the widgets that get passed into the `field` declaration can optionally recieve
-additional validations (`lines 66-68`) by calling the `validate` function with a list of functions that validate
+additional validations by calling the `validate` function with a list of functions that validate
 inputs for that specific widget type.
 
 Here we use the `greaterThan` validator to ensure that the user has selected a day, month and year that 
@@ -337,8 +325,8 @@ as unopinionated and simple as possible.
 To not having to repeat the same markup over and over again we can use the `Form.wrap` function.
 It allows us add markup to an input widget without changing the logic of the widget itself.
 
-We can use it to add a _"Decoration"_ when we declare the field (`line 59`) or create versions of
-existing widgets like the `textInputWithLabel` (`line 36`).
+We can use it to add a _"Decoration"_ when we declare the field or create versions of
+existing widgets like the `textInputWithLabel`.
 
 One noteworthy aspect of the `Form.wrap` function is that it is aware of the unique `DomId` of the input
 that gets wrapped. This is especially import in our _"label"_ case since we need to know the value of
@@ -386,10 +374,14 @@ In this case we can use the `listField` function.
 To collect information for an item in in the list we can use
 any widget that we want to collect a list of values. Here we use the `textInput` widget.
 
-In addition we need to supply the `listField` function with two more arguments:
+In addition to the input widget for the list items we need to supply the `listField` function
+with a few more arguments:
 
 1. A function that will place a button to remove an item from the list in the vicinity of the item
 2. A function that places a UI element to add a _new_ item to the list.
+3. A default value for a new item.
+4. A function that extracts the inital list from the initial value of the form.
+
 """
 
 
@@ -402,13 +394,16 @@ viewLists model =
 variantsMarkdown =
     """
 Often we want to let the user choose __"the kind"__ of date they want to enter.
-When the choice affects the shape of the form we can use the `fieldWithVariants` function (`line 35`) to create a field.
+When the choice affects the shape of the form we can use the `fieldWithVariants` function to create a field.
 
 The first argument is the widget that will be used to let the user choose the kind of data.
 In this case we use the `dropdown` widget.
 
 The next argument provides the default variant. Each variant is a `Tuple` of the label and the sub form.
 The third argument is the list of all the other variants.
+
+Lastly we need a function that extracts the inital variant from the initial value of the form.
+This function also needs to tell us which variant to use to edit it. That's why `fromForm` returns a tuple.
 
 The resulting field will still only collect a value of a **single** type. 
 So the widgets of all sub forms need to return the same type.
@@ -440,10 +435,10 @@ viewExample model markdown toMsg example subView =
 
 
 viewTocEntry { title, example, subTitle } =
-    li [] 
+    li []
         [ a [ href <| "#" ++ exampleAsStr example ] [ text title ]
         , br [] []
-        , small [] [text subTitle]
+        , small [] [ text subTitle ]
         ]
 
 
@@ -468,9 +463,9 @@ viewToc : Html Msg
 viewToc =
     div [ class "grid" ]
         [ article [] [ intro ]
-        , article [] 
-            [ header [] [ text "Table of Contents" ] 
-            ,   ul [] <|  List.map viewTocEntry examples
+        , article []
+            [ header [] [ text "Table of Contents" ]
+            , ul [] <| List.map viewTocEntry examples
             ]
         ]
 

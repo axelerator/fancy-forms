@@ -19,10 +19,8 @@ type Msg
 myForm : Form (List String) ()
 myForm =
     Form.form "lists-example"
-        -- no custom validations
-        alwaysValid
-        -- omitting errors for brevity
-        (\_ html -> html)
+        alwaysValid -- no custom validations
+        (\_ html -> html) -- omitting errors for brevity
         (\todos ->
             { view = \formState _ -> todos.view formState
             , combine = \formState -> todos.value formState
