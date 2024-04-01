@@ -26,8 +26,8 @@ Checklist:
 
  - [x] Type saftey
  - [x] Custom widget support
- - [ ] Form can be initialized with custom values
- - [ ] Validation errors aggregate to the top
+ - [x] Form can be initialized with custom values
+ - [x] Validation errors aggregate to the top
  - [ ] set "external" errors for fields (failed backend validation)
  - [ ] Lock/Disable fields when rendering
  - Lists fields:
