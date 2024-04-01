@@ -5394,6 +5394,9 @@ var $elm$core$Set$Set_elm_builtin = function (a) {
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
+var $author$project$Examples$Combination$defaultDate = {day: 1, month: 1, year: 1970};
+var $author$project$Examples$Combination$emptyLogin = {password: '', username: ''};
+var $author$project$Examples$Combination$formDefaults = {birthday: $author$project$Examples$Combination$defaultDate, login: $author$project$Examples$Combination$emptyLogin};
 var $author$project$FancyForms$FormState$FormState = function (a) {
 	return {$: 'FormState', a: a};
 };
@@ -5402,11 +5405,15 @@ var $author$project$FancyForms$FormState$init = F2(
 		return $author$project$FancyForms$FormState$FormState(
 			{allBlurred: false, fieldStatus: $elm$core$Dict$empty, parentDomId: parentDomId, values: values});
 	});
-var $author$project$FancyForms$Form$init = function (_v0) {
-	var defaults = _v0.defaults;
-	var domId = _v0.domId;
-	return A2($author$project$FancyForms$FormState$init, defaults, domId);
-};
+var $author$project$FancyForms$Form$init = F2(
+	function (_v0, data) {
+		var domId = _v0.domId;
+		var initWithData = _v0.initWithData;
+		return A2(
+			initWithData,
+			data,
+			A2($author$project$FancyForms$FormState$init, $elm$core$Dict$empty, domId));
+	});
 var $author$project$FancyForms$FormState$alwaysValid = function (_v0) {
 	return _List_Nil;
 };
@@ -5477,6 +5484,8 @@ var $author$project$Examples$Validation$daysOfMonthValidator = function (_v0) {
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $author$project$Examples$Validation$errorToString = function (e) {
 	switch (e.$) {
+		case 'NotValid':
+			return '';
 		case 'MustNotBeBlank':
 			return 'must not be blank';
 		case 'MustBeGreaterThan':
@@ -5612,6 +5621,7 @@ var $elm$core$Result$map = F2(
 			return $elm$core$Result$Err(e);
 		}
 	});
+var $elm$json$Json$Encode$null = _Json_encodeNull;
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
 		get:
@@ -5688,7 +5698,7 @@ var $author$project$FancyForms$FormState$blurChildren = F3(
 		var values = formState.values;
 		var blurredModel = A2(
 			$elm$core$Result$withDefault,
-			widget.encodeModel(widget.init),
+			$elm$json$Json$Encode$null,
 			A2(
 				$elm$core$Result$map,
 				widget.encodeModel,
@@ -5745,27 +5755,6 @@ var $elm$json$Json$Encode$list = F2(
 				_Json_addEntry(func),
 				_Json_emptyArray(_Utils_Tuple0),
 				entries));
-	});
-var $elm$core$List$repeatHelp = F3(
-	function (result, n, value) {
-		repeatHelp:
-		while (true) {
-			if (n <= 0) {
-				return result;
-			} else {
-				var $temp$result = A2($elm$core$List$cons, value, result),
-					$temp$n = n - 1,
-					$temp$value = value;
-				result = $temp$result;
-				n = $temp$n;
-				value = $temp$value;
-				continue repeatHelp;
-			}
-		}
-	});
-var $elm$core$List$repeat = F2(
-	function (n, value) {
-		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
 	});
 var $elm$core$List$takeReverse = F3(
 	function (n, list, kept) {
@@ -5893,8 +5882,9 @@ var $elm$core$List$take = F2(
 	function (n, list) {
 		return A3($elm$core$List$takeFast, 0, n, list);
 	});
-var $author$project$FancyForms$Form$encodedUpdate = F4(
-	function (widget, subfieldId, operation, modelVal) {
+var $elm$core$Debug$todo = _Debug_todo;
+var $author$project$FancyForms$Form$encodedUpdate = F5(
+	function (widget, mbTemplate, subfieldId, operation, modelVal) {
 		var decoderMsg = widget.decoderMsg;
 		var decoderModel = widget.decoderModel;
 		var encodeModel = widget.encodeModel;
@@ -5914,7 +5904,7 @@ var $author$project$FancyForms$Form$encodedUpdate = F4(
 							}),
 						A2(
 							$elm$core$Result$withDefault,
-							A2($elm$core$List$repeat, i + 1, widget.init),
+							_List_Nil,
 							A2(
 								$elm$json$Json$Decode$decodeValue,
 								$elm$json$Json$Decode$list(decoderModel),
@@ -5944,7 +5934,10 @@ var $author$project$FancyForms$Form$encodedUpdate = F4(
 									_Utils_ap(
 										list,
 										_List_fromArray(
-											[widget.init])));
+											[
+												widget.init(
+												A2($elm$core$Maybe$withDefault, widget._default, mbTemplate))
+											])));
 							}(
 								A2(
 									$elm$core$Result$withDefault,
@@ -5997,7 +5990,16 @@ var $author$project$FancyForms$Form$encodedUpdate = F4(
 						} else {
 							var msg = _v3.a.a;
 							var e = _v3.b;
-							var updateResult = A2(widget.update, msg, widget.init);
+							var updateResult = A2(
+								widget.update,
+								msg,
+								widget.init(
+									_Debug_todo(
+										'FancyForms.Form',
+										{
+											start: {line: 759, column: 61},
+											end: {line: 759, column: 71}
+										})('???2')));
 							return _Utils_Tuple2(
 								encodeSubfield(updateResult.model),
 								updateResult.effect);
@@ -6010,17 +6012,99 @@ var $author$project$FancyForms$Form$encodedUpdate = F4(
 		}
 		return _Utils_Tuple2(modelVal, $author$project$FancyForms$FormState$NoEffect);
 	});
+var $author$project$FancyForms$Form$extendConsistencyCheck = F3(
+	function (previousChecks, newCheck, formState) {
+		return previousChecks(formState) && newCheck(formState);
+	});
+var $author$project$FancyForms$Form$extendInit = F4(
+	function (previousInit, nextInit, data, formState) {
+		return A2(
+			nextInit,
+			data,
+			A2(previousInit, data, formState));
+	});
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $author$project$FancyForms$Form$extractConsistencyCheck = F3(
+	function (widget, fieldId, formState) {
+		return A2(
+			$elm$core$Result$withDefault,
+			false,
+			A2(
+				$elm$core$Result$map,
+				function (model) {
+					return widget.isConsistent(model) && $elm$core$List$isEmpty(
+						widget.validate(model));
+				},
+				A2(
+					$elm$json$Json$Decode$decodeValue,
+					widget.decoderModel,
+					A2($author$project$FancyForms$FormState$read, fieldId, formState))));
+	});
+var $author$project$FancyForms$FormState$SingleValue = {$: 'SingleValue'};
+var $author$project$FancyForms$FormState$toKey = F2(
+	function (fieldId, subfieldId) {
+		if (subfieldId.$ === 'SingleValue') {
+			return fieldId;
+		} else {
+			var i = subfieldId.a;
+			return fieldId + ('-' + $elm$core$String$fromInt(i));
+		}
+	});
+var $author$project$FancyForms$FormState$write = F4(
+	function (fieldId, subfieldId, _v0, value) {
+		var formState = _v0.a;
+		return $author$project$FancyForms$FormState$FormState(
+			_Utils_update(
+				formState,
+				{
+					values: A3(
+						$elm$core$Dict$insert,
+						A2($author$project$FancyForms$FormState$toKey, fieldId, subfieldId),
+						value,
+						formState.values)
+				}));
+	});
+var $author$project$FancyForms$Form$extractInit = F5(
+	function (widget, fieldId, valueExtractor, formModel, formState) {
+		var value = valueExtractor(formModel);
+		var encodedValue = widget.encodeModel(
+			widget.init(value));
+		return A4($author$project$FancyForms$FormState$write, fieldId, $author$project$FancyForms$FormState$SingleValue, formState, encodedValue);
+	});
 var $author$project$FancyForms$FormState$Blurred = {$: 'Blurred'};
 var $author$project$FancyForms$Form$FormMsg = F3(
 	function (a, b, c) {
 		return {$: 'FormMsg', a: a, b: b, c: c};
 	});
-var $author$project$FancyForms$FormState$SingleValue = {$: 'SingleValue'};
 var $author$project$FancyForms$FormState$Update = function (a) {
 	return {$: 'Update', a: a};
 };
 var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
 var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$core$Result$toMaybe = function (result) {
+	if (result.$ === 'Ok') {
+		var v = result.a;
+		return $elm$core$Maybe$Just(v);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
 var $author$project$FancyForms$FormState$NotVisited = {$: 'NotVisited'};
 var $author$project$FancyForms$FormState$wasAtLeast = F3(
 	function (goal, fieldId, _v0) {
@@ -6082,21 +6166,29 @@ var $author$project$FancyForms$FormState$wasAtLeast = F3(
 var $author$project$FancyForms$Form$mkField = F3(
 	function (fieldWithErrors, fieldId, widget) {
 		var deserializeModel = function (formState) {
-			return A2(
-				$elm$core$Result$withDefault,
-				widget.init,
+			return $elm$core$Result$toMaybe(
 				A2(
 					$elm$json$Json$Decode$decodeValue,
 					widget.decoderModel,
 					A2($author$project$FancyForms$FormState$read, fieldId, formState)));
 		};
 		var errors_ = function (formState) {
-			return widget.validate(
-				deserializeModel(formState));
+			return A2(
+				$elm$core$Maybe$withDefault,
+				_List_Nil,
+				A2(
+					$elm$core$Maybe$map,
+					widget.validate,
+					deserializeModel(formState)));
 		};
 		var value = function (formState) {
-			return widget.value(
-				deserializeModel(formState));
+			return A2(
+				$elm$core$Maybe$withDefault,
+				widget._default,
+				A2(
+					$elm$core$Maybe$map,
+					widget.value,
+					deserializeModel(formState)));
 		};
 		var viewField = function (formState) {
 			var parentDomId = formState.a.parentDomId;
@@ -6114,24 +6206,28 @@ var $author$project$FancyForms$Form$mkField = F3(
 				$elm$core$List$map,
 				$elm$html$Html$map(toMsg),
 				A2(
-					widget.view,
-					parentDomId + ('f-' + fieldId),
-					deserializeModel(formState)));
+					$elm$core$Maybe$withDefault,
+					_List_Nil,
+					A2(
+						$elm$core$Maybe$map,
+						widget.view(parentDomId + ('f-' + fieldId)),
+						deserializeModel(formState))));
 			var fieldErrors = A3($author$project$FancyForms$FormState$wasAtLeast, $author$project$FancyForms$FormState$Blurred, fieldId, formState) ? errors_(formState) : _List_Nil;
 			return A2(fieldWithErrors, fieldErrors, inputHtml);
 		};
 		return {errors: errors_, id: fieldId, multiple: false, value: value, view: viewField};
 	});
-var $author$project$FancyForms$Form$field = F2(
-	function (widget, _v0) {
+var $author$project$FancyForms$Form$field = F3(
+	function (extractDefault, widget, _v0) {
 		var fn = _v0.fn;
 		var count = _v0.count;
 		var updates = _v0.updates;
 		var fieldWithErrors = _v0.fieldWithErrors;
 		var validator = _v0.validator;
-		var defaults = _v0.defaults;
 		var blur = _v0.blur;
 		var domId = _v0.domId;
+		var isConsistent = _v0.isConsistent;
+		var initWithData = _v0.initWithData;
 		var fieldId = $elm$core$String$fromInt(count);
 		return {
 			blur: A2(
@@ -6139,19 +6235,22 @@ var $author$project$FancyForms$Form$field = F2(
 				blur,
 				A2($author$project$FancyForms$FormState$blurChildren, fieldId, widget)),
 			count: count + 1,
-			defaults: A3(
-				$elm$core$Dict$insert,
-				fieldId,
-				widget.encodeModel(widget.init),
-				defaults),
 			domId: domId,
 			fieldWithErrors: fieldWithErrors,
 			fn: fn(
 				A3($author$project$FancyForms$Form$mkField, fieldWithErrors, fieldId, widget)),
+			initWithData: A2(
+				$author$project$FancyForms$Form$extendInit,
+				initWithData,
+				A3($author$project$FancyForms$Form$extractInit, widget, fieldId, extractDefault)),
+			isConsistent: A2(
+				$author$project$FancyForms$Form$extendConsistencyCheck,
+				isConsistent,
+				A2($author$project$FancyForms$Form$extractConsistencyCheck, widget, fieldId)),
 			updates: A3(
 				$elm$core$Dict$insert,
 				fieldId,
-				$author$project$FancyForms$Form$encodedUpdate(widget),
+				A2($author$project$FancyForms$Form$encodedUpdate, widget, $elm$core$Maybe$Nothing),
 				updates),
 			validator: validator
 		};
@@ -6180,13 +6279,6 @@ var $elm$html$Html$Attributes$classList = function (classes) {
 				$elm$core$List$map,
 				$elm$core$Tuple$first,
 				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
-};
-var $elm$core$List$isEmpty = function (xs) {
-	if (!xs.b) {
-		return true;
-	} else {
-		return false;
-	}
 };
 var $elm$core$Basics$not = _Basics_not;
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
@@ -6240,7 +6332,22 @@ var $author$project$FancyForms$FormState$blurAll = function (_v0) {
 };
 var $author$project$FancyForms$Form$form = F4(
 	function (domId, validator, fieldWithErrors, fn) {
-		return {blur: $author$project$FancyForms$FormState$blurAll, count: 0, defaults: $elm$core$Dict$empty, domId: domId, fieldWithErrors: fieldWithErrors, fn: fn, updates: $elm$core$Dict$empty, validator: validator};
+		return {
+			blur: $author$project$FancyForms$FormState$blurAll,
+			count: 0,
+			domId: domId,
+			fieldWithErrors: fieldWithErrors,
+			fn: fn,
+			initWithData: F2(
+				function (_v0, fs) {
+					return fs;
+				}),
+			isConsistent: function (_v1) {
+				return true;
+			},
+			updates: $elm$core$Dict$empty,
+			validator: validator
+		};
 	});
 var $author$project$FancyForms$FormState$MustBeGreaterThan = function (a) {
 	return {$: 'MustBeGreaterThan', a: a};
@@ -6312,16 +6419,6 @@ var $elm$json$Json$Encode$int = _Json_wrap;
 var $author$project$FancyForms$FormState$justChanged = function (model) {
 	return {effect: $author$project$FancyForms$FormState$WasChanged, model: model};
 };
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -6395,6 +6492,7 @@ var $author$project$FancyForms$Widgets$Int$integerInput = function (attrs) {
 			A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$string),
 			A2($elm$json$Json$Decode$field, 'parsedValue', $elm$json$Json$Decode$int)),
 		decoderMsg: $author$project$FancyForms$Widgets$Int$decoderMsg,
+		_default: 0,
 		encodeModel: function (model) {
 			return $elm$json$Json$Encode$object(
 				_List_fromArray(
@@ -6408,7 +6506,19 @@ var $author$project$FancyForms$Widgets$Int$integerInput = function (attrs) {
 					]));
 		},
 		encodeMsg: $author$project$FancyForms$Widgets$Int$encodeMsg,
-		init: {parsedValue: 0, value: '0'},
+		init: function (i) {
+			return {
+				parsedValue: i,
+				value: $elm$core$String$fromInt(i)
+			};
+		},
+		isConsistent: function (_v0) {
+			var parsedValue = _v0.parsedValue;
+			var value = _v0.value;
+			return _Utils_eq(
+				$elm$core$String$toInt(value),
+				$elm$core$Maybe$Just(parsedValue));
+		},
 		update: F2(
 			function (msg, model) {
 				switch (msg.$) {
@@ -6491,8 +6601,11 @@ var $author$project$FancyForms$Form$validate = F2(
 				validate: $author$project$FancyForms$Form$concatValidators(validators)
 			});
 	});
-var $author$project$Examples$Validation$myForm = A2(
+var $author$project$Examples$Validation$myForm = A3(
 	$author$project$FancyForms$Form$field,
+	function ($) {
+		return $.year;
+	},
 	A2(
 		$author$project$FancyForms$Form$validate,
 		_List_fromArray(
@@ -6500,8 +6613,11 @@ var $author$project$Examples$Validation$myForm = A2(
 				$author$project$FancyForms$Widgets$Int$greaterThan(1900)
 			]),
 		$author$project$FancyForms$Widgets$Int$integerInput(_List_Nil)),
-	A2(
+	A3(
 		$author$project$FancyForms$Form$field,
+		function ($) {
+			return $.month;
+		},
 		A2(
 			$author$project$FancyForms$Form$validate,
 			_List_fromArray(
@@ -6510,8 +6626,11 @@ var $author$project$Examples$Validation$myForm = A2(
 					$author$project$FancyForms$Widgets$Int$lesserThan(13)
 				]),
 			$author$project$FancyForms$Widgets$Int$integerInput(_List_Nil)),
-		A2(
+		A3(
 			$author$project$FancyForms$Form$field,
+			function ($) {
+				return $.day;
+			},
 			A2(
 				$author$project$FancyForms$Form$validate,
 				_List_fromArray(
@@ -6660,7 +6779,6 @@ var $author$project$FancyForms$Form$encodeFieldOperation = function (operation) 
 					]));
 	}
 };
-var $elm$json$Json$Encode$null = _Json_encodeNull;
 var $author$project$FancyForms$Form$encodeSubFieldId = function (subfieldId) {
 	if (subfieldId.$ === 'SingleValue') {
 		return $elm$json$Json$Encode$null;
@@ -6820,6 +6938,7 @@ var $author$project$FancyForms$FormState$formStateEncode = function (_v0) {
 				$elm$json$Json$Encode$bool(allBlurred))
 			]));
 };
+var $elm$core$Debug$log = _Debug_log;
 var $author$project$FancyForms$FormState$updateFieldStatus = F2(
 	function (status, effect) {
 		var _v0 = _Utils_Tuple2(status, effect);
@@ -6924,14 +7043,20 @@ var $author$project$FancyForms$Form$toWidget = function (f) {
 		blur: $author$project$FancyForms$FormState$blurAll,
 		decoderModel: $author$project$FancyForms$FormState$formStateDecoder,
 		decoderMsg: $author$project$FancyForms$Form$decoderFormMsg,
+		_default: f.fn.combine(
+			A2($author$project$FancyForms$FormState$init, $elm$core$Dict$empty, '')),
 		encodeModel: $author$project$FancyForms$FormState$formStateEncode,
 		encodeMsg: $author$project$FancyForms$Form$encodeFormMsg,
-		init: $author$project$FancyForms$Form$init(f),
+		init: function (data) {
+			var _v0 = A2($elm$core$Debug$log, 'toWidget.init', data);
+			return A2($author$project$FancyForms$Form$init, f, data);
+		},
+		isConsistent: f.isConsistent,
 		update: F2(
-			function (_v0, model) {
-				var fieldId = _v0.a;
-				var subfieldId = _v0.b;
-				var value = _v0.c;
+			function (_v1, model) {
+				var fieldId = _v1.a;
+				var subfieldId = _v1.b;
+				var value = _v1.c;
 				return $author$project$FancyForms$FormState$justChanged(
 					A5($author$project$FancyForms$Form$updateField, f, fieldId, subfieldId, value, model));
 			}),
@@ -7003,9 +7128,13 @@ var $author$project$FancyForms$Widgets$Text$textInput = function (attrs) {
 		blur: $elm$core$Basics$identity,
 		decoderModel: $elm$json$Json$Decode$string,
 		decoderMsg: $author$project$FancyForms$Widgets$Text$decoderMsg,
+		_default: '',
 		encodeModel: $elm$json$Json$Encode$string,
 		encodeMsg: $author$project$FancyForms$Widgets$Text$encodeMsg,
-		init: '',
+		init: $elm$core$Basics$identity,
+		isConsistent: function (_v0) {
+			return true;
+		},
 		update: F2(
 			function (msg, model) {
 				switch (msg.$) {
@@ -7085,8 +7214,11 @@ var $author$project$Examples$Decoration$textInputWithLabel = function (labelText
 		labelText,
 		$author$project$FancyForms$Widgets$Text$textInput(_List_Nil));
 };
-var $author$project$Examples$Decoration$myForm = A2(
+var $author$project$Examples$Decoration$myForm = A3(
 	$author$project$FancyForms$Form$field,
+	function ($) {
+		return $.password;
+	},
 	A2(
 		$author$project$Examples$Decoration$withLabel,
 		'password',
@@ -7095,8 +7227,11 @@ var $author$project$Examples$Decoration$myForm = A2(
 				[
 					$elm$html$Html$Attributes$type_('password')
 				]))),
-	A2(
+	A3(
 		$author$project$FancyForms$Form$field,
+		function ($) {
+			return $.username;
+		},
 		$author$project$Examples$Decoration$textInputWithLabel('username'),
 		A4(
 			$author$project$FancyForms$Form$form,
@@ -7127,11 +7262,17 @@ var $author$project$Examples$Decoration$myForm = A2(
 					};
 				}))));
 var $author$project$Examples$Combination$loginInput = $author$project$FancyForms$Form$toWidget($author$project$Examples$Decoration$myForm);
-var $author$project$Examples$Combination$myForm = A2(
+var $author$project$Examples$Combination$myForm = A3(
 	$author$project$FancyForms$Form$field,
+	function ($) {
+		return $.birthday;
+	},
 	A2($author$project$Examples$Decoration$withLabel, 'birthday', $author$project$Examples$Combination$dateInput),
-	A2(
+	A3(
 		$author$project$FancyForms$Form$field,
+		function ($) {
+			return $.login;
+		},
 		$author$project$Examples$Combination$loginInput,
 		A4(
 			$author$project$FancyForms$Form$form,
@@ -7162,10 +7303,11 @@ var $author$project$Examples$Combination$myForm = A2(
 					};
 				}))));
 var $author$project$Examples$Combination$init = {
-	formState: $author$project$FancyForms$Form$init($author$project$Examples$Combination$myForm)
+	formState: A2($author$project$FancyForms$Form$init, $author$project$Examples$Combination$myForm, $author$project$Examples$Combination$formDefaults)
 };
+var $author$project$Examples$Decoration$default = {password: '', username: ''};
 var $author$project$Examples$Decoration$init = {
-	formState: $author$project$FancyForms$Form$init($author$project$Examples$Decoration$myForm)
+	formState: A2($author$project$FancyForms$Form$init, $author$project$Examples$Decoration$myForm, $author$project$Examples$Decoration$default)
 };
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$fieldset = _VirtualDom_node('fieldset');
@@ -7212,6 +7354,16 @@ var $author$project$Examples$Lists$fieldWithRemoveButton = F2(
 								]))
 						])))
 			]);
+	});
+var $author$project$FancyForms$Form$extractListInit = F5(
+	function (widget, fieldId, valueExtractor, formModel, formState) {
+		var values = valueExtractor(formModel);
+		var encodedValues = A2(
+			$elm$core$List$map,
+			widget.encodeModel,
+			A2($elm$core$List$map, widget.init, values));
+		var encodedListValue = A2($elm$json$Json$Encode$list, $elm$core$Basics$identity, encodedValues);
+		return A4($author$project$FancyForms$FormState$write, fieldId, $author$project$FancyForms$FormState$SingleValue, formState, encodedListValue);
 	});
 var $author$project$FancyForms$Form$buildDomId = F3(
 	function (parentDomId, fieldId, subfieldId) {
@@ -7323,16 +7475,17 @@ var $author$project$FancyForms$Form$mkListField = F5(
 		};
 		return {errors: errors_, id: fieldId, multiple: true, value: value, view: viewField};
 	});
-var $author$project$FancyForms$Form$listField = F4(
-	function (listWithAddButton, fieldWithRemoveButton, widget, _v0) {
+var $author$project$FancyForms$Form$listField = F6(
+	function (listWithAddButton, fieldWithRemoveButton, template, extractDefault, widget, _v0) {
 		var fn = _v0.fn;
 		var count = _v0.count;
 		var updates = _v0.updates;
 		var fieldWithErrors = _v0.fieldWithErrors;
 		var validator = _v0.validator;
-		var defaults = _v0.defaults;
 		var blur = _v0.blur;
 		var domId = _v0.domId;
+		var isConsistent = _v0.isConsistent;
+		var initWithData = _v0.initWithData;
 		var fieldId = $elm$core$String$fromInt(count);
 		return {
 			blur: A2(
@@ -7340,23 +7493,25 @@ var $author$project$FancyForms$Form$listField = F4(
 				blur,
 				A2($author$project$FancyForms$FormState$blurChildren, fieldId, widget)),
 			count: count + 1,
-			defaults: A3(
-				$elm$core$Dict$insert,
-				fieldId,
-				A2(
-					$elm$json$Json$Encode$list,
-					widget.encodeModel,
-					_List_fromArray(
-						[widget.init])),
-				defaults),
 			domId: domId,
 			fieldWithErrors: fieldWithErrors,
 			fn: fn(
 				A5($author$project$FancyForms$Form$mkListField, fieldWithErrors, listWithAddButton, fieldWithRemoveButton, fieldId, widget)),
+			initWithData: A2(
+				$author$project$FancyForms$Form$extendInit,
+				initWithData,
+				A3($author$project$FancyForms$Form$extractListInit, widget, fieldId, extractDefault)),
+			isConsistent: A2(
+				$author$project$FancyForms$Form$extendConsistencyCheck,
+				isConsistent,
+				A2($author$project$FancyForms$Form$extractConsistencyCheck, widget, fieldId)),
 			updates: A3(
 				$elm$core$Dict$insert,
 				$elm$core$String$fromInt(count),
-				$author$project$FancyForms$Form$encodedUpdate(widget),
+				A2(
+					$author$project$FancyForms$Form$encodedUpdate,
+					widget,
+					$elm$core$Maybe$Just(template)),
 				updates),
 			validator: validator
 		};
@@ -7385,10 +7540,12 @@ var $author$project$Examples$Lists$listWithAddButton = F2(
 						])))
 			]);
 	});
-var $author$project$Examples$Lists$myForm = A4(
+var $author$project$Examples$Lists$myForm = A6(
 	$author$project$FancyForms$Form$listField,
 	$author$project$Examples$Lists$listWithAddButton,
 	$author$project$Examples$Lists$fieldWithRemoveButton,
+	'a new todo',
+	$elm$core$Basics$identity,
 	$author$project$FancyForms$Widgets$Text$textInput(_List_Nil),
 	A4(
 		$author$project$FancyForms$Form$form,
@@ -7410,11 +7567,22 @@ var $author$project$Examples$Lists$myForm = A4(
 			};
 		}));
 var $author$project$Examples$Lists$init = {
-	formState: $author$project$FancyForms$Form$init($author$project$Examples$Lists$myForm)
+	formState: A2(
+		$author$project$FancyForms$Form$init,
+		$author$project$Examples$Lists$myForm,
+		_List_fromArray(
+			['yay!']))
 };
-var $author$project$Examples$Minimal$myForm = A2(
+var $author$project$Examples$Minimal$myForm = A3(
 	$author$project$FancyForms$Form$field,
-	$author$project$FancyForms$Widgets$Int$integerInput(_List_Nil),
+	$elm$core$Basics$identity,
+	A2(
+		$author$project$FancyForms$Form$validate,
+		_List_fromArray(
+			[
+				$author$project$FancyForms$Widgets$Int$greaterThan(0)
+			]),
+		$author$project$FancyForms$Widgets$Int$integerInput(_List_Nil)),
 	A4(
 		$author$project$FancyForms$Form$form,
 		'minimal-example',
@@ -7435,11 +7603,19 @@ var $author$project$Examples$Minimal$myForm = A2(
 			};
 		}));
 var $author$project$Examples$Minimal$init = {
-	formState: $author$project$FancyForms$Form$init($author$project$Examples$Minimal$myForm)
+	formState: A2($author$project$FancyForms$Form$init, $author$project$Examples$Minimal$myForm, 42)
 };
 var $author$project$Examples$Validation$init = {
-	formState: $author$project$FancyForms$Form$init($author$project$Examples$Validation$myForm)
+	formState: A2(
+		$author$project$FancyForms$Form$init,
+		$author$project$Examples$Validation$myForm,
+		{day: 1, month: 1, year: 2000})
 };
+var $author$project$Examples$Variants$Phone = F2(
+	function (a, b) {
+		return {$: 'Phone', a: a, b: b};
+	});
+var $author$project$Examples$Variants$default = A2($author$project$Examples$Variants$Phone, 1, 1234);
 var $elm$core$List$head = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -7470,6 +7646,42 @@ var $author$project$FancyForms$Widgets$Dropdown$fromString = F2(
 						},
 						A2($elm$core$List$cons, first, others)))));
 	});
+var $coreygirard$elm_nonempty_list$List$Nonempty$head = function (_v0) {
+	var a = _v0.a;
+	var b = _v0.b;
+	return a;
+};
+var $coreygirard$elm_nonempty_list$List$Nonempty$toList = function (_v0) {
+	var a = _v0.a;
+	var b = _v0.b;
+	return A2($elm$core$List$cons, a, b);
+};
+var $coreygirard$elm_nonempty_list$List$Nonempty$filter = F2(
+	function (f, elems) {
+		return A2(
+			$elm$core$List$filter,
+			f,
+			$coreygirard$elm_nonempty_list$List$Nonempty$toList(elems));
+	});
+var $author$project$FancyForms$Widgets$Dropdown$init = F2(
+	function (variants, v) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			$coreygirard$elm_nonempty_list$List$Nonempty$head(variants).id,
+			A2(
+				$elm$core$Maybe$map,
+				function ($) {
+					return $.id;
+				},
+				$elm$core$List$head(
+					A2(
+						$coreygirard$elm_nonempty_list$List$Nonempty$filter,
+						function (_v0) {
+							var value = _v0.value;
+							return _Utils_eq(value, v);
+						},
+						variants))));
+	});
 var $author$project$FancyForms$Widgets$Dropdown$update = F2(
 	function (id, _v0) {
 		return $author$project$FancyForms$FormState$justChanged(id);
@@ -7479,6 +7691,8 @@ var $author$project$FancyForms$Widgets$Dropdown$all = function (_v0) {
 	var others = _v0.b;
 	return A2($elm$core$List$cons, first, others);
 };
+var $elm$html$Html$option = _VirtualDom_node('option');
+var $elm$html$Html$select = _VirtualDom_node('select');
 var $elm$html$Html$Attributes$boolProperty = F2(
 	function (key, bool) {
 		return A2(
@@ -7486,12 +7700,10 @@ var $elm$html$Html$Attributes$boolProperty = F2(
 			key,
 			$elm$json$Json$Encode$bool(bool));
 	});
-var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
-var $elm$html$Html$option = _VirtualDom_node('option');
-var $elm$html$Html$select = _VirtualDom_node('select');
+var $elm$html$Html$Attributes$selected = $elm$html$Html$Attributes$boolProperty('selected');
 var $author$project$FancyForms$Widgets$Dropdown$view = F3(
 	function (variants, _v0, selectedId) {
-		var selected = A2($author$project$FancyForms$Widgets$Dropdown$fromString, variants, selectedId);
+		var selectedValue = A2($author$project$FancyForms$Widgets$Dropdown$fromString, variants, selectedId);
 		var opt = function (_v1) {
 			var id = _v1.id;
 			var label = _v1.label;
@@ -7501,8 +7713,8 @@ var $author$project$FancyForms$Widgets$Dropdown$view = F3(
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$value(id),
-						$elm$html$Html$Attributes$checked(
-						_Utils_eq(selected, value))
+						$elm$html$Html$Attributes$selected(
+						_Utils_eq(selectedValue, value))
 					]),
 				_List_fromArray(
 					[
@@ -7525,14 +7737,17 @@ var $author$project$FancyForms$Widgets$Dropdown$view = F3(
 			]);
 	});
 var $author$project$FancyForms$Widgets$Dropdown$dropdown = function (variants) {
-	var _default = variants.a;
 	return {
 		blur: $elm$core$Basics$identity,
 		decoderModel: $elm$json$Json$Decode$string,
 		decoderMsg: $elm$json$Json$Decode$string,
+		_default: $coreygirard$elm_nonempty_list$List$Nonempty$head(variants).value,
 		encodeModel: $elm$json$Json$Encode$string,
 		encodeMsg: $elm$json$Json$Encode$string,
-		init: _default.id,
+		init: $author$project$FancyForms$Widgets$Dropdown$init(variants),
+		isConsistent: function (_v0) {
+			return true;
+		},
 		update: $author$project$FancyForms$Widgets$Dropdown$update,
 		validate: $author$project$FancyForms$FormState$alwaysValid,
 		value: $author$project$FancyForms$Widgets$Dropdown$fromString(variants),
@@ -7542,8 +7757,17 @@ var $author$project$FancyForms$Widgets$Dropdown$dropdown = function (variants) {
 var $author$project$Examples$Variants$Email = function (a) {
 	return {$: 'Email', a: a};
 };
-var $author$project$Examples$Variants$emailForm = A2(
+var $author$project$Examples$Variants$email_ = function (c) {
+	if (c.$ === 'Email') {
+		var email = c.a;
+		return email;
+	} else {
+		return '';
+	}
+};
+var $author$project$Examples$Variants$emailForm = A3(
 	$author$project$FancyForms$Form$field,
+	$author$project$Examples$Variants$email_,
 	$author$project$FancyForms$Widgets$Text$textInput(_List_Nil),
 	A4(
 		$author$project$FancyForms$Form$form,
@@ -7565,11 +7789,89 @@ var $author$project$Examples$Variants$emailForm = A2(
 					})
 			};
 		}));
-var $coreygirard$elm_nonempty_list$List$Nonempty$head = function (_v0) {
-	var a = _v0.a;
-	var b = _v0.b;
-	return a;
+var $elm$core$Dict$map = F2(
+	function (func, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return $elm$core$Dict$RBEmpty_elm_builtin;
+		} else {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				color,
+				key,
+				A2(func, key, value),
+				A2($elm$core$Dict$map, func, left),
+				A2($elm$core$Dict$map, func, right));
+		}
+	});
+var $elm$core$Basics$negate = function (n) {
+	return -n;
 };
+var $author$project$FancyForms$Form$debugFormState = function (fs) {
+	var values = fs.a.values;
+	var dbg = F2(
+		function (k, v) {
+			return A2(
+				$elm$core$Debug$log,
+				k,
+				A2($elm$json$Json$Encode$encode, -1, v));
+		});
+	var _v0 = A2($elm$core$Dict$map, dbg, values);
+	return fs;
+};
+var $author$project$FancyForms$Widgets$VariantSelect$selectorFieldId = 'selectorValue';
+var $elm$core$Dict$singleton = F2(
+	function (key, value) {
+		return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+	});
+var $author$project$FancyForms$Widgets$VariantSelect$variantWidgetInit = F3(
+	function (variantWidgets, extractVariantName, value_) {
+		var variantInit = F2(
+			function (_v0, dict) {
+				var variantName = _v0.a;
+				var variantW = _v0.b;
+				return function (v) {
+					return A3($elm$core$Dict$insert, variantName, v, dict);
+				}(
+					variantW.encodeModel(
+						variantW.init(value_)));
+			});
+		var values = A2(
+			$elm$core$Dict$singleton,
+			$author$project$FancyForms$Widgets$VariantSelect$selectorFieldId,
+			$elm$json$Json$Encode$string(
+				extractVariantName(value_)));
+		var values_ = A3(
+			$elm$core$List$foldl,
+			variantInit,
+			values,
+			$coreygirard$elm_nonempty_list$List$Nonempty$toList(variantWidgets));
+		return $author$project$FancyForms$FormState$FormState(
+			{allBlurred: false, fieldStatus: $elm$core$Dict$empty, parentDomId: '0', values: values_});
+	});
+var $author$project$FancyForms$Form$extractVariantInit = F5(
+	function (variantsWithWidgets, fieldId, valueExtractor, formModel, formState) {
+		var variantNameExtractor = function (v) {
+			var _v2 = valueExtractor(v);
+			var variantName_ = _v2.a;
+			return variantName_;
+		};
+		var _v0 = valueExtractor(formModel);
+		var variantName = _v0.a;
+		var value = _v0.b;
+		var encodedValue = $author$project$FancyForms$FormState$formStateEncode(
+			A3($author$project$FancyForms$Widgets$VariantSelect$variantWidgetInit, variantsWithWidgets, variantNameExtractor, value));
+		var _v1 = A2(
+			$elm$core$Debug$log,
+			'extractVariantInit',
+			_Utils_Tuple2(variantName, value));
+		return $author$project$FancyForms$Form$debugFormState(
+			A4($author$project$FancyForms$FormState$write, fieldId, $author$project$FancyForms$FormState$SingleValue, formState, encodedValue));
+	});
 var $coreygirard$elm_nonempty_list$List$Nonempty$map = F2(
 	function (f, _v0) {
 		var a = _v0.a;
@@ -7578,7 +7880,6 @@ var $coreygirard$elm_nonempty_list$List$Nonempty$map = F2(
 			f(a),
 			A2($elm$core$List$map, f, b));
 	});
-var $author$project$FancyForms$Widgets$VariantSelect$selectorFieldId = 'selectorValue';
 var $author$project$FancyForms$Widgets$VariantSelect$blur = F3(
 	function (variantSelector, variantWidgets, formState) {
 		var withBlurredSelector = A3($author$project$FancyForms$FormState$blurChildren, $author$project$FancyForms$Widgets$VariantSelect$selectorFieldId, variantSelector, formState);
@@ -7644,45 +7945,20 @@ var $author$project$FancyForms$Widgets$VariantSelect$encodeMsg = function (msg) 
 				]));
 	}
 };
-var $coreygirard$elm_nonempty_list$List$Nonempty$toList = function (_v0) {
-	var a = _v0.a;
-	var b = _v0.b;
-	return A2($elm$core$List$cons, a, b);
-};
-var $coreygirard$elm_nonempty_list$List$Nonempty$filter = F2(
-	function (f, elems) {
+var $author$project$FancyForms$Widgets$VariantSelect$value = F3(
+	function (defaultVariantName, widget, formState) {
 		return A2(
-			$elm$core$List$filter,
-			f,
-			$coreygirard$elm_nonempty_list$List$Nonempty$toList(elems));
-	});
-var $elm$core$Result$toMaybe = function (result) {
-	if (result.$ === 'Ok') {
-		var v = result.a;
-		return $elm$core$Maybe$Just(v);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $author$project$FancyForms$Widgets$VariantSelect$deserializeModel = F2(
-	function (widget, formState) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			widget.init,
-			$elm$core$Result$toMaybe(
-				A2(
-					$elm$json$Json$Decode$decodeValue,
-					widget.decoderModel,
-					A2($author$project$FancyForms$FormState$read, $author$project$FancyForms$Widgets$VariantSelect$selectorFieldId, formState))));
-	});
-var $author$project$FancyForms$Widgets$VariantSelect$value = F2(
-	function (widget, state) {
-		return widget.value(
-			A2($author$project$FancyForms$Widgets$VariantSelect$deserializeModel, widget, state));
+			$elm$core$Result$withDefault,
+			defaultVariantName,
+			A2(
+				$elm$json$Json$Decode$decodeValue,
+				widget.decoderModel,
+				A2($author$project$FancyForms$FormState$read, $author$project$FancyForms$Widgets$VariantSelect$selectorFieldId, formState)));
 	});
 var $author$project$FancyForms$Widgets$VariantSelect$selectedValue = F3(
 	function (variantSelectWidget, variantWidgets, model) {
-		var selectedVariantName = A2($author$project$FancyForms$Widgets$VariantSelect$value, variantSelectWidget, model);
+		var defaultVariantName = $coreygirard$elm_nonempty_list$List$Nonempty$head(variantWidgets).a;
+		var selectedVariantName = A3($author$project$FancyForms$Widgets$VariantSelect$value, defaultVariantName, variantSelectWidget, model);
 		var selectedWidget = A2(
 			$elm$core$Maybe$withDefault,
 			$coreygirard$elm_nonempty_list$List$Nonempty$head(variantWidgets),
@@ -7696,7 +7972,7 @@ var $author$project$FancyForms$Widgets$VariantSelect$selectedValue = F3(
 					variantWidgets))).b;
 		return A2(
 			$elm$core$Result$withDefault,
-			selectedWidget.value(selectedWidget.init),
+			selectedWidget._default,
 			A2(
 				$elm$core$Result$map,
 				selectedWidget.value,
@@ -7726,7 +8002,7 @@ var $author$project$FancyForms$FormState$encodedUpdate = F4(
 							}),
 						A2(
 							$elm$core$Result$withDefault,
-							A2($elm$core$List$repeat, i + 1, widget.init),
+							_List_Nil,
 							A2(
 								$elm$json$Json$Decode$decodeValue,
 								$elm$json$Json$Decode$list(decoderModel),
@@ -7755,7 +8031,15 @@ var $author$project$FancyForms$FormState$encodedUpdate = F4(
 								_Utils_ap(
 									list,
 									_List_fromArray(
-										[widget.init])));
+										[
+											widget.init(
+											_Debug_todo(
+												'FancyForms.FormState',
+												{
+													start: {line: 423, column: 49},
+													end: {line: 423, column: 59}
+												})('needs template object'))
+										])));
 						}(
 							A2(
 								$elm$core$Result$withDefault,
@@ -7802,8 +8086,7 @@ var $author$project$FancyForms$FormState$encodedUpdate = F4(
 								A2(widget.update, msg, model).model);
 						} else {
 							var msg = _v3.a.a;
-							return encodeSubfield(
-								A2(widget.update, msg, widget.init).model);
+							return modelVal;
 						}
 					} else {
 						return modelVal;
@@ -7828,29 +8111,6 @@ var $author$project$FancyForms$Widgets$VariantSelect$widgetByName = F2(
 							return _Utils_eq(name, variantName);
 						},
 						variantWidgets))));
-	});
-var $author$project$FancyForms$FormState$toKey = F2(
-	function (fieldId, subfieldId) {
-		if (subfieldId.$ === 'SingleValue') {
-			return fieldId;
-		} else {
-			var i = subfieldId.a;
-			return fieldId + ('-' + $elm$core$String$fromInt(i));
-		}
-	});
-var $author$project$FancyForms$FormState$write = F4(
-	function (fieldId, subfieldId, _v0, value) {
-		var formState = _v0.a;
-		return $author$project$FancyForms$FormState$FormState(
-			_Utils_update(
-				formState,
-				{
-					values: A3(
-						$elm$core$Dict$insert,
-						A2($author$project$FancyForms$FormState$toKey, fieldId, subfieldId),
-						value,
-						formState.values)
-				}));
 	});
 var $author$project$FancyForms$Widgets$VariantSelect$update = F4(
 	function (variantSelector, variantWidgets, msg, model) {
@@ -7883,33 +8143,6 @@ var $author$project$FancyForms$Widgets$VariantSelect$update = F4(
 					A2($author$project$FancyForms$FormState$read, $author$project$FancyForms$Widgets$VariantSelect$selectorFieldId, model)));
 		}
 	});
-var $elm$core$Dict$singleton = F2(
-	function (key, value) {
-		return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
-	});
-var $author$project$FancyForms$Widgets$VariantSelect$variantWidgetInit = F2(
-	function (_default, variantWidgets) {
-		var variantInit = F2(
-			function (_v0, dict) {
-				var variantName = _v0.a;
-				var variantW = _v0.b;
-				return function (v) {
-					return A3($elm$core$Dict$insert, variantName, v, dict);
-				}(
-					variantW.encodeModel(variantW.init));
-			});
-		var values = A2(
-			$elm$core$Dict$singleton,
-			$author$project$FancyForms$Widgets$VariantSelect$selectorFieldId,
-			$elm$json$Json$Encode$string(_default));
-		var values_ = A3(
-			$elm$core$List$foldl,
-			variantInit,
-			values,
-			$coreygirard$elm_nonempty_list$List$Nonempty$toList(variantWidgets));
-		return $author$project$FancyForms$FormState$FormState(
-			{allBlurred: false, fieldStatus: $elm$core$Dict$empty, parentDomId: '0', values: values_});
-	});
 var $author$project$FancyForms$FormState$subId = F3(
 	function (parentDomId, fieldId, subfieldId) {
 		return A2(
@@ -7921,8 +8154,8 @@ var $author$project$FancyForms$FormState$subId = F3(
 					A2($author$project$FancyForms$FormState$toKey, fieldId, subfieldId)
 				]));
 	});
-var $author$project$FancyForms$Widgets$VariantSelect$view = F4(
-	function (variantSelectWidget, variantWidgets, domId, model) {
+var $author$project$FancyForms$Widgets$VariantSelect$view = F5(
+	function (defaultVariantName, variantSelectWidget, variantWidgets, domId, model) {
 		var variantView = function (_v1) {
 			var variantName = _v1.a;
 			var variantW = _v1.b;
@@ -7958,7 +8191,7 @@ var $author$project$FancyForms$Widgets$VariantSelect$view = F4(
 						variantW.decoderModel,
 						A2($author$project$FancyForms$FormState$read, variantName, model))));
 		};
-		var selectedVariantName = A2($author$project$FancyForms$Widgets$VariantSelect$value, variantSelectWidget, model);
+		var selectedVariantName = A3($author$project$FancyForms$Widgets$VariantSelect$value, defaultVariantName, variantSelectWidget, model);
 		var variantSelectorHtml = A2(
 			$elm$core$List$map,
 			$elm$html$Html$map(
@@ -7983,8 +8216,8 @@ var $author$project$FancyForms$Widgets$VariantSelect$view = F4(
 					variantWidgets)));
 		return _Utils_ap(variantSelectorHtml, variantsHtml);
 	});
-var $author$project$FancyForms$Widgets$VariantSelect$variantWidget = F3(
-	function (variantSelector, defaultVariantName, variantWidgets) {
+var $author$project$FancyForms$Widgets$VariantSelect$variantWidget = F4(
+	function (variantSelector, variantNameExtractor, defaultVariantName, variantWidgets) {
 		return {
 			blur: A2(
 				$author$project$FancyForms$Widgets$VariantSelect$blur,
@@ -7992,9 +8225,15 @@ var $author$project$FancyForms$Widgets$VariantSelect$variantWidget = F3(
 				$coreygirard$elm_nonempty_list$List$Nonempty$toList(variantWidgets)),
 			decoderModel: $author$project$FancyForms$FormState$formStateDecoder,
 			decoderMsg: $author$project$FancyForms$Widgets$VariantSelect$decoderMsg,
+			_default: $coreygirard$elm_nonempty_list$List$Nonempty$head(variantWidgets).b._default,
 			encodeModel: $author$project$FancyForms$FormState$formStateEncode,
 			encodeMsg: $author$project$FancyForms$Widgets$VariantSelect$encodeMsg,
-			init: A2($author$project$FancyForms$Widgets$VariantSelect$variantWidgetInit, defaultVariantName, variantWidgets),
+			init: function (v) {
+				return A3($author$project$FancyForms$Widgets$VariantSelect$variantWidgetInit, variantWidgets, variantNameExtractor, v);
+			},
+			isConsistent: function (_v0) {
+				return true;
+			},
 			update: F2(
 				function (msg, model) {
 					return $author$project$FancyForms$FormState$justChanged(
@@ -8002,22 +8241,27 @@ var $author$project$FancyForms$Widgets$VariantSelect$variantWidget = F3(
 				}),
 			validate: $author$project$FancyForms$FormState$alwaysValid,
 			value: A2($author$project$FancyForms$Widgets$VariantSelect$selectedValue, variantSelector, variantWidgets),
-			view: A2(
+			view: A3(
 				$author$project$FancyForms$Widgets$VariantSelect$view,
+				defaultVariantName,
 				variantSelector,
 				$coreygirard$elm_nonempty_list$List$Nonempty$toList(variantWidgets))
 		};
 	});
-var $author$project$FancyForms$Form$fieldWithVariants = F4(
-	function (variantSelector, defaultVariant, otherVariants, _v0) {
+var $author$project$FancyForms$Form$fieldWithVariants = F5(
+	function (variantSelector, defaultVariant, otherVariants, extractDefault, _v0) {
 		var fn = _v0.fn;
 		var count = _v0.count;
 		var updates = _v0.updates;
 		var fieldWithErrors = _v0.fieldWithErrors;
 		var validator = _v0.validator;
-		var defaults = _v0.defaults;
 		var blur = _v0.blur;
 		var domId = _v0.domId;
+		var isConsistent = _v0.isConsistent;
+		var initWithData = _v0.initWithData;
+		var variantNameExtractor = function (data) {
+			return extractDefault(data).a;
+		};
 		var toWidgetVariant = function (_v2) {
 			var n = _v2.a;
 			var f = _v2.b;
@@ -8032,10 +8276,11 @@ var $author$project$FancyForms$Form$fieldWithVariants = F4(
 			var name = _v1.a;
 			return {id: name, label: name, value: name};
 		};
-		var widget = A3(
+		var widget = A4(
 			$author$project$FancyForms$Widgets$VariantSelect$variantWidget,
 			variantSelector(
 				A2($coreygirard$elm_nonempty_list$List$Nonempty$map, mkVariant, variantsWithWidgets)),
+			variantNameExtractor,
 			$coreygirard$elm_nonempty_list$List$Nonempty$head(variantsWithWidgets).a,
 			variantsWithWidgets);
 		var fieldId = $elm$core$String$fromInt(count);
@@ -8045,32 +8290,56 @@ var $author$project$FancyForms$Form$fieldWithVariants = F4(
 				blur,
 				A2($author$project$FancyForms$FormState$blurChildren, fieldId, widget)),
 			count: count + 1,
-			defaults: A3(
-				$elm$core$Dict$insert,
-				fieldId,
-				widget.encodeModel(widget.init),
-				defaults),
 			domId: domId,
 			fieldWithErrors: fieldWithErrors,
 			fn: fn(
 				A3($author$project$FancyForms$Form$mkField, fieldWithErrors, fieldId, widget)),
+			initWithData: A2(
+				$author$project$FancyForms$Form$extendInit,
+				initWithData,
+				A3($author$project$FancyForms$Form$extractVariantInit, variantsWithWidgets, fieldId, extractDefault)),
+			isConsistent: A2(
+				$author$project$FancyForms$Form$extendConsistencyCheck,
+				isConsistent,
+				A2($author$project$FancyForms$Form$extractConsistencyCheck, widget, fieldId)),
 			updates: A3(
 				$elm$core$Dict$insert,
 				fieldId,
-				$author$project$FancyForms$Form$encodedUpdate(widget),
+				A2($author$project$FancyForms$Form$encodedUpdate, widget, $elm$core$Maybe$Nothing),
 				updates),
 			validator: validator
 		};
 	});
-var $author$project$Examples$Variants$Phone = F2(
-	function (a, b) {
-		return {$: 'Phone', a: a, b: b};
-	});
-var $author$project$Examples$Variants$phoneForm = A2(
+var $author$project$Examples$Variants$fromForm = function (c) {
+	if (c.$ === 'Email') {
+		return _Utils_Tuple2('email', c);
+	} else {
+		return _Utils_Tuple2('phone', c);
+	}
+};
+var $author$project$Examples$Variants$countryCode_ = function (c) {
+	if (c.$ === 'Email') {
+		return 0;
+	} else {
+		var cc = c.a;
+		return cc;
+	}
+};
+var $author$project$Examples$Variants$number_ = function (c) {
+	if (c.$ === 'Email') {
+		return 0;
+	} else {
+		var n = c.b;
+		return n;
+	}
+};
+var $author$project$Examples$Variants$phoneForm = A3(
 	$author$project$FancyForms$Form$field,
+	$author$project$Examples$Variants$number_,
 	$author$project$FancyForms$Widgets$Int$integerInput(_List_Nil),
-	A2(
+	A3(
 		$author$project$FancyForms$Form$field,
+		$author$project$Examples$Variants$countryCode_,
 		$author$project$FancyForms$Widgets$Int$integerInput(_List_Nil),
 		A4(
 			$author$project$FancyForms$Form$form,
@@ -8114,7 +8383,7 @@ var $author$project$Examples$Variants$phoneForm = A2(
 							})
 					};
 				}))));
-var $author$project$Examples$Variants$myForm = A4(
+var $author$project$Examples$Variants$myForm = A5(
 	$author$project$FancyForms$Form$fieldWithVariants,
 	$author$project$FancyForms$Widgets$Dropdown$dropdown,
 	_Utils_Tuple2('email', $author$project$Examples$Variants$emailForm),
@@ -8122,6 +8391,7 @@ var $author$project$Examples$Variants$myForm = A4(
 		[
 			_Utils_Tuple2('phone', $author$project$Examples$Variants$phoneForm)
 		]),
+	$author$project$Examples$Variants$fromForm,
 	A4(
 		$author$project$FancyForms$Form$form,
 		'variant-example',
@@ -8142,7 +8412,7 @@ var $author$project$Examples$Variants$myForm = A4(
 			};
 		}));
 var $author$project$Examples$Variants$init = {
-	formState: $author$project$FancyForms$Form$init($author$project$Examples$Variants$myForm)
+	formState: A2($author$project$FancyForms$Form$init, $author$project$Examples$Variants$myForm, $author$project$Examples$Variants$default)
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
@@ -8609,12 +8879,16 @@ var $author$project$Examples$Minimal$update = F2(
 	});
 var $author$project$Examples$Validation$update = F2(
 	function (msg, model) {
-		var formMsg = msg.a;
-		return _Utils_update(
-			model,
-			{
-				formState: A3($author$project$FancyForms$Form$update, $author$project$Examples$Validation$myForm, formMsg, model.formState)
-			});
+		if (msg.$ === 'ForForm') {
+			var formMsg = msg.a;
+			return _Utils_update(
+				model,
+				{
+					formState: A3($author$project$FancyForms$Form$update, $author$project$Examples$Validation$myForm, formMsg, model.formState)
+				});
+		} else {
+			return model;
+		}
 	});
 var $author$project$Examples$Variants$update = F2(
 	function (msg, model) {
@@ -9205,6 +9479,11 @@ var $author$project$FancyForms$Form$extract = function (_v0) {
 	return fn.combine;
 };
 var $elm$html$Html$p = _VirtualDom_node('p');
+var $author$project$FancyForms$FormState$NotValid = {$: 'NotValid'};
+var $author$project$FancyForms$Form$addInvalidIfInconsistent = F3(
+	function (form_, formState, errors) {
+		return form_.isConsistent(formState) ? errors : A2($elm$core$List$cons, $author$project$FancyForms$FormState$NotValid, errors);
+	});
 var $author$project$FancyForms$Form$render = F3(
 	function (toMsg, form_, formState) {
 		return A2(
@@ -9213,8 +9492,12 @@ var $author$project$FancyForms$Form$render = F3(
 			A2(
 				form_.fn.view,
 				formState,
-				form_.validator(
-					form_.fn.combine(formState))));
+				A3(
+					$author$project$FancyForms$Form$addInvalidIfInconsistent,
+					form_,
+					formState,
+					form_.validator(
+						form_.fn.combine(formState)))));
 	});
 var $author$project$Examples$Combination$view = function (model) {
 	var data = A2($author$project$FancyForms$Form$extract, $author$project$Examples$Combination$myForm, model.formState);
@@ -9261,53 +9544,53 @@ var $author$project$Main$Lists = {$: 'Lists'};
 var $author$project$Main$Minimal = {$: 'Minimal'};
 var $author$project$Main$Validation = {$: 'Validation'};
 var $author$project$Main$Variants = {$: 'Variants'};
-var $author$project$Examples$Code$Combination$code = '\nmodule Examples.Combination exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, field)\nimport FancyForms.FormState exposing (FormState, Widget, alwaysValid)\nimport FancyForms.Widgets.Text exposing (textInput)\nimport Html exposing (div, p, text)\nimport Html.Attributes exposing (type_)\nimport Html exposing (label)\nimport Html.Attributes exposing (for)\nimport Examples.Decoration exposing (Login)\nimport Examples.Validation exposing (Date)\nimport Examples.Decoration exposing (withLabel)\nimport Examples.Validation exposing (MyError)\nimport Html exposing (hr)\nimport String exposing (fromInt)\nimport Html exposing (br)\n\n\ntype alias Model =\n    { formState : FormState }\n\n\ntype Msg\n    = ForForm Form.Msg\n\n\ntype alias Signup =\n    { login: Login\n    , birthday : Date\n    }\n\nloginInput = Form.toWidget Examples.Decoration.myForm\n\ndateInput = Form.toWidget Examples.Validation.myForm\n\nmyForm : Form Signup MyError\nmyForm =\n    Form.form "combination-example"\n        alwaysValid -- no custom validations\n        (\\errors_ html -> html) -- omitting errors for brevity\n        (\\login birthday ->\n            { view =\n                \\formState _ ->\n                    List.concat\n                        [ login.view formState\n                        , birthday.view formState\n                        ]\n            , combine =\n                \\formState ->\n                    { login = login.value formState\n                    , birthday = birthday.value formState\n                    }\n            }\n        )\n        |> field loginInput\n        |> field (dateInput |> withLabel "birthday")\n\n\nview model =\n    let\n      data = Form.extract myForm model.formState\n    in\n    \n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            [ text "The user entered: "\n            , br [] []\n            , text "login: "\n            , text <| data.login.username \n            , text ":"\n            , text <| data.login.password \n            ]\n        , p [] \n            [ text "day: ", text <| fromInt data.birthday.day \n            , text " month: ", text <| fromInt data.birthday.month\n            , text " year: ", text <| fromInt data.birthday.year\n            ]\n        ]\n\n\ninit =\n    { formState = Form.init myForm }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n';
-var $author$project$Examples$Code$Decoration$code = '\nmodule Examples.Decoration exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, field)\nimport FancyForms.FormState exposing (FormState, Widget, alwaysValid)\nimport FancyForms.Widgets.Text exposing (textInput)\nimport Html exposing (div, p, text)\nimport Html.Attributes exposing (type_)\nimport Html exposing (label)\nimport Html.Attributes exposing (for)\nimport Examples.Validation exposing (MyError)\n\n\ntype alias Model =\n    { formState : FormState }\n\n\ntype Msg\n    = ForForm Form.Msg\n\n\ntype alias Login =\n    { username : String\n    , password : String\n    }\n\ncontentWithLabel labelText domId content =\n    label [ for domId ] [ text labelText ] :: content\n\nwithLabel :\n    String\n    -> Widget widgetModel msg value customError\n    -> Widget widgetModel msg value customError\nwithLabel labelText wrapped =\n    Form.wrap wrapped <| contentWithLabel labelText\n\ntextInputWithLabel labelText =\n    textInput [] |> withLabel labelText\n\nmyForm : Form Login MyError\nmyForm =\n    Form.form "decoration-example"\n        alwaysValid -- no custom validations\n        (\\errors_ html -> html) -- omitting errors for brevity\n        (\\user password ->\n            { view =\n                \\formState _ ->\n                    List.concat\n                        [ user.view formState\n                        , password.view formState\n                        ]\n            , combine =\n                \\formState ->\n                    { username = user.value formState\n                    , password = password.value formState\n                    }\n            }\n        )\n        |> field (textInputWithLabel "username")\n        |> field (textInput [ type_ "password" ] |> withLabel "password")\n\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            [ text "The user entered: "\n            , text <| .username <| Form.extract myForm model.formState\n            , text ":"\n            , text <| .password <| Form.extract myForm model.formState\n            ]\n        ]\n\n\ninit =\n    { formState = Form.init myForm }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n';
-var $author$project$Examples$Code$Lists$code = '\nmodule Examples.Lists exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, listField)\nimport FancyForms.FormState exposing (FormState, alwaysValid)\nimport FancyForms.Widgets.Text exposing (textInput)\nimport Html exposing (Attribute, button, div, fieldset, p, text)\nimport Html.Attributes exposing (attribute)\nimport Html.Events exposing (onClick)\n\n\ntype alias Model =\n    { formState : FormState }\n\n\ntype Msg\n    = ForForm Form.Msg\n\n\nmyForm : Form (List String) ()\nmyForm =\n    Form.form "lists-example"\n        alwaysValid\n        -- no custom validations\n        (\\_ html -> html)\n        -- omitting errors for brevity\n        (\\todos ->\n            { view = \\formState _ -> todos.view formState\n            , combine = \\formState -> todos.value formState\n            }\n        )\n        |> listField listWithAddButton fieldWithRemoveButton (textInput [])\n\n\nfieldWithRemoveButton removeMsg input =\n    [ fieldset [ role "group" ] <|\n        input\n            ++ [ button [ onClick removeMsg ] [ text "Remove" ] ]\n    ]\n\n\nlistWithAddButton addMsg items =\n    [ div [] <|\n        items\n            ++ [ button [ onClick addMsg ] [ text "Add todo" ] ]\n    ]\n\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            (text "The user entered: "\n                :: (List.map (\\todo -> div [] [ text todo ]) <| Form.extract myForm model.formState)\n            )\n        ]\n\n\ninit =\n    { formState = Form.init myForm }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n\n\nrole : String -> Attribute msg\nrole value =\n    attribute "role" value\n';
-var $author$project$Examples$Code$Minimal$code = '\nmodule Examples.Minimal exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, field)\nimport FancyForms.FormState exposing (FormState, alwaysValid)\nimport FancyForms.Widgets.Int exposing (integerInput)\nimport Html exposing (div, p, text)\nimport String exposing (fromInt)\n\n\ntype alias Model =\n    { formState : FormState }\n\ntype Msg\n    = ForForm Form.Msg\n\nmyForm : Form Int ()\nmyForm =\n    Form.form "minimal-example"\n        alwaysValid -- no custom validations\n        (\\errors_ html -> html) -- omitting errors for brevity\n        (\\amount ->\n            { view = \\formState _ -> amount.view formState\n            , combine = \\formState -> amount.value formState\n            }\n        )\n        |> field (integerInput [])\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            [ text "The user entered: "\n            , text <| fromInt <| Form.extract myForm model.formState\n            ]\n        ]\n\ninit =\n    { formState = Form.init myForm }\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n';
-var $author$project$Examples$Code$Validation$code = '\nmodule Examples.Validation exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, field, validate)\nimport FancyForms.FormState exposing (FormState, Error)\nimport FancyForms.Widgets.Int exposing (greaterThan, integerInput, lesserThan)\nimport Html exposing (div, p, text, label)\nimport String exposing (fromInt)\nimport Html exposing (label)\nimport FancyForms.FormState exposing (Error(..))\nimport Html.Attributes exposing (class)\nimport Html exposing (Html)\nimport FancyForms.Form exposing (FieldWithErrors)\nimport Html.Attributes exposing (classList)\n\ntype alias Model = { formState : FormState }\n\ntype Msg = ForForm Form.Msg\n\ntype alias Date = \n    { day : Int\n    , month : Int\n    , year : Int\n    }\n\ntype MyError\n    = MustNotBeGreaterThanDaysInMonth Int\n\ndaysOfMonthValidator : Date -> List (Error MyError)\ndaysOfMonthValidator { day, month, year } =\n    if day > daysInMonth month year then\n        [ CustomError <| MustNotBeGreaterThanDaysInMonth (daysInMonth month year) ]\n    else\n        []\n\nviewErrors : List (Error MyError) -> Html msg\nviewErrors errors =\n    if List.isEmpty errors then\n        text ""\n    else\n        div [ class "errors" ]\n            [ List.map errorToString errors\n                |> String.join " "\n                |> text\n            ]\n\nfieldWithErrors : FieldWithErrors MyError\nfieldWithErrors errors html =\n    [ div [ classList [ ( "has-error", not <| List.isEmpty errors ) ] ]\n        (html ++ [ viewErrors errors ])\n    ]\n\nmyForm : Form Date MyError\nmyForm =\n    Form.form "validation-example"\n        daysOfMonthValidator\n        fieldWithErrors\n        (\\day month year ->\n            { view = \\formState errors -> \n                [ div [class "errors"] \n                    [ List.map errorToString errors \n                        |> String.join " "\n                        |> text\n                    ]\n                , div [class "grid"] <| \n                    [ label [] <| text "Day:" :: day.view formState\n                    , label [] <| text "Month:" :: month.view formState\n                    , label [] <| text "Year: " :: year.view formState\n                    ]\n                ]\n            , combine = \\formState -> \n                { day = day.value formState\n                , month = month.value formState\n                , year = year.value formState\n                }\n            }\n        )\n        |> field (integerInput [] |> validate [greaterThan 0])\n        |> field (integerInput [] |> validate [greaterThan 0, lesserThan 13])\n        |> field (integerInput [] |> validate [greaterThan 1900])\n\n\nerrorToString : Error MyError -> String\nerrorToString e =\n    case e of\n        MustNotBeBlank ->\n            "must not be blank"\n\n        MustBeGreaterThan n ->\n            "must be greater than " ++ String.fromInt n\n\n        MustBeLesserThan n ->\n            "must be lower than " ++ String.fromInt n\n\n        CustomError ce ->\n            case ce of\n                MustNotBeGreaterThanDaysInMonth daysInMonth_ ->\n                    "There are only " ++ String.fromInt daysInMonth_ ++ " days in this month"\n\n\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p [] [ text "The user entered: " ]\n        , viewDate <| Form.extract myForm model.formState\n        ]\n\ninit = { formState = Form.init myForm }\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n\nviewDate { day, month, year } =\n    div []\n        [ div [] \n            [ text "day: ", text <| fromInt day \n            , text " month: ", text <| fromInt month\n            , text " year: ", text <| fromInt year\n            ]\n        ]\n\ndaysInMonth : Int -> Int -> Int\ndaysInMonth month year =\n            case month of\n                1 -> 31\n                2 ->\n                    if (modBy 4 year == 0) && (modBy 100 year /= 0) || (modBy 400 year  == 0) then\n                        29\n\n                    else\n                        28\n                3 -> 31\n                5 -> 31\n                7 -> 31\n                8 -> 31\n                10 -> 31\n                12 -> 31\n                _ -> 30\n';
-var $author$project$Examples$Code$Variants$code = '\nmodule Examples.Variants exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, field, fieldWithVariants, toWidget)\nimport FancyForms.FormState exposing (FormState, alwaysValid)\nimport FancyForms.Widgets.Dropdown exposing (dropdown)\nimport FancyForms.Widgets.Int exposing (integerInput)\nimport FancyForms.Widgets.Text exposing (textInput)\nimport Html exposing (div, p, text)\nimport Html.Attributes exposing (class)\nimport String exposing (fromInt)\n\n\ntype alias Model =\n    { formState : FormState }\n\n\ntype Msg\n    = ForForm Form.Msg\n\n\ntype Contact\n    = Email String\n    | Phone Int Int\n\nmyForm : Form Contact ()\nmyForm =\n    Form.form "variant-example"\n        alwaysValid -- no custom validations\n        (\\errors_ html -> html) -- omitting errors for brevity\n        (\\contact ->\n            { view = \\formState _ -> contact.view formState\n            , combine = \\formState -> contact.value formState\n            }\n        )\n        |> fieldWithVariants dropdown\n            ( "email", emailForm )\n            [ ( "phone", phoneForm ) ]\n\nemailForm : Form Contact ()\nemailForm =\n    Form.form "email-form"\n        alwaysValid -- no custom validations\n        (\\errors_ html -> html) -- omitting errors for brevity\n        (\\email ->\n            { view = \\formState _ -> email.view formState\n            , combine = \\formState -> Email <| email.value formState\n            }\n        )\n        |> field (textInput [])\n\n\nphoneForm : Form Contact ()\nphoneForm =\n    Form.form "email-form"\n        alwaysValid -- no custom validations\n        (\\errors_ html -> html) -- omitting errors for brevity\n        (\\countryCode number ->\n            { view =\n                \\formState _ ->\n                    [ div [ class "grid" ]\n                        [ div [] <| countryCode.view formState\n                        , div [] <| number.view formState\n                        ]\n                    ]\n            , combine = \\formState -> Phone (countryCode.value formState) (number.value formState)\n            }\n        )\n        |> field (integerInput [])\n        |> field (integerInput [])\n\n\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            [ text "The user entered: "\n            , case Form.extract myForm model.formState of\n                Email email ->\n                    text <| "Email: " ++ email\n\n                Phone countryCode number ->\n                    text <| "Phone: " ++ fromInt countryCode ++ " " ++ fromInt number\n            ]\n        ]\n\n\ninit =\n    { formState = Form.init myForm }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n';
+var $author$project$Examples$Code$Combination$code = '\nmodule Examples.Combination exposing (..)\n\nimport Examples.Decoration exposing (Login, withLabel)\nimport Examples.Validation exposing (Date, MyError)\nimport FancyForms.Form as Form exposing (Form, field)\nimport FancyForms.FormState exposing (FormState, alwaysValid)\nimport Html exposing (br, div, p, text)\nimport String exposing (fromInt)\n\n\ntype alias Model =\n    { formState : FormState }\n\n\ntype Msg\n    = ForForm Form.Msg\n\n\ntype alias Signup =\n    { login : Login\n    , birthday : Date\n    }\n\n\nloginInput =\n    Form.toWidget Examples.Decoration.myForm\n\n\ndateInput =\n    Form.toWidget Examples.Validation.myForm\n\n\nmyForm : Form Signup MyError\nmyForm =\n    Form.form "combination-example"\n        alwaysValid -- no custom validations\n        (\\errors_ html -> html) -- omitting errors for brevity\n        (\\login birthday ->\n            { view =\n                \\formState _ ->\n                    List.concat\n                        [ login.view formState\n                        , birthday.view formState\n                        ]\n            , combine =\n                \\formState ->\n                    { login = login.value formState\n                    , birthday = birthday.value formState\n                    }\n            }\n        )\n        |> field .login loginInput\n        |> field .birthday (dateInput |> withLabel "birthday")\n\n\nview model =\n    let\n        data =\n            Form.extract myForm model.formState\n    in\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            [ text "The user entered: "\n            , br [] []\n            , text "login: "\n            , text <| data.login.username\n            , text ":"\n            , text <| data.login.password\n            ]\n        , p []\n            [ text "day: "\n            , text <| fromInt data.birthday.day\n            , text " month: "\n            , text <| fromInt data.birthday.month\n            , text " year: "\n            , text <| fromInt data.birthday.year\n            ]\n        ]\n\n\ninit =\n    { formState = Form.init myForm formDefaults }\n\n\nformDefaults =\n    { login = emptyLogin\n    , birthday = defaultDate\n    }\n\n\nemptyLogin =\n    { username = ""\n    , password = ""\n    }\n\n\ndefaultDate =\n    { day = 1\n    , month = 1\n    , year = 1970\n    }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n';
+var $author$project$Examples$Code$Decoration$code = '\nmodule Examples.Decoration exposing (..)\n\nimport Examples.Validation exposing (MyError)\nimport FancyForms.Form as Form exposing (Form, field)\nimport FancyForms.FormState exposing (FormState, Widget, alwaysValid)\nimport FancyForms.Widgets.Text exposing (textInput)\nimport Html exposing (div, label, p, text)\nimport Html.Attributes exposing (for, type_)\n\n\ntype alias Model =\n    { formState : FormState }\n\n\ntype Msg\n    = ForForm Form.Msg\n\n\ntype alias Login =\n    { username : String\n    , password : String\n    }\n\n\ncontentWithLabel labelText domId content =\n    label [ for domId ] [ text labelText ] :: content\n\n\nwithLabel :\n    String\n    -> Widget widgetModel msg value customError\n    -> Widget widgetModel msg value customError\nwithLabel labelText wrapped =\n    Form.wrap wrapped <| contentWithLabel labelText\n\n\ntextInputWithLabel labelText =\n    textInput [] |> withLabel labelText\n\n\nmyForm : Form Login MyError\nmyForm =\n    Form.form "decoration-example"\n        alwaysValid -- no custom validations\n        (\\errors_ html -> html) -- omitting errors for brevity\n        (\\user password ->\n            { view =\n                \\formState _ ->\n                    List.concat\n                        [ user.view formState\n                        , password.view formState\n                        ]\n            , combine =\n                \\formState ->\n                    { username = user.value formState\n                    , password = password.value formState\n                    }\n            }\n        )\n        |> field .username (textInputWithLabel "username")\n        |> field .password (textInput [ type_ "password" ] |> withLabel "password")\n\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            [ text "The user entered: "\n            , text <| .username <| Form.extract myForm model.formState\n            , text ":"\n            , text <| .password <| Form.extract myForm model.formState\n            ]\n        ]\n\n\ninit =\n    { formState = Form.init myForm default }\n\n\ndefault =\n    { username = ""\n    , password = ""\n    }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n';
+var $author$project$Examples$Code$Lists$code = '\nmodule Examples.Lists exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, listField)\nimport FancyForms.FormState exposing (FormState, alwaysValid)\nimport FancyForms.Widgets.Text exposing (textInput)\nimport Html exposing (Attribute, button, div, fieldset, p, text)\nimport Html.Attributes exposing (attribute)\nimport Html.Events exposing (onClick)\n\n\ntype alias Model =\n    { formState : FormState }\n\n\ntype Msg\n    = ForForm Form.Msg\n\n\nmyForm : Form (List String) ()\nmyForm =\n    Form.form "lists-example"\n        alwaysValid -- no custom validations\n        (\\_ html -> html) -- omitting errors for brevity\n        (\\todos ->\n            { view = \\formState _ -> todos.view formState\n            , combine = \\formState -> todos.value formState\n            }\n        )\n        |> listField\n            listWithAddButton\n            fieldWithRemoveButton\n            "a new todo"\n            identity\n            (textInput [])\n\n\nfieldWithRemoveButton removeMsg input =\n    [ fieldset [ role "group" ] <|\n        input\n            ++ [ button [ onClick removeMsg ] [ text "Remove" ] ]\n    ]\n\n\nlistWithAddButton addMsg items =\n    [ div [] <|\n        items\n            ++ [ button [ onClick addMsg ] [ text "Add todo" ] ]\n    ]\n\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            (text "The user entered: "\n                :: (List.map (\\todo -> div [] [ text todo ]) <| Form.extract myForm model.formState)\n            )\n        ]\n\n\ninit =\n    { formState = Form.init myForm [ "yay!" ] }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n\n\nrole : String -> Attribute msg\nrole value =\n    attribute "role" value\n';
+var $author$project$Examples$Code$Minimal$code = '\nmodule Examples.Minimal exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, field)\nimport FancyForms.FormState exposing (FormState, alwaysValid)\nimport FancyForms.Widgets.Int exposing (integerInput)\nimport Html exposing (div, p, text)\nimport String exposing (fromInt)\nimport FancyForms.Form exposing (validate)\nimport FancyForms.Widgets.Int exposing (greaterThan)\n\n\ntype alias Model =\n    { formState : FormState }\n\ntype Msg\n    = ForForm Form.Msg\n\nmyForm : Form Int ()\nmyForm =\n    Form.form "minimal-example"\n        alwaysValid -- no custom validations\n        (\\errors_ html -> html) -- omitting errors for brevity\n        (\\amount ->\n            { view = \\formState _ -> amount.view formState\n            , combine = \\formState -> amount.value formState\n            }\n        )\n        |> field identity (integerInput [] |> validate [greaterThan 0])\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            [ text "The user entered: "\n            , text <| fromInt <| Form.extract myForm model.formState\n            ]\n        ]\n\ninit =\n    { formState = Form.init myForm 42 }\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n';
+var $author$project$Examples$Code$Validation$code = '\nmodule Examples.Validation exposing (..)\n\nimport FancyForms.Form as Form exposing (FieldWithErrors, Form, field, validate)\nimport FancyForms.FormState exposing (Error(..), FormState)\nimport FancyForms.Widgets.Int exposing (greaterThan, integerInput, lesserThan)\nimport Html exposing (Html, button, div, label, p, text)\nimport Html.Attributes exposing (class, classList, disabled)\nimport Html.Events exposing (onClick)\nimport String exposing (fromInt)\n\n\ntype alias Model =\n    { formState : FormState }\n\n\ntype Msg\n    = ForForm Form.Msg\n    | Submit\n\n\ntype alias Date =\n    { day : Int\n    , month : Int\n    , year : Int\n    }\n\n\ntype MyError\n    = MustNotBeGreaterThanDaysInMonth Int\n\n\ndaysOfMonthValidator : Date -> List (Error MyError)\ndaysOfMonthValidator { day, month, year } =\n    if day > daysInMonth month year then\n        [ CustomError <| MustNotBeGreaterThanDaysInMonth (daysInMonth month year) ]\n\n    else\n        []\n\n\nviewErrors : List (Error MyError) -> Html msg\nviewErrors errors =\n    if List.isEmpty errors then\n        text ""\n\n    else\n        div [ class "errors" ]\n            [ List.map errorToString errors\n                |> String.join " "\n                |> text\n            ]\n\n\nfieldWithErrors : FieldWithErrors MyError\nfieldWithErrors errors html =\n    [ div [ classList [ ( "has-error", not <| List.isEmpty errors ) ] ]\n        (html ++ [ viewErrors errors ])\n    ]\n\n\nmyForm : Form Date MyError\nmyForm =\n    Form.form "validation-example"\n        daysOfMonthValidator\n        fieldWithErrors\n        (\\day month year ->\n            { view =\n                \\formState errors ->\n                    [ div [ class "errors" ]\n                        [ List.map errorToString errors\n                            |> String.join " "\n                            |> text\n                        ]\n                    , div [ class "grid" ] <|\n                        [ label [] <| text "Day:" :: day.view formState\n                        , label [] <| text "Month:" :: month.view formState\n                        , label [] <| text "Year: " :: year.view formState\n                        ]\n                    ]\n            , combine =\n                \\formState ->\n                    { day = day.value formState\n                    , month = month.value formState\n                    , year = year.value formState\n                    }\n            }\n        )\n        |> field .day (integerInput [] |> validate [ greaterThan 0 ])\n        |> field .month (integerInput [] |> validate [ greaterThan 0, lesserThan 13 ])\n        |> field .year (integerInput [] |> validate [ greaterThan 1900 ])\n\n\ntakeDay : Date -> Int\ntakeDay { day } =\n    day\n\n\nerrorToString : Error MyError -> String\nerrorToString e =\n    case e of\n        NotValid ->\n            ""\n\n        MustNotBeBlank ->\n            "must not be blank"\n\n        MustBeGreaterThan n ->\n            "must be greater than " ++ String.fromInt n\n\n        MustBeLesserThan n ->\n            "must be lower than " ++ String.fromInt n\n\n        CustomError ce ->\n            case ce of\n                MustNotBeGreaterThanDaysInMonth daysInMonth_ ->\n                    "There are only " ++ String.fromInt daysInMonth_ ++ " days in this month"\n\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , div []\n            [ button\n                [ onClick Submit\n                , disabled <| not <| Form.isValid myForm model.formState\n                ]\n                [ text "Submit" ]\n            ]\n        , p [] [ text "The user entered: " ]\n        , viewDate <| Form.extract myForm model.formState\n        ]\n\n\ninit =\n    { formState = Form.init myForm { day = 1, month = 1, year = 2000 } }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n\n        Submit ->\n            model\n\n\nviewDate { day, month, year } =\n    div []\n        [ div []\n            [ text "day: "\n            , text <| fromInt day\n            , text " month: "\n            , text <| fromInt month\n            , text " year: "\n            , text <| fromInt year\n            ]\n        ]\n\n\ndaysInMonth : Int -> Int -> Int\ndaysInMonth month year =\n    case month of\n        1 ->\n            31\n\n        2 ->\n            if (modBy 4 year == 0) && (modBy 100 year /= 0) || (modBy 400 year == 0) then\n                29\n\n            else\n                28\n\n        3 ->\n            31\n\n        5 ->\n            31\n\n        7 ->\n            31\n\n        8 ->\n            31\n\n        10 ->\n            31\n\n        12 ->\n            31\n\n        _ ->\n            30\n';
+var $author$project$Examples$Code$Variants$code = '\nmodule Examples.Variants exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, field, fieldWithVariants)\nimport FancyForms.FormState exposing (FormState, alwaysValid)\nimport FancyForms.Widgets.Dropdown exposing (dropdown)\nimport FancyForms.Widgets.Int exposing (integerInput)\nimport FancyForms.Widgets.Text exposing (textInput)\nimport Html exposing (div, p, text)\nimport Html.Attributes exposing (class)\nimport String exposing (fromInt)\n\n\ntype alias Model =\n    { formState : FormState }\n\n\ntype Msg\n    = ForForm Form.Msg\n\n\ntype Contact\n    = Email String\n    | Phone Int Int\n\n\nmyForm : Form Contact ()\nmyForm =\n    Form.form "variant-example"\n        alwaysValid\n        -- no custom validations\n        (\\errors_ html -> html)\n        -- omitting errors for brevity\n        (\\contact ->\n            { view = \\formState _ -> contact.view formState\n            , combine = \\formState -> contact.value formState\n            }\n        )\n        |> fieldWithVariants dropdown\n            ( "email", emailForm )\n            [ ( "phone", phoneForm ) ]\n            fromForm\n\n\nfromForm : Contact -> ( String, Contact )\nfromForm c =\n    case c of\n        Email _ ->\n            ( "email", c )\n\n        Phone _ _ ->\n            ( "phone", c )\n\n\nemailForm : Form Contact ()\nemailForm =\n    Form.form "email-form"\n        alwaysValid\n        -- no custom validations\n        (\\errors_ html -> html)\n        -- omitting errors for brevity\n        (\\email ->\n            { view = \\formState _ -> email.view formState\n            , combine = \\formState -> Email <| email.value formState\n            }\n        )\n        |> field email_ (textInput [])\n\n\nemail_ : Contact -> String\nemail_ c =\n    case c of\n        Email email ->\n            email\n\n        Phone _ _ ->\n            ""\n\n\nphoneForm : Form Contact ()\nphoneForm =\n    Form.form "email-form"\n        alwaysValid\n        -- no custom validations\n        (\\errors_ html -> html)\n        -- omitting errors for brevity\n        (\\countryCode number ->\n            { view =\n                \\formState _ ->\n                    [ div [ class "grid" ]\n                        [ div [] <| countryCode.view formState\n                        , div [] <| number.view formState\n                        ]\n                    ]\n            , combine = \\formState -> Phone (countryCode.value formState) (number.value formState)\n            }\n        )\n        |> field countryCode_ (integerInput [])\n        |> field number_ (integerInput [])\n\n\ncountryCode_ : Contact -> Int\ncountryCode_ c =\n    case c of\n        Email _ ->\n            0\n\n        Phone cc _ ->\n            cc\n\n\nnumber_ : Contact -> Int\nnumber_ c =\n    case c of\n        Email _ ->\n            0\n\n        Phone _ n ->\n            n\n\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            [ text "The user entered: "\n            , case Form.extract myForm model.formState of\n                Email email ->\n                    text <| "Email: " ++ email\n\n                Phone countryCode number ->\n                    text <| "Phone: " ++ fromInt countryCode ++ " " ++ fromInt number\n            ]\n        ]\n\n\ndefault =\n    Phone 1 1234\n\n\ninit =\n    { formState = Form.init myForm default }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n';
 var $author$project$Main$examples = _List_fromArray(
 	[
 		{
 		code: $author$project$Examples$Code$Minimal$code,
 		example: $author$project$Main$Minimal,
-		range: _Utils_Tuple2(13, 48),
+		range: _Utils_Tuple2(12, 48),
 		subTitle: 'The simplest possible form',
 		title: 'Getting started'
 	},
 		{
 		code: $author$project$Examples$Code$Validation$code,
 		example: $author$project$Main$Validation,
-		range: _Utils_Tuple2(16, 77),
+		range: _Utils_Tuple2(16, 90),
 		subTitle: 'How to add validations to individual fields and entire forms',
 		title: 'Validations'
 	},
 		{
 		code: $author$project$Examples$Code$Decoration$code,
 		example: $author$project$Main$Decoration,
-		range: _Utils_Tuple2(20, 59),
+		range: _Utils_Tuple2(19, 61),
 		subTitle: 'Controlling markup of fields without changing widgets',
 		title: 'Decoration/Wrapping of input widgets'
 	},
 		{
 		code: $author$project$Examples$Code$Combination$code,
 		example: $author$project$Main$Combination,
-		range: _Utils_Tuple2(27, 56),
+		range: _Utils_Tuple2(19, 53),
 		subTitle: 'How to turn forms into input widgets',
 		title: 'Combination: Reusing forms by combining them'
 	},
 		{
 		code: $author$project$Examples$Code$Lists$code,
 		example: $author$project$Main$Lists,
-		range: _Utils_Tuple2(19, 44),
+		range: _Utils_Tuple2(19, 48),
 		subTitle: 'How to add repeatable elements to a form',
 		title: 'Lists'
 	},
 		{
 		code: $author$project$Examples$Code$Variants$code,
 		example: $author$project$Main$Variants,
-		range: _Utils_Tuple2(21, 69),
+		range: _Utils_Tuple2(13, 41),
 		subTitle: 'Letting the user choose between multiple sub forms',
 		title: 'Variants'
 	}
@@ -9735,9 +10018,6 @@ var $elm$parser$Parser$Advanced$fromState = F2(
 			A4($elm$parser$Parser$Advanced$DeadEnd, s.row, s.col, x, s.context));
 	});
 var $elm$parser$Parser$Advanced$isSubString = _Parser_isSubString;
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var $elm$parser$Parser$Advanced$token = function (_v0) {
 	var str = _v0.a;
 	var expecting = _v0.b;
@@ -11566,7 +11846,7 @@ var $author$project$Main$viewCombination = function (model) {
 var $author$project$Main$ForDecoration = function (a) {
 	return {$: 'ForDecoration', a: a};
 };
-var $author$project$Main$decorationMarkdown = '\nHow the markup for an input field has to be structured varies from application to application.\nOften it depends on the CSS framework you are using. This is why we keep the basic input widgets\nas unopinionated and simple as possible.\n\nTo not having to repeat the same markup over and over again we can use the `Form.wrap` function.\nIt allows us add markup to an input widget without changing the logic of the widget itself.\n\nWe can use it to add a _"Decoration"_ when we declare the field (`line 59`) or create versions of\nexisting widgets like the `textInputWithLabel` (`line 36`).\n\nOne noteworthy aspect of the `Form.wrap` function is that it is aware of the unique `DomId` of the input\nthat gets wrapped. This is especially import in our _"label"_ case since we need to know the value of\nthe `id` attribute of the `input` element. Only if we use that value for the `for` attribute of the \nlabel element the user will be able to focus the input by clicking on the label.\n';
+var $author$project$Main$decorationMarkdown = '\nHow the markup for an input field has to be structured varies from application to application.\nOften it depends on the CSS framework you are using. This is why we keep the basic input widgets\nas unopinionated and simple as possible.\n\nTo not having to repeat the same markup over and over again we can use the `Form.wrap` function.\nIt allows us add markup to an input widget without changing the logic of the widget itself.\n\nWe can use it to add a _"Decoration"_ when we declare the field or create versions of\nexisting widgets like the `textInputWithLabel`.\n\nOne noteworthy aspect of the `Form.wrap` function is that it is aware of the unique `DomId` of the input\nthat gets wrapped. This is especially import in our _"label"_ case since we need to know the value of\nthe `id` attribute of the `input` element. Only if we use that value for the `for` attribute of the \nlabel element the user will be able to focus the input by clicking on the label.\n';
 var $author$project$Examples$Decoration$ForForm = function (a) {
 	return {$: 'ForForm', a: a};
 };
@@ -11606,7 +11886,7 @@ var $author$project$Main$viewDecoration = function (model) {
 var $author$project$Main$ForLists = function (a) {
 	return {$: 'ForLists', a: a};
 };
-var $author$project$Main$listsMarkdown = '\nAnother common use case is collecting a list of values. When the user determins the\nnumber if items in the form we can\'t _"hard code"_ a list of fields.\n\nIn this case we can use the `listField` function.\n\nTo collect information for an item in in the list we can use\nany widget that we want to collect a list of values. Here we use the `textInput` widget.\n\nIn addition we need to supply the `listField` function with two more arguments:\n\n1. A function that will place a button to remove an item from the list in the vicinity of the item\n2. A function that places a UI element to add a _new_ item to the list.\n';
+var $author$project$Main$listsMarkdown = '\nAnother common use case is collecting a list of values. When the user determins the\nnumber if items in the form we can\'t _"hard code"_ a list of fields.\n\nIn this case we can use the `listField` function.\n\nTo collect information for an item in in the list we can use\nany widget that we want to collect a list of values. Here we use the `textInput` widget.\n\nIn addition to the input widget for the list items we need to supply the `listField` function\nwith a few more arguments:\n\n1. A function that will place a button to remove an item from the list in the vicinity of the item\n2. A function that places a UI element to add a _new_ item to the list.\n3. A default value for a new item.\n4. A function that extracts the inital list from the initial value of the form.\n\n';
 var $author$project$Examples$Lists$ForForm = function (a) {
 	return {$: 'ForForm', a: a};
 };
@@ -11652,7 +11932,7 @@ var $author$project$Main$viewLists = function (model) {
 var $author$project$Main$ForMinimal = function (a) {
 	return {$: 'ForMinimal', a: a};
 };
-var $author$project$Main$minimalMarkdown = '\nA form is declared by calling [`Form.form`](https://package.elm-lang.org/packages/axelerator/fancy-forms/1.0.0/FancyForms-Form#form)\nto create an expression of type `Form data error`.\nThe `data` type parameter declares what type of data the form inputs will be converted to.\nThe `error` type parameter allows you to name your own error type for custom validations.\n\nSo this form declares a form that collects an `Int` from the user and doesn\'t have any custom validations\n(it usese the unit type `()` as the `error` type parameter).\n\nTo track the state of the form we add a `FormState` field to our model and a `Msg` variant to modify it.\n\nThe second argument to the form is a function that receives an argument for each field.\nIt returns a record with two fields: `view` and `combine`.\nThe `view` function is used to render the field.\nThe `combine` function is used to extract the value from the form state.\n\nWe add fields to the form by "piping" the result of the `form` call into the [`field`](https://package.elm-lang.org/packages/axelerator/fancy-forms/1.0.0/FancyForms-Form#field)\nfunction.\n\nHere we only have a single `Int` input field. The `view` function can use the `amount` field to render the input widget.\nThe `combine` function can use the `amount` field to extract the value from the form state.\n';
+var $author$project$Main$minimalMarkdown = '\nA form is declared by calling [`Form.form`](https://package.elm-lang.org/packages/axelerator/fancy-forms/2.0.0/FancyForms-Form#form)\nto create an expression of type `Form data error`.\nThe `data` type parameter declares what type of data the form inputs will be converted to.\nThe `error` type parameter allows you to name your own error type for custom validations.\n\nSo this form declares a form that collects an `Int` from the user and doesn\'t have any custom validations\n(it usese the unit type `()` as the `error` type parameter).\n\nTo track the state of the form we add a `FormState` field to our model and a `Msg` variant to modify it.\nWe use the `Form.init` function to create the inital `FormState` with the values we want the form to start with.\n\nThe second argument to the form is a function that receives an argument for each field.\nIt returns a record with two fields: `view` and `combine`.\nThe `view` function is used to render the field.\nThe `combine` function is used to extract the value from the form state.\n\nWe add fields to the form by "piping" the result of the `form` call into the [`field`](https://package.elm-lang.org/packages/axelerator/fancy-forms/2.0.0/FancyForms-Form#field)\nfunction.\n\nHere we only have a single `Int` input field. The `view` function can use the `amount` field to render the input widget.\nThe `combine` function can use the `amount` field to extract the value from the form state.\n';
 var $author$project$Examples$Minimal$ForForm = function (a) {
 	return {$: 'ForForm', a: a};
 };
@@ -11694,7 +11974,7 @@ var $author$project$Main$intro = A2(
 		[
 			$elm$html$Html$Attributes$class('content')
 		]),
-	'\n# FancyForms\n\n[_FancyForms_ is a library](https://package.elm-lang.org/packages/axelerator/fancy-forms/1.0.0/) for building forms in Elm.\nIt is designed with the following goals in mind:\n\n1. **Type saftey**: Data collected in the forms will be returned directly into a user provided type.\n1. **Ease of use**: No matter how complex the form is, it will only need **one** `Msg` and **one** field on the model.\n1. **Customization**: Users can provide their own widgets and custom validations.\n1. **CSS Agnostic**: Adapts to any CSS framework.\n1. **Composable**: Smaller forms can be combined into larger forms.\n1. **I18n**: Internationalization is supported by avoiding hard coded strings.\n\n');
+	'\n# FancyForms\n\n[_FancyForms_ is a library](https://package.elm-lang.org/packages/axelerator/fancy-forms/2.0.0/) for building forms in Elm.\nIt is designed with the following goals in mind:\n\n1. **Type saftey**: Data collected in the forms will be returned directly into a user provided type.\n1. **Ease of use**: No matter how complex the form is, it will only need **one** `Msg` and **one** field on the model.\n1. **Customization**: Users can provide their own widgets and custom validations.\n1. **CSS Agnostic**: Adapts to any CSS framework.\n1. **Composable**: Smaller forms can be combined into larger forms.\n1. **I18n**: Internationalization is supported by avoiding hard coded strings.\n\n');
 var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $elm$html$Html$li = _VirtualDom_node('li');
 var $elm$html$Html$small = _VirtualDom_node('small');
@@ -11762,10 +12042,24 @@ var $author$project$Main$viewToc = A2(
 var $author$project$Main$ForValidation = function (a) {
 	return {$: 'ForValidation', a: a};
 };
-var $author$project$Main$validationMarkdown = '\n#### Per-form validation\n\nSometimes whether the data in the form is valid or not can\'t be determined\nbased on the input of a single field.\n\nThe first argument (`line 56`) to the `form` call is a function that returns errors based on\nwhat would otherwise be returned as data from the **entire form**.\n\nIn this example we make sure that the selected day is in the correct range. To do so\nwe need to know which month and year the user has selected.\n\nTo display the errors that that occurr "per-form" we use the **second** argument that gets passed into our\n`view` function. They are a `List (Error MyError)` and we have to convert them into human readable Html and\nplace them somewhere in our view (`line 60,64`)\n\n#### Per-field validation\n\nPer-field validations validate the input independently of the other fields\nand display an error next to the input widget of that field.\n\nThe the widgets that get passed into the `field` declaration can optionally recieve\nadditional validations (`lines 66-68`) by calling the `validate` function with a list of functions that validate\ninputs for that specific widget type.\n\nHere we use the `greaterThan` validator to ensure that the user has selected a day, month and year that \nhave a certain minimum value.\n\nTo ensure a consistent UX we assume that errors are always displayed in the same relation to the input\nfield they occur in. That\'s why the second argument to the `form` function is a function that places\na list of `Error MyError` relative to the input field.\n\nPer-field validations are only executed the first time a field is blurred. This is because we wan\'t to\navoid the user being confronted with an "all red" form before they have entered anything.\n';
+var $author$project$Main$validationMarkdown = '\n#### Per-form validation\n\nSometimes whether the data in the form is valid or not can\'t be determined\nbased on the input of a single field.\n\nThe first argument to the `form` call is a function that returns errors based on\nwhat would otherwise be returned as data from the **entire form**.\n\nIn this example we make sure that the selected day is in the correct range. To do so\nwe need to know which month and year the user has selected.\n\nTo display the errors that that occurr "per-form" we use the **second** argument that gets passed into our\n`view` function. They are a `List (Error MyError)` and we have to convert them into human readable Html and\nplace them somewhere in our view\n\nTo assess whether to for example submit the value entered by the user we can use\nthe `isValid` predicate. This will return `False` if any of the forms or it\'s fields have an error.\n\n#### Per-field validation\n\nPer-field validations validate the input independently of the other fields\nand display an error next to the input widget of that field.\n\nThe the widgets that get passed into the `field` declaration can optionally recieve\nadditional validations by calling the `validate` function with a list of functions that validate\ninputs for that specific widget type.\n\nHere we use the `greaterThan` validator to ensure that the user has selected a day, month and year that \nhave a certain minimum value.\n\nTo ensure a consistent UX we assume that errors are always displayed in the same relation to the input\nfield they occur in. That\'s why the second argument to the `form` function is a function that places\na list of `Error MyError` relative to the input field.\n\nPer-field validations are only executed the first time a field is blurred. This is because we wan\'t to\navoid the user being confronted with an "all red" form before they have entered anything.\n';
 var $author$project$Examples$Validation$ForForm = function (a) {
 	return {$: 'ForForm', a: a};
 };
+var $author$project$Examples$Validation$Submit = {$: 'Submit'};
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
+var $author$project$FancyForms$Form$isValid = F2(
+	function (form_, formState) {
+		var fn = form_.fn;
+		var validator = form_.validator;
+		return $elm$core$List$isEmpty(
+			A3(
+				$author$project$FancyForms$Form$addInvalidIfInconsistent,
+				form_,
+				formState,
+				validator(
+					fn.combine(formState))));
+	});
 var $author$project$Examples$Validation$viewDate = function (_v0) {
 	var day = _v0.day;
 	var month = _v0.month;
@@ -11803,6 +12097,24 @@ var $author$project$Examples$Validation$view = function (model) {
 				_List_Nil,
 				A3($author$project$FancyForms$Form$render, $author$project$Examples$Validation$ForForm, $author$project$Examples$Validation$myForm, model.formState)),
 				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick($author$project$Examples$Validation$Submit),
+								$elm$html$Html$Attributes$disabled(
+								!A2($author$project$FancyForms$Form$isValid, $author$project$Examples$Validation$myForm, model.formState))
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Submit')
+							]))
+					])),
+				A2(
 				$elm$html$Html$p,
 				_List_Nil,
 				_List_fromArray(
@@ -11825,7 +12137,7 @@ var $author$project$Main$viewValidation = function (model) {
 var $author$project$Main$ForVariants = function (a) {
 	return {$: 'ForVariants', a: a};
 };
-var $author$project$Main$variantsMarkdown = '\nOften we want to let the user choose __"the kind"__ of date they want to enter.\nWhen the choice affects the shape of the form we can use the `fieldWithVariants` function (`line 35`) to create a field.\n\nThe first argument is the widget that will be used to let the user choose the kind of data.\nIn this case we use the `dropdown` widget.\n\nThe next argument provides the default variant. Each variant is a `Tuple` of the label and the sub form.\nThe third argument is the list of all the other variants.\n\nThe resulting field will still only collect a value of a **single** type. \nSo the widgets of all sub forms need to return the same type.\nSo pratically we will create a new sum type with a variant for each of the possible sub forms.\n';
+var $author$project$Main$variantsMarkdown = '\nOften we want to let the user choose __"the kind"__ of date they want to enter.\nWhen the choice affects the shape of the form we can use the `fieldWithVariants` function to create a field.\n\nThe first argument is the widget that will be used to let the user choose the kind of data.\nIn this case we use the `dropdown` widget.\n\nThe next argument provides the default variant. Each variant is a `Tuple` of the label and the sub form.\nThe third argument is the list of all the other variants.\n\nLastly we need a function that extracts the inital variant from the initial value of the form.\nThis function also needs to tell us which variant to use to edit it. That\'s why `fromForm` returns a tuple.\n\nThe resulting field will still only collect a value of a **single** type. \nSo the widgets of all sub forms need to return the same type.\nSo pratically we will create a new sum type with a variant for each of the possible sub forms.\n';
 var $author$project$Examples$Variants$ForForm = function (a) {
 	return {$: 'ForForm', a: a};
 };
