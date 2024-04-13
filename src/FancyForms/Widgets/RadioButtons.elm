@@ -8,7 +8,7 @@ module FancyForms.Widgets.RadioButtons exposing (radioButtons)
 
 import FancyForms.Form exposing (Msg, Variant, Variants)
 import FancyForms.FormState exposing (DomId, UpdateResult, alwaysValid, justChanged, noAttributes)
-import FancyForms.Form.Widgets exposing (SelectWidget)
+import FancyForms.Widgets.Dropdown exposing (SelectWidget)
 import Html exposing (Html, input, text)
 import Html.Attributes exposing (checked, id, type_, value)
 import Html.Events exposing (onInput)
@@ -39,7 +39,7 @@ init variants v =
 {-| Returns a widget that lets the user select a value from a list of
 variants with radio buttons.
 -}
-radioButtons : Variants a -> SelectWidget a
+radioButtons : Variants a -> SelectWidget a customError
 radioButtons variants =
     { init = init variants
     , value = fromString variants

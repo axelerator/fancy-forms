@@ -3,7 +3,7 @@
     "name": "axelerator/fancy-forms",
     "summary": "A modular form library with support for custom input widgets",
     "license": "MIT",
-    "version": "4.1.0",
+    "version": "4.2.0",
     "exposed-modules": [
         "FancyForms.Form",
         "FancyForms.FormState",
@@ -12,6 +12,7 @@
         "FancyForms.Widgets.Int",
         "FancyForms.Widgets.Float",
         "FancyForms.Widgets.Text",
+        "FancyForms.Widgets.RadioButtons",
         "FancyForms.Widgets.Date"
     ],
     "elm-version": "0.19.1 <= v < 0.20.0",
