@@ -1,11 +1,11 @@
 module FancyForms.Widgets.Int exposing
-    ( integerInput
+    ( integerInput, IntInput, Msg
     , greaterThan, lesserThan
     )
 
 {-| An integer input widget.
 
-@docs integerInput
+@docs integerInput, IntInput, Msg
 
 
 # Validators
@@ -24,6 +24,8 @@ import Json.Encode as E
 import String exposing (fromInt)
 
 
+{-| Messages for the `IntInput`
+-}
 type Msg
     = Changed String
     | Focused
@@ -57,10 +59,12 @@ lesserThan x value =
     else
         []
 
+
 {-| Signature for an input widget that collects an `Int`
 -}
-type alias IntInput customError = 
+type alias IntInput customError =
     Widget Model Msg Int customError
+
 
 {-| A widget that collects an `Int`
 -}
