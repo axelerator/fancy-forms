@@ -3,7 +3,7 @@
 [_FancyForms_](https://blog.axelerator.de/fancy-forms/) is a library for building forms in Elm.
 It is designed with the following goals in mind:
 
-1. **Type saftey**: Data collected in the forms will be returned directly into a user provided type.
+1. **Type safety**: Data collected in the forms will be returned directly into a user provided type.
 1. **Ease of use**: No matter how complex the form is, it will only need **one** `Msg` and **one** field on the model.
 1. **Customization**: Users can provide their own widgets and custom validations.
 1. **CSS Agnostic**: Adapts to any CSS framework.
@@ -24,7 +24,7 @@ The library is still under active development and is still missing some features
 
 Checklist:
 
- - [x] Type saftey
+ - [x] Type safety
  - [x] Custom widget support
  - [x] Form can be initialized with custom values
  - [x] Validation errors aggregate to the top
