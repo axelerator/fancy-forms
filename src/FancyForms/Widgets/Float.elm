@@ -1,11 +1,12 @@
 module FancyForms.Widgets.Float exposing
     ( floatInput, FloatInput
     , greaterThan, lesserThan
+    , Msg
     )
 
 {-| An float input widget.
 
-@docs floatInput, FloatInput
+@docs floatInput, FloatInput, Msg
 
 
 # Validators

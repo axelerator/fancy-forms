@@ -1,11 +1,12 @@
 module FancyForms.Widgets.Text exposing
     ( textInput, TextInput
     , notBlank
+    , Msg
     )
 
 {-| A text input widget
 
-@docs textInput, TextInput
+@docs textInput, TextInput, Msg
 
 
 # Validators

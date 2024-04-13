@@ -1,8 +1,11 @@
-module FancyForms.Widgets.Date exposing (dateInput, Msg)
+module FancyForms.Widgets.Date exposing
+    ( dateInput, DateInput
+    , Msg
+    )
 
 {-| An date input widget.
 
-@docs dateInput, Msg
+@docs dateInput, DateInput, Msg
 
 -}
 
