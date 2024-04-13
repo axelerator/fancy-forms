@@ -7,6 +7,7 @@ import Json.Decode as D exposing (Decoder, Error(..))
 import Json.Encode as E exposing (Value)
 import List.Nonempty exposing (ListNonempty)
 import Maybe exposing (withDefault)
+import FancyForms.FormState exposing (noAttributes)
 
 
 type Msg
@@ -42,6 +43,7 @@ variantWidget variantSelector variantNameExtractor defaultVariantName variantWid
     , encodeModel = formStateEncode
     , decoderModel = formStateDecoder
     , blur = blur variantSelector (List.Nonempty.toList variantWidgets)
+    , innerAttributes = noAttributes
     }
 
 
@@ -195,9 +197,10 @@ view :
     -> Widget String msg String customError
     -> List ( String, Widget widgetModel msg2 value customError )
     -> DomId
+    -> List (Html.Attribute Msg)
     -> Model
     -> List (Html Msg)
-view defaultVariantName variantSelectWidget variantWidgets domId model =
+view defaultVariantName variantSelectWidget variantWidgets domId innerAttrs model =
     let
         selectedVariantName : String
         selectedVariantName =
@@ -206,7 +209,7 @@ view defaultVariantName variantSelectWidget variantWidgets domId model =
         variantSelectorHtml : List (Html Msg)
         variantSelectorHtml =
             selectedVariantName
-                |> variantSelectWidget.view (subId domId selectorFieldId SingleValue)
+                |> variantSelectWidget.view (subId domId selectorFieldId SingleValue) []
                 |> List.map (Html.map (\msg -> ForVariantSelect <| variantSelectWidget.encodeMsg msg))
 
         variantView : ( String, Widget widgetModel msg2 value customError ) -> List (Html Msg)
@@ -215,7 +218,7 @@ view defaultVariantName variantSelectWidget variantWidgets domId model =
                 |> D.decodeValue variantW.decoderModel
                 |> Result.map
                     (\variantModel ->
-                        variantW.view (domId ++ variantName) variantModel
+                        variantW.view (domId ++ variantName) [] variantModel 
                             |> List.map (\html -> Html.map (\m -> ForVariant variantName <| variantW.encodeMsg m) html)
                     )
                 |> Result.withDefault

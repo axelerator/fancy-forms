@@ -17,9 +17,10 @@ type Msg
 
 myForm : Form Int ()
 myForm =
-    Form.form "minimal-example"
-        alwaysValid -- no custom validations
+    Form.form
         (\errors_ html -> html) -- omitting errors for brevity
+        alwaysValid -- no custom validations
+         "minimal-example" -- unique id to be used in DOM
         (\amount ->
             { view = \formState _ -> amount.view formState
             , combine = \formState -> amount.value formState

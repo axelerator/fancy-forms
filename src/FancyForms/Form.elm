@@ -1,5 +1,5 @@
 module FancyForms.Form exposing
-    ( Form, form, FieldWithErrors, validate, field
+    ( Form, PartialForm, form, FieldWithErrors, validate, field
     , Msg, update, extract, init, render
     , listField, FieldWithRemoveButton, ListWithAddButton
     , fieldWithVariants, Variant, Variants
@@ -19,7 +19,7 @@ module FancyForms.Form exposing
 
 # Definition
 
-@docs Form, form, field, isValid, validate, FieldWithErrors
+@docs Form, form, field, isValid, validate, FieldWithErrors, PartialForm
 
 
 # Wiring
@@ -53,6 +53,7 @@ import List.Nonempty exposing (ListNonempty)
 import Maybe exposing (withDefault)
 import String exposing (fromInt, toInt)
 import Tuple
+import FancyForms.FormState exposing (noAttributes)
 
 
 {-| The message type for the form.
@@ -118,10 +119,14 @@ addInvalidIfInconsistent form_ formState errors =
 -}
 update : Form a customError -> Msg -> FormState -> FormState
 update form_ (FormMsg fieldId subfieldId op) formState =
+    let
+        _ = Debug.log "Form.update" (fieldId, subfieldId, op)
+    in
+    
     updateField form_ fieldId subfieldId op formState
 
 
-updateField : FormInternal a customError data -> FieldId -> SubfieldId -> FieldOperation -> FormState -> FormState
+updateField : PartialForm a customError data -> FieldId -> SubfieldId -> FieldOperation -> FormState -> FormState
 updateField { updates } fieldId subfieldId operation ((FormState formState) as fs) =
     let
         updateFn : SubfieldId -> FieldOperation -> Value -> ( Value, Effect )
@@ -184,12 +189,23 @@ mkField fieldWithErrors fieldId widget =
                         errors_ formState
 
                     else
-                        []
+                        Debug.log "was not blurred" []
+
+                widgetModel : Maybe model
+                widgetModel =
+                    deserializeModel formState
+
+                innerAttrs : List (Html.Attribute msg)
+                innerAttrs =
+                    widgetModel
+                    |> Maybe.map widget.value 
+                    |> Maybe.map (\v -> widget.innerAttributes fieldErrors v)
+                    |> Maybe.withDefault []
 
                 inputHtml : List (Html Msg)
                 inputHtml =
-                    deserializeModel formState
-                        |> Maybe.map (widget.view (parentDomId ++ "f-" ++ fieldId))
+                    widgetModel
+                        |> Maybe.map (widget.view (parentDomId ++ "f-" ++ fieldId) innerAttrs) 
                         |> Maybe.withDefault []
                         |> List.map (Html.map toMsg)
             in
@@ -204,6 +220,7 @@ mkField fieldWithErrors fieldId widget =
         errors_ : FormState -> List (Error customError)
         errors_ formState =
             deserializeModel formState
+                |> Maybe.map widget.value
                 |> Maybe.map widget.validate
                 |> Maybe.withDefault []
     in
@@ -218,7 +235,7 @@ mkField fieldWithErrors fieldId widget =
 {-| A form that collects a value of type `data` and potentially produces errors of type `customError`.
 -}
 type alias Form data customError =
-    FormInternal
+    PartialForm
         { view : FormState -> List (Error customError) -> List (Html Msg)
         , combine : FormState -> data
         }
@@ -246,7 +263,11 @@ init { domId, initWithData } data =
         |> initWithData data
 
 
-type alias FormInternal f customError data =
+{-| Represents a form that still needs it's fields to be declared.
+Once all the fields that the view function consumes are declared it
+is not "partial" anymore.
+-}
+type alias PartialForm f customError data =
     { fn : f
     , count : Int
     , updates : Dict FieldId (SubfieldId -> FieldOperation -> Value -> ( Value, Effect ))
@@ -259,7 +280,7 @@ type alias FormInternal f customError data =
     }
 
 
-isConsistentTmp : FormInternal f customError data -> FormState -> Bool
+isConsistentTmp : PartialForm f customError data -> FormState -> Bool
 isConsistentTmp { isConsistent } formState =
     isConsistent formState
 
@@ -268,7 +289,7 @@ extractConsistencyCheck : Widget model msg value customError -> FieldId -> FormS
 extractConsistencyCheck widget fieldId formState =
     read fieldId formState
         |> D.decodeValue widget.decoderModel
-        |> Result.map (\model -> widget.isConsistent model && (List.isEmpty <| widget.validate model))
+        |> Result.map (\model -> widget.isConsistent model && (List.isEmpty <| widget.validate <| widget.value model))
         |> Result.withDefault False
 
 
@@ -325,9 +346,6 @@ extractVariantInit variantsWithWidgets fieldId valueExtractor formModel formStat
         ( variantName, value ) =
             valueExtractor formModel
 
-        _ =
-            Debug.log "extractVariantInit" ( variantName, value )
-
         variantNameExtractor : value -> String
         variantNameExtractor v =
             let
@@ -380,9 +398,10 @@ Takes four arguments:
 
         myForm : Form Int ()
         myForm =
-            Form.form "minimal-example"
-                (\data -> [])
+            Form.form
                 (\errors_ html -> html)
+                (\data -> [])
+                 "minimal-example"
                 (\amount ->
                     { view = \formState _ -> amount.view formState
                     , combine = \formState -> amount.value formState
@@ -391,8 +410,8 @@ Takes four arguments:
                 |> field (integerInput [])
 
 -}
-form : DomId -> Validator data customError -> FieldWithErrors customError -> a -> FormInternal a customError data
-form domId validator fieldWithErrors fn =
+form : FieldWithErrors customError -> Validator data customError -> DomId -> a -> PartialForm a customError data
+form fieldWithErrors validator domId fn =
     { fn = fn
     , count = 0
     , updates = Dict.empty
@@ -415,8 +434,8 @@ default a _ =
 field :
     (data -> value)
     -> Widget widgetModel msg value customError
-    -> FormInternal (Field value customError -> c) customError data
-    -> FormInternal c customError data
+    -> PartialForm (Field value customError -> c) customError data
+    -> PartialForm c customError data
 field extractDefault widget { fn, count, updates, fieldWithErrors, validator, blur, domId, isConsistent, initWithData } =
     let
         fieldId =
@@ -471,8 +490,8 @@ fieldWithVariants :
     -> ( String, Form data customError )
     -> List ( String, Form data customError )
     -> (data -> ( String, data ))
-    -> FormInternal (Field data customError -> c) customError data
-    -> FormInternal c customError data
+    -> PartialForm (Field data customError -> c) customError data
+    -> PartialForm c customError data
 fieldWithVariants variantSelector defaultVariant otherVariants extractDefault { fn, count, updates, fieldWithErrors, validator, blur, domId, isConsistent, initWithData } =
     let
         toWidgetVariant ( n, f ) =
@@ -571,6 +590,7 @@ mkListField fieldWithErrors listWithAddButton fieldWithRemoveButton fieldId widg
                 arrayElementHtml i model =
                     widget.view
                         (buildDomId parentDomId fieldId (ArrayElement i))
+                        []
                         model
 
                 addRemoveButton : Int -> List (Html Msg) -> List (Html Msg)
@@ -602,6 +622,7 @@ mkListField fieldWithErrors listWithAddButton fieldWithRemoveButton fieldId widg
         errors_ : FormState -> List (Error customError)
         errors_ formState =
             deserializeModel formState
+                |> List.map widget.value
                 |> List.map widget.validate
                 |> List.concat
     in
@@ -683,7 +704,7 @@ wrap :
     -> Widget widgetModel msg value customError
 wrap widget container =
     { widget
-        | view = \domId model -> container domId <| widget.view domId model
+        | view = \domId innerAttrs model -> container domId <| widget.view domId innerAttrs model
     }
 
 
@@ -724,9 +745,17 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) mbTemplate s
     in
     case ( operation, subfieldId ) of
         ( Add, ArrayElement _ ) ->
+            let
+                _ = Debug.log "Adding" "ArrayElement"
+            in
+            
             ( D.decodeValue (D.list decoderModel) modelVal
                 |> Result.withDefault []
                 |> (\list ->
+                    let
+                        _ = Debug.log "Adding" [widget.init <| withDefault widget.default mbTemplate ]
+                    in
+                    
                         list
                             ++ [ widget.init <| withDefault widget.default mbTemplate ]
                             |> E.list encodeModel
@@ -742,12 +771,13 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) mbTemplate s
             , WasChanged
             )
 
-        ( Update msgVal, _ ) ->
+        ( Update msgVal, sf ) ->
             case ( D.decodeValue decoderMsg msgVal, D.decodeValue decodeSubfield modelVal ) of
                 ( Ok msg, Ok model ) ->
                     let
                         updateResult =
                             widget.update msg model
+                        _ = Debug.log "update3" (msg, model)
                     in
                     ( encodeSubfield updateResult.model
                     , updateResult.effect
@@ -756,13 +786,20 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) mbTemplate s
                 ( Ok msg, e ) ->
                     let
                         updateResult =
-                            widget.update msg (widget.init (Debug.todo "???2"))
+                            widget.update msg (widget.init widget.default)
+                        _ = Debug.log "update2" e
                     in
                     ( encodeSubfield updateResult.model
                     , updateResult.effect
                     )
 
-                ( e1, _ ) ->
+                ( e1, e2 ) ->
+                    let
+                        
+                        
+                        _ = Debug.log "update1" (sf, e1, E.encode -1 msgVal)
+                    in
+                    
                     ( modelVal
                     , NoEffect
                     )
@@ -778,31 +815,38 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) mbTemplate s
 toWidget : Form a customError -> Widget FormState Msg a customError
 toWidget f =
     let
-        widgetErrors formState =
+        value_ : FormState -> a
+        value_ formState =
             f.fn.combine formState
-                |> f.validator
     in
-    { init =
-        \data ->
-            let
-                _ =
-                    Debug.log "toWidget.init" data
-            in
-            init f data
-    , value = \formState -> f.fn.combine formState
+    { init = \data -> init f data
+    , value = value_
     , default = f.fn.combine <| FormState.init Dict.empty ""
-    , validate =
-        \formState -> widgetErrors formState
+    , validate = f.validator
     , isConsistent = f.isConsistent
     , view =
-        \domId ((FormState model) as fs) ->
-            f.fn.view (FormState { model | parentDomId = domId }) (widgetErrors fs)
-    , update = \(FormMsg fieldId subfieldId value) model -> updateField f fieldId subfieldId value model |> justChanged
+        \domId innerAttrs ((FormState model) as fs) ->
+            f.fn.view (FormState { model | parentDomId = domId }) (f.validator <| value_  fs)
+    , update = (\(FormMsg fieldId subfieldId value) model -> 
+        let
+            _ = Debug.log "toWidget.update" (fieldId, subfieldId, value)
+        in
+        
+        updateField f fieldId subfieldId value model |> justChanged
+        )
     , encodeMsg = encodeFormMsg
-    , decoderMsg = decoderFormMsg
+    , decoderMsg = decoderFormMsg |> D.andThen (\((FormMsg fieldId subfieldId fieldOperation) as m )->
+        let
+            _ = Debug.log "toWidget.decoderMsg" (fieldId, subfieldId, fieldOperation)
+        in
+            D.succeed m
+        
+
+    )
     , encodeModel = formStateEncode
     , decoderModel = formStateDecoder
     , blur = blurAll
+    , innerAttributes = noAttributes
     }
 
 
@@ -890,7 +934,7 @@ keysToInt d =
 {-| Adds a validator to a widget.
 -}
 validate :
-    List (Validator model customError)
+    List (Validator value customError)
     -> Widget model msg value customError
     -> Widget model msg value customError
 validate validators widget =

@@ -3,6 +3,7 @@ module Examples.Variants exposing (..)
 import FancyForms.Form as Form exposing (Form, field, fieldWithVariants)
 import FancyForms.FormState exposing (FormState, alwaysValid)
 import FancyForms.Widgets.Dropdown exposing (dropdown)
+import FancyForms.Widgets.RadioButtons exposing (radioButtons)
 import FancyForms.Widgets.Int exposing (integerInput)
 import FancyForms.Widgets.Text exposing (textInput)
 import Html exposing (div, p, text)
@@ -11,11 +12,14 @@ import String exposing (fromInt)
 
 
 type alias Model =
-    { formState : FormState }
+    { formState : FormState 
+    , useRadioButtons : Bool
+    }
 
 
 type Msg
     = ForForm Form.Msg
+    | ToggleSwitcher
 
 
 type Contact
@@ -23,19 +27,19 @@ type Contact
     | Phone Int Int
 
 
-myForm : Form Contact ()
-myForm =
-    Form.form "variant-example"
-        alwaysValid
-        -- no custom validations
-        (\errors_ html -> html)
-        -- omitting errors for brevity
+myForm : Bool -> Form Contact ()
+myForm useRadioButtons =
+    Form.form 
+        (\errors_ html -> html) -- omitting errors for brevity
+        alwaysValid -- no custom validations
+        "variant-example"
         (\contact ->
             { view = \formState _ -> contact.view formState
             , combine = \formState -> contact.value formState
             }
         )
-        |> fieldWithVariants dropdown
+        |> fieldWithVariants 
+            (if useRadioButtons then radioButtons else dropdown)
             ( "email", emailForm )
             [ ( "phone", phoneForm ) ]
             fromForm
@@ -53,11 +57,10 @@ fromForm c =
 
 emailForm : Form Contact ()
 emailForm =
-    Form.form "email-form"
-        alwaysValid
-        -- no custom validations
-        (\errors_ html -> html)
-        -- omitting errors for brevity
+    Form.form
+        (\errors_ html -> html) -- omitting errors for brevity
+        alwaysValid -- no custom validations
+         "email-form"
         (\email ->
             { view = \formState _ -> email.view formState
             , combine = \formState -> Email <| email.value formState
@@ -78,11 +81,10 @@ email_ c =
 
 phoneForm : Form Contact ()
 phoneForm =
-    Form.form "email-form"
-        alwaysValid
-        -- no custom validations
-        (\errors_ html -> html)
-        -- omitting errors for brevity
+    Form.form
+        (\errors_ html -> html) -- omitting errors for brevity
+        alwaysValid -- no custom validations
+        "email-form"
         (\countryCode number ->
             { view =
                 \formState _ ->
@@ -118,12 +120,12 @@ number_ c =
             n
 
 
-view model =
+view {formState, useRadioButtons} =
     div []
-        [ div [] <| Form.render ForForm myForm model.formState
+        [ div [] <| Form.render ForForm (myForm useRadioButtons) formState
         , p []
             [ text "The user entered: "
-            , case Form.extract myForm model.formState of
+            , case Form.extract (myForm False) formState of
                 Email email ->
                     text <| "Email: " ++ email
 
@@ -138,11 +140,15 @@ default =
 
 
 init =
-    { formState = Form.init myForm default }
+    { formState = Form.init (myForm False) default 
+    , useRadioButtons = False
+    }
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
         ForForm formMsg ->
-            { model | formState = Form.update myForm formMsg model.formState }
+            { model | formState = Form.update (myForm False) formMsg model.formState }
+        ToggleSwitcher ->
+            { model | useRadioButtons = not model.useRadioButtons }

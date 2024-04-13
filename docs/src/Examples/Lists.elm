@@ -18,9 +18,10 @@ type Msg
 
 myForm : Form (List String) ()
 myForm =
-    Form.form "lists-example"
-        alwaysValid -- no custom validations
+    Form.form
         (\_ html -> html) -- omitting errors for brevity
+        alwaysValid -- no custom validations
+        "lists-example"
         (\todos ->
             { view = \formState _ -> todos.view formState
             , combine = \formState -> todos.value formState
@@ -33,20 +34,17 @@ myForm =
             identity
             (textInput [])
 
-
 fieldWithRemoveButton removeMsg input =
     [ fieldset [ role "group" ] <|
         input
             ++ [ button [ onClick removeMsg ] [ text "Remove" ] ]
     ]
 
-
 listWithAddButton addMsg items =
     [ div [] <|
         items
             ++ [ button [ onClick addMsg ] [ text "Add todo" ] ]
     ]
-
 
 view model =
     div []

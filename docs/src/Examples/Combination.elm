@@ -32,9 +32,10 @@ dateInput =
 
 myForm : Form Signup MyError
 myForm =
-    Form.form "combination-example"
-        alwaysValid -- no custom validations
+    Form.form
         (\errors_ html -> html) -- omitting errors for brevity
+        alwaysValid -- no custom validations
+        "combination-example"
         (\login birthday ->
             { view =
                 \formState _ ->

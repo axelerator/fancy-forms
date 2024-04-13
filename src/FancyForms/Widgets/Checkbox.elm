@@ -7,7 +7,7 @@ module FancyForms.Widgets.Checkbox exposing (checkbox)
 -}
 
 import FancyForms.Form exposing (Msg)
-import FancyForms.FormState exposing (Widget, alwaysValid, justChanged)
+import FancyForms.FormState exposing (Widget, alwaysValid, justChanged, noAttributes)
 import Html exposing (input)
 import Html.Attributes exposing (checked, id, type_)
 import Html.Events exposing (onInput)
@@ -29,12 +29,20 @@ checkbox =
     , validate = alwaysValid
     , isConsistent = \_ -> True
     , view =
-        \domId model ->
-            [ input [ id domId, type_ "checkbox", onInput (\_ -> ()), checked model ] [] ]
+        \domId innerAttrs model ->
+            [ input
+                (List.concat
+                    [ [ id domId, type_ "checkbox", onInput (\_ -> ()), checked model ]
+                    , innerAttrs
+                    ]
+                )
+                []
+            ]
     , update = \_ model -> not model |> justChanged
     , encodeMsg = \_ -> E.object []
     , decoderMsg = D.succeed ()
     , encodeModel = E.bool
     , decoderModel = D.bool
     , blur = identity
+    , innerAttributes = noAttributes
     }

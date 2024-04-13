@@ -1,11 +1,11 @@
-module FancyForms.Widgets.Int exposing
-    ( integerInput
+module FancyForms.Widgets.Float exposing
+    ( floatInput
     , greaterThan, lesserThan
     )
 
-{-| An integer input widget.
+{-| An float input widget.
 
-@docs integerInput
+@docs floatInput
 
 
 # Validators
@@ -21,7 +21,7 @@ import Html.Attributes exposing (id, type_, value)
 import Html.Events exposing (onBlur, onFocus, onInput)
 import Json.Decode as D exposing (Decoder, Value)
 import Json.Encode as E
-import String exposing (fromInt)
+import String exposing (fromFloat)
 
 
 type Msg
@@ -32,16 +32,16 @@ type Msg
 
 type alias Model =
     { value : String
-    , parsedValue : Int
+    , parsedValue : Float
     }
 
 
 {-| A validator function that ensures the value is greater than `x`
 -}
-greaterThan : Int -> Validator Int customError
+greaterThan : Float -> Validator Float customError
 greaterThan x value =
     if value <= x then
-        [ MustBeGreaterThan <| fromInt x ]
+        [ MustBeGreaterThan <| fromFloat x ]
 
     else
         []
@@ -49,24 +49,24 @@ greaterThan x value =
 
 {-| A validator function that ensures the value is less than `x`
 -}
-lesserThan : Int -> Validator Int customError
+lesserThan : Float -> Validator Float customError
 lesserThan x value =
     if value >= x then
-        [ MustBeLesserThan <| fromInt x ]
+        [ MustBeLesserThan <| fromFloat x ]
 
     else
         []
 
 
-{-| A widget that collects an `Int`
+{-| A widget that collects an `Float`
 -}
-integerInput : List (Attribute Msg) -> Widget Model Msg Int customError
-integerInput attrs =
-    { init = \i -> { value = fromInt i, parsedValue = i }
+floatInput : List (Attribute Msg) -> Widget Model Msg Float customError
+floatInput attrs =
+    { init = \i -> { value = fromFloat i, parsedValue = i }
     , value = .parsedValue
     , default = 0
     , validate = alwaysValid
-    , isConsistent = \{ parsedValue, value } -> String.toInt value == Just parsedValue
+    , isConsistent = \{ parsedValue, value } -> String.toFloat value == Just parsedValue
     , view =
         \domId innerAttrs model ->
             [ input
@@ -88,7 +88,7 @@ integerInput attrs =
         \msg model ->
             case msg of
                 Changed val ->
-                    String.toInt val
+                    String.toFloat val
                         |> Maybe.map (\i -> { model | parsedValue = i, value = val })
                         |> Maybe.withDefault { model | value = val }
                         |> justChanged
@@ -104,12 +104,12 @@ integerInput attrs =
         \model ->
             E.object
                 [ ( "value", E.string model.value )
-                , ( "parsedValue", E.int model.parsedValue )
+                , ( "parsedValue", E.float model.parsedValue )
                 ]
     , decoderModel =
         D.map2 Model
             (D.field "value" D.string)
-            (D.field "parsedValue" D.int)
+            (D.field "parsedValue" D.float)
     , blur = identity
     , innerAttributes = noAttributes
     }
@@ -146,3 +146,4 @@ decoderMsg =
                 )
         , D.field "Changed" D.string |> D.map Changed
         ]
+

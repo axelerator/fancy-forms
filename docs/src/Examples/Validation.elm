@@ -7,6 +7,8 @@ import Html exposing (Html, button, div, label, p, text)
 import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
 import String exposing (fromInt)
+import Html.Attributes exposing (attribute)
+import Html exposing (small)
 
 
 type alias Model =
@@ -44,7 +46,7 @@ viewErrors errors =
         text ""
 
     else
-        div [ class "errors" ]
+        small []
             [ List.map errorToString errors
                 |> String.join " "
                 |> text
@@ -60,9 +62,10 @@ fieldWithErrors errors html =
 
 myForm : Form Date MyError
 myForm =
-    Form.form "validation-example"
-        daysOfMonthValidator
+    Form.form 
         fieldWithErrors
+        daysOfMonthValidator
+        "validation-example"
         (\day month year ->
             { view =
                 \formState errors ->
@@ -89,6 +92,11 @@ myForm =
         |> field .month (integerInput [] |> validate [ greaterThan 0, lesserThan 13 ])
         |> field .year (integerInput [] |> validate [ greaterThan 1900 ])
 
+markAsInvalid errors _ =
+    if List.isEmpty errors then
+        []
+    else
+        [attribute "aria-invalid" "true"]
 
 takeDay : Date -> Int
 takeDay { day } =
@@ -105,10 +113,10 @@ errorToString e =
             "must not be blank"
 
         MustBeGreaterThan n ->
-            "must be greater than " ++ String.fromInt n
+            "must be greater than " ++ n
 
         MustBeLesserThan n ->
-            "must be lower than " ++ String.fromInt n
+            "must be lower than " ++ n
 
         CustomError ce ->
             case ce of

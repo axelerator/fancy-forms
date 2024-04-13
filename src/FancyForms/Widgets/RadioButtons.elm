@@ -1,20 +1,20 @@
-module FancyForms.Widgets.Dropdown exposing (dropdown)
+module FancyForms.Widgets.RadioButtons exposing (radioButtons)
 
-{-| A dropdown widget.
+{-| A widget that lets the user make a selection based on radio buttons
 
-@docs dropdown
+@docs radioButtons
 
 -}
 
 import FancyForms.Form exposing (Msg, Variant, Variants)
 import FancyForms.FormState exposing (DomId, UpdateResult, Widget, alwaysValid, justChanged, noAttributes)
-import Html exposing (Html, option, select, text)
-import Html.Attributes exposing (checked, class, id, selected, value)
+import Html exposing (Html, input, select, text)
+import Html.Attributes exposing (checked, class, id, type_, value)
 import Html.Events exposing (onInput)
 import Json.Decode as D
 import Json.Encode as E
-import List.Nonempty exposing (ListNonempty)
-import Maybe exposing (withDefault)
+import List.Nonempty
+import Maybe
 
 
 type alias Msg =
@@ -34,10 +34,10 @@ init variants v =
 
 
 {-| Returns a widget that lets the user select a value from a list of
-variants.
+variants with radio buttons.
 -}
-dropdown : Variants a -> Widget String Msg a customError
-dropdown variants =
+radioButtons : Variants a -> Widget String Msg a customError
+radioButtons variants =
     { init = init variants
     , value = fromString variants
     , default = List.Nonempty.head variants |> .value
@@ -79,9 +79,17 @@ view variants _ innerAttrs selectedId =
             fromString variants selectedId
 
         opt { id, label, value } =
-            option [ Html.Attributes.value id, selected <| selectedValue == value ] [ text label ]
+            Html.label []
+                [ input
+                    ([ type_ "radio"
+                     , Html.Attributes.value id
+                     , checked <| selectedValue == value
+                     , onInput (\_ -> id)
+                     ]
+                        ++ innerAttrs
+                    )
+                    []
+                , text label
+                ]
     in
-    [ select
-        ([ class "dropdown", onInput identity ] ++ innerAttrs)
-        (List.map opt (all variants))
-    ]
+    List.map opt (all variants)

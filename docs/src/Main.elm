@@ -150,22 +150,12 @@ update msg model =
             )
 
 
-styles : Html Msg
-styles =
-    """
-    .has-error > input { border-color: red; }
-    .errors { color: red; }
-    """
-        |> text
-        |> List.singleton
-        |> Html.node "style" []
 
 
 view : Model -> Html Msg
 view model =
     Html.main_ [ class "container-fluid" ]
-        [ styles
-        , SH.useTheme SH.monokai
+        [ SH.useTheme SH.monokai
         , a [ name "top" ] []
         , viewToc
         , viewMinimal model
@@ -205,22 +195,13 @@ function.
 
 Here we only have a single `Int` input field. The `view` function can use the `amount` field to render the input widget.
 The `combine` function can use the `amount` field to extract the value from the form state.
-"""
+""" |> Markdown.toHtml []
 
 
 htmlMap : (msg -> Msg) -> Html msg -> Html Msg
 htmlMap toMsg html =
     article []
         [ Html.map toMsg html ]
-
-
-partial : Model -> Example -> Int -> Int -> CodeRange
-partial model example start end =
-    if isExpanded example model then
-        Complete
-
-    else
-        Partial start end
 
 
 examples =
@@ -256,7 +237,7 @@ examples =
       }
     , { example = Variants
       , code = Variants.code
-      , range = ( 13, 41 )
+      , range = ( 13, 45 )
       , title = "Variants"
       , subTitle = "Letting the user choose between multiple sub forms"
       }
@@ -307,7 +288,7 @@ a list of `Error MyError` relative to the input field.
 
 Per-field validations are only executed the first time a field is blurred. This is because we wan't to
 avoid the user being confronted with an "all red" form before they have entered anything.
-"""
+""" |> Markdown.toHtml []
 
 
 viewValidation : Model -> Html Msg
@@ -332,7 +313,7 @@ One noteworthy aspect of the `Form.wrap` function is that it is aware of the uni
 that gets wrapped. This is especially import in our _"label"_ case since we need to know the value of
 the `id` attribute of the `input` element. Only if we use that value for the `for` attribute of the 
 label element the user will be able to focus the input by clicking on the label.
-"""
+""" |> Markdown.toHtml []
 
 
 viewDecoration : Model -> Html Msg
@@ -355,7 +336,7 @@ converted collects.
 
 For this to work, all widgets need to use the same custom `Error` type. Throughout these examples
 we consistently use the `MyError` type.
-"""
+""" |> Markdown.toHtml []
 
 
 viewCombination : Model -> Html Msg
@@ -382,7 +363,7 @@ with a few more arguments:
 3. A default value for a new item.
 4. A function that extracts the inital list from the initial value of the form.
 
-"""
+""" |> Markdown.toHtml []
 
 
 viewLists : Model -> Html Msg
@@ -391,14 +372,17 @@ viewLists model =
         |> viewExample model listsMarkdown ForLists Lists
 
 
-variantsMarkdown =
+variantsMarkdown1 =
     """
 Often we want to let the user choose __"the kind"__ of date they want to enter.
 When the choice affects the shape of the form we can use the `fieldWithVariants` function to create a field.
 
 The first argument is the widget that will be used to let the user choose the kind of data.
 In this case we use the `dropdown` widget.
+""" |> Markdown.toHtml []
 
+variantsMarkdown2 =
+    """
 The next argument provides the default variant. Each variant is a `Tuple` of the label and the sub form.
 The third argument is the list of all the other variants.
 
@@ -408,16 +392,25 @@ This function also needs to tell us which variant to use to edit it. That's why 
 The resulting field will still only collect a value of a **single** type. 
 So the widgets of all sub forms need to return the same type.
 So pratically we will create a new sum type with a variant for each of the possible sub forms.
-"""
+""" |> Markdown.toHtml []
 
 
 viewVariants : Model -> Html Msg
 viewVariants model =
+    let
+        description =
+            div [] 
+              [ variantsMarkdown1
+              , text "But we could also use the ", small [] [button [onClick <| ForVariants Variants.ToggleSwitcher] [ text "radioButtons"]], text " widget."
+              , variantsMarkdown2
+              ]
+    in
+
     Variants.view model.variants
-        |> viewExample model variantsMarkdown ForVariants Variants
+        |> viewExample model description ForVariants Variants
 
 
-viewExample model markdown toMsg example subView =
+viewExample model description toMsg example subView =
     section []
         [ h2 []
             [ a [ name <| exampleAsStr example ] []
@@ -425,7 +418,7 @@ viewExample model markdown toMsg example subView =
             ]
         , div [ class "grid" ]
             [ div []
-                [ Markdown.toHtml [ class "content" ] markdown
+                [ description
                 , htmlMap toMsg <| subView
                 ]
             , viewCode example model

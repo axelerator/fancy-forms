@@ -1,7 +1,8 @@
 module FancyForms.FormState exposing
     ( DomId, Error(..), FormState(..), Validator, Widget
     , alwaysValid, blurAll, init
-    , blurChildren, Effect(..), FieldId, FieldOperation(..), FieldStatus(..), SubfieldId(..), UpdateResult, encodedUpdate, formStateDecoder, formStateEncode, justChanged, justChangedInternally, read, subId, updateFieldStatus, wasAtLeast, withBlur, withFocus, write
+    , blurChildren, Effect(..), FieldId, FieldOperation(..), FieldStatus(..), SubfieldId(..), UpdateResult, encodedUpdate, formStateDecoder, formStateEncode, justChanged, justChangedInternally, read, subId, updateFieldStatus, wasAtLeast, withBlur, withFocus, write, withInnerAttributes
+    , noAttributes
     )
 
 {-| Exposes various types used to track state of the form.
@@ -19,17 +20,16 @@ module FancyForms.FormState exposing
 
 # Advanced helpers to cunstruc widgets from scratch
 
-@docs blurChildren, Effect, FieldId, FieldOperation, FieldStatus, SubfieldId, UpdateResult, encodedUpdate, formStateDecoder, formStateEncode, justChanged, justChangedInternally, read, subId, updateFieldStatus, wasAtLeast, withBlur, withFocus, write
+@docs blurChildren, Effect, FieldId, FieldOperation, FieldStatus, SubfieldId, UpdateResult, encodedUpdate, formStateDecoder, formStateEncode, justChanged, justChangedInternally, read, subId, updateFieldStatus, wasAtLeast, withBlur, withFocus, write, withInnerAttributes, noAttributes
 
 -}
 
-import Dict exposing (Dict)
+import Dict exposing (Dict, values)
 import Html exposing (Html)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E exposing (Value)
 import Maybe exposing (withDefault)
 import String exposing (fromInt)
-import Dict exposing (values)
 
 
 {-| The state of the form. Stores all the values and the status of each field.
@@ -41,6 +41,7 @@ type FormState
         , fieldStatus : Dict FieldId FieldStatus
         , allBlurred : Bool
         }
+
 
 {-| The status of a field. We'll only expose the result of a field validation after it has been blurred.
 -}
@@ -89,7 +90,8 @@ updateFieldStatus status effect =
         ( Blurred, _ ) ->
             Blurred
 
-{-| Marks all fields as blurred. This is needed to show all errors when trying to submit a 
+
+{-| Marks all fields as blurred. This is needed to show all errors when trying to submit a
 form without the user having visited all fields.
 -}
 blurAll : FormState -> FormState
@@ -99,7 +101,8 @@ blurAll (FormState formState) =
             | allBlurred = True
         }
 
-{-| Helper to check if a field was visited 
+
+{-| Helper to check if a field was visited
 -}
 wasAtLeast : FieldStatus -> FieldId -> FormState -> Bool
 wasAtLeast goal fieldId (FormState { fieldStatus, allBlurred }) =
@@ -149,8 +152,9 @@ type Effect
     | WasChanged
     | WasBlurred
 
+
 {-| Specifies the operation to perform on a field. `Add` and `Remove` are
-   used for list fields.
+used for list fields.
 -}
 type FieldOperation
     = Add
@@ -158,10 +162,8 @@ type FieldOperation
     | Update Value
 
 
-
-{-|
-   List fields need an index additional to the FieldId to know which
-   list item to update.
+{-| List fields need an index additional to the FieldId to know which
+list item to update.
 -}
 type SubfieldId
     = SingleValue
@@ -172,6 +174,7 @@ type SubfieldId
 -}
 type alias FieldId =
     String
+
 
 {-| Is returned from the `update` function of a `Widget`
 -}
@@ -223,16 +226,40 @@ type alias Widget model msg value customError =
     { init : value -> model
     , default : value
     , value : model -> value
-    , validate : Validator model customError
+    , validate : Validator value customError
     , isConsistent : model -> Bool
-    , view : DomId -> model -> List (Html msg)
+    , view : DomId -> List (Html.Attribute msg) -> model -> List (Html msg)
     , update : msg -> model -> UpdateResult model
     , encodeMsg : msg -> Value
     , decoderMsg : Decoder msg
     , encodeModel : model -> Value
     , decoderModel : Decoder model
     , blur : model -> model
+    , innerAttributes : List (Error customError) -> value -> List (Html.Attribute msg)
     }
+
+
+{-| The default for a `Widget`
+-}
+noAttributes : List (Error customError) -> value -> List (Html.Attribute msg)
+noAttributes _ _ =
+    []
+
+
+{-| You can provide a function that generates a list of attributes for the inner widget.
+This function can use the current value and errors to generate the attributes.
+-} 
+withInnerAttributes :
+    (List (Error customError) -> value -> List (Html.Attribute msg))
+    -> Widget model msg value customError
+    -> Widget model msg value customError
+withInnerAttributes f widget =
+    let
+        combined errors value =
+            widget.innerAttributes errors value ++ f errors value
+    in
+    { widget | innerAttributes = combined }
+
 
 {-| A validator is a function that can be used to validate the value of a form or a widget.
 -}
@@ -245,9 +272,10 @@ type alias Validator a e =
 type Error customError
     = NotValid
     | MustNotBeBlank
-    | MustBeGreaterThan Int
-    | MustBeLesserThan Int
+    | MustBeGreaterThan String
+    | MustBeLesserThan String
     | CustomError customError
+
 
 {-| A unique identifier for a field in a form.
 -}
@@ -331,6 +359,7 @@ decoderFieldStatus =
                         D.fail "invalid field status"
             )
 
+
 {-| Reads the value for the given field.
 -}
 read : FieldId -> FormState -> Value
@@ -372,13 +401,14 @@ toKey fieldId subfieldId =
 {-| Creates a validator that always succeeds.
 
 Useful for forms that fully rely on per-field validations.
+
 -}
 alwaysValid : Validator a e
 alwaysValid _ =
     []
 
 
-{-| Encodes the update for the given field. 
+{-| Encodes the update for the given field.
 -}
 encodedUpdate :
     Widget model msg value customError

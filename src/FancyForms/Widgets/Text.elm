@@ -1,14 +1,21 @@
-module FancyForms.Widgets.Text exposing (notBlank, textInput)
-{-| A text input widget 
+module FancyForms.Widgets.Text exposing
+    ( textInput
+    , notBlank
+    )
+
+{-| A text input widget
+
 @docs textInput
+
 
 # Validators
 
 @docs notBlank
+
 -}
 
 import FancyForms.Form exposing (Msg)
-import FancyForms.FormState exposing (Error(..), Validator, Widget, alwaysValid, justChanged, withBlur, withFocus)
+import FancyForms.FormState exposing (Error(..), Validator, Widget, alwaysValid, justChanged, noAttributes, withBlur, withFocus)
 import Html exposing (Attribute, input)
 import Html.Attributes exposing (id, value)
 import Html.Events exposing (onBlur, onFocus, onInput)
@@ -21,29 +28,35 @@ type Msg
     | Focused
     | Blurred
 
-{-| A validator function that ensures that the given string is not empty. 
+
+{-| A validator function that ensures that the given string is not empty.
 -}
 notBlank : Validator String customError
 notBlank model =
-    if model == "" then
+    if (Debug.log "notBlank" model) == "" then
         [ MustNotBeBlank ]
 
     else
         []
 
-{-| A text input widget -}
+
+{-| A text input widget
+-}
 textInput : List (Attribute Msg) -> Widget String Msg String customError
 textInput attrs =
     { init = identity
     , value = identity
     , default = ""
     , validate = alwaysValid
-    , isConsistent = (\_ -> True)
+    , isConsistent = \_ -> True
     , view =
-        \domId model ->
+        \domId innerAttrs model ->
             [ input
-                (attrs
-                    ++ [ id domId, onInput Changed, onFocus Focused, onBlur Blurred, value model ]
+                (List.concat
+                    [ attrs
+                    , innerAttrs
+                    , [ id domId, onInput Changed, onFocus Focused, onBlur Blurred, value model ]
+                    ]
                 )
                 []
             ]
@@ -63,6 +76,7 @@ textInput attrs =
     , encodeModel = E.string
     , decoderModel = D.string
     , blur = identity
+    , innerAttributes = noAttributes
     }
 
 

@@ -40,9 +40,10 @@ textInputWithLabel labelText =
 
 myForm : Form Login MyError
 myForm =
-    Form.form "decoration-example"
-        alwaysValid -- no custom validations
+    Form.form
         (\errors_ html -> html) -- omitting errors for brevity
+        alwaysValid -- no custom validations
+        "decoration-example"
         (\user password ->
             { view =
                 \formState _ ->
