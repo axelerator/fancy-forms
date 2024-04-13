@@ -1,14 +1,11 @@
 module FancyForms.Widgets.Date exposing
     ( dateInput
+    , Msg
     )
 
 {-| An date input widget.
 
-@docs dateInput
-
-
-# Validators
-
+@docs dateInput, Msg
 
 -}
 
@@ -23,6 +20,8 @@ import Date exposing (Date, fromIsoString, toIsoString, fromRataDie, toRataDie)
 import Date exposing (fromOrdinalDate)
 
 
+{-| Messages that can be sent to the date input 
+-}
 type Msg
     = Changed String
     | Focused

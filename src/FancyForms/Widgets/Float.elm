@@ -1,11 +1,11 @@
 module FancyForms.Widgets.Float exposing
-    ( floatInput
+    ( floatInput, Msg
     , greaterThan, lesserThan
     )
 
 {-| An float input widget.
 
-@docs floatInput
+@docs floatInput, Msg
 
 
 # Validators
@@ -24,6 +24,8 @@ import Json.Encode as E
 import String exposing (fromFloat)
 
 
+{-| Messages that can be sent to the float input
+-}
 type Msg
     = Changed String
     | Focused
@@ -146,4 +148,3 @@ decoderMsg =
                 )
         , D.field "Changed" D.string |> D.map Changed
         ]
-

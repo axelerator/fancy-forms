@@ -1,8 +1,8 @@
-module FancyForms.Widgets.Checkbox exposing (checkbox)
+module FancyForms.Widgets.Checkbox exposing (checkbox, Msg)
 
 {-| Checkbox widget
 
-@docs checkbox
+@docs checkbox, Msg
 
 -}
 
@@ -14,7 +14,8 @@ import Html.Events exposing (onInput)
 import Json.Decode as D
 import Json.Encode as E
 
-
+{-| Messages that can be sent to the checkbox
+-}
 type alias Msg =
     ()
 

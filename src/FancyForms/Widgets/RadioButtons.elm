@@ -1,15 +1,18 @@
-module FancyForms.Widgets.RadioButtons exposing (radioButtons)
+module FancyForms.Widgets.RadioButtons exposing
+    ( radioButtons
+    , Msg
+    )
 
 {-| A widget that lets the user make a selection based on radio buttons
 
-@docs radioButtons
+@docs radioButtons, Msg
 
 -}
 
 import FancyForms.Form exposing (Msg, Variant, Variants)
 import FancyForms.FormState exposing (DomId, UpdateResult, Widget, alwaysValid, justChanged, noAttributes)
-import Html exposing (Html, input, select, text)
-import Html.Attributes exposing (checked, class, id, type_, value)
+import Html exposing (Html, input, text)
+import Html.Attributes exposing (checked, id, type_, value)
 import Html.Events exposing (onInput)
 import Json.Decode as D
 import Json.Encode as E
@@ -17,6 +20,8 @@ import List.Nonempty
 import Maybe
 
 
+{-| Messages that can be sent to the radio buttons
+-}
 type alias Msg =
     String
 

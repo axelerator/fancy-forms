@@ -1,11 +1,11 @@
 module FancyForms.Widgets.Text exposing
-    ( textInput
+    ( textInput, Msg
     , notBlank
     )
 
 {-| A text input widget
 
-@docs textInput
+@docs textInput, Msg
 
 
 # Validators
@@ -23,6 +23,8 @@ import Json.Decode as D exposing (Decoder)
 import Json.Encode as E exposing (Value)
 
 
+{-| Messages that can be sent to the text input
+-}
 type Msg
     = Changed String
     | Focused
@@ -33,7 +35,7 @@ type Msg
 -}
 notBlank : Validator String customError
 notBlank model =
-    if (Debug.log "notBlank" model) == "" then
+    if Debug.log "notBlank" model == "" then
         [ MustNotBeBlank ]
 
     else

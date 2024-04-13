@@ -1,22 +1,24 @@
-module FancyForms.Widgets.Dropdown exposing (dropdown)
+module FancyForms.Widgets.Dropdown exposing (dropdown, Msg)
 
 {-| A dropdown widget.
 
-@docs dropdown
+@docs dropdown, Msg
 
 -}
 
 import FancyForms.Form exposing (Msg, Variant, Variants)
 import FancyForms.FormState exposing (DomId, UpdateResult, Widget, alwaysValid, justChanged, noAttributes)
 import Html exposing (Html, option, select, text)
-import Html.Attributes exposing (checked, class, id, selected, value)
+import Html.Attributes exposing (class, id, selected, value)
 import Html.Events exposing (onInput)
 import Json.Decode as D
 import Json.Encode as E
-import List.Nonempty exposing (ListNonempty)
-import Maybe exposing (withDefault)
+import List.Nonempty
+import Maybe
 
 
+{-| Messages that can be sent to the dropdown.
+-}
 type alias Msg =
     String
 
