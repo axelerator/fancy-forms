@@ -1,7 +1,4 @@
-module FancyForms.Widgets.Date exposing
-    ( dateInput
-    , Msg
-    )
+module FancyForms.Widgets.Date exposing (dateInput, Msg)
 
 {-| An date input widget.
 
@@ -9,18 +6,17 @@ module FancyForms.Widgets.Date exposing
 
 -}
 
+import Date exposing (Date, fromIsoString, fromOrdinalDate, fromRataDie, toIsoString, toRataDie)
 import FancyForms.Form exposing (Msg)
-import FancyForms.FormState exposing (Error(..), Validator, Widget, alwaysValid, justChanged, noAttributes, withBlur, withFocus)
+import FancyForms.FormState exposing (Error(..), Widget, alwaysValid, justChanged, noAttributes, withBlur, withFocus)
 import Html exposing (Attribute, input)
 import Html.Attributes exposing (id, type_, value)
 import Html.Events exposing (onBlur, onFocus, onInput)
 import Json.Decode as D exposing (Decoder, Value)
 import Json.Encode as E
-import Date exposing (Date, fromIsoString, toIsoString, fromRataDie, toRataDie)
-import Date exposing (fromOrdinalDate)
 
 
-{-| Messages that can be sent to the date input 
+{-| Messages that can be sent to the date input
 -}
 type Msg
     = Changed String
@@ -33,11 +29,16 @@ type alias Model =
     , parsedValue : Date
     }
 
-    
+
+{-| Signature for an input widget that collects a `Date` value
+-}
+type alias DateInput customError =
+    Widget Model Msg Date customError
+
 
 {-| A widget that collects an `Date`
 -}
-dateInput : List (Attribute Msg) -> Widget Model Msg Date customError
+dateInput : List (Attribute Msg) -> DateInput customError
 dateInput attrs =
     { init = \i -> { value = toIsoString i, parsedValue = i }
     , value = .parsedValue
@@ -123,4 +124,3 @@ decoderMsg =
                 )
         , D.field "Changed" D.string |> D.map Changed
         ]
-

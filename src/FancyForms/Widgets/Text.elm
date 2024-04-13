@@ -1,11 +1,11 @@
 module FancyForms.Widgets.Text exposing
-    ( textInput, Msg
+    ( textInput, TextInput
     , notBlank
     )
 
 {-| A text input widget
 
-@docs textInput, Msg
+@docs textInput, TextInput
 
 
 # Validators
@@ -42,9 +42,15 @@ notBlank model =
         []
 
 
+{-| Signature for a text input widget
+-}
+type alias TextInput customError =
+    Widget String Msg String customError
+
+
 {-| A text input widget
 -}
-textInput : List (Attribute Msg) -> Widget String Msg String customError
+textInput : List (Attribute Msg) -> TextInput customError
 textInput attrs =
     { init = identity
     , value = identity

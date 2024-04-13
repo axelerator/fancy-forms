@@ -1,11 +1,11 @@
 module FancyForms.Widgets.Float exposing
-    ( floatInput, Msg
+    ( floatInput, FloatInput
     , greaterThan, lesserThan
     )
 
 {-| An float input widget.
 
-@docs floatInput, Msg
+@docs floatInput, FloatInput
 
 
 # Validators
@@ -60,9 +60,15 @@ lesserThan x value =
         []
 
 
+{-| Signature of an input widget that collects a `Float`
+-}
+type alias FloatInput customError =
+    Widget Model Msg Float customError
+
+
 {-| A widget that collects an `Float`
 -}
-floatInput : List (Attribute Msg) -> Widget Model Msg Float customError
+floatInput : List (Attribute Msg) -> FloatInput customError
 floatInput attrs =
     { init = \i -> { value = fromFloat i, parsedValue = i }
     , value = .parsedValue

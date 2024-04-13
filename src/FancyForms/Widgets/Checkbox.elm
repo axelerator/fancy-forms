@@ -1,8 +1,8 @@
-module FancyForms.Widgets.Checkbox exposing (checkbox, Msg)
+module FancyForms.Widgets.Checkbox exposing (checkbox, BoolInput)
 
 {-| Checkbox widget
 
-@docs checkbox, Msg
+@docs checkbox, BoolInput
 
 -}
 
@@ -19,10 +19,13 @@ import Json.Encode as E
 type alias Msg =
     ()
 
+{-| Signature for an input that collects a `Bool` value
+-}
+type alias BoolInput customError = Widget Bool Msg Bool customError
 
 {-| A checkbox widget the collects a `Bool` value
 -}
-checkbox : Widget Bool Msg Bool customError
+checkbox : BoolInput customError
 checkbox =
     { init = identity
     , value = identity

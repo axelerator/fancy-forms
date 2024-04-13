@@ -57,10 +57,14 @@ lesserThan x value =
     else
         []
 
+{-| Signature for an input widget that collects an `Int`
+-}
+type alias IntInput customError = 
+    Widget Model Msg Int customError
 
 {-| A widget that collects an `Int`
 -}
-integerInput : List (Attribute Msg) -> Widget Model Msg Int customError
+integerInput : List (Attribute Msg) -> IntInput customError
 integerInput attrs =
     { init = \i -> { value = fromInt i, parsedValue = i }
     , value = .parsedValue

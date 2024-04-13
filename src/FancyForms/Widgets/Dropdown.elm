@@ -1,8 +1,8 @@
-module FancyForms.Widgets.Dropdown exposing (dropdown, Msg)
+module FancyForms.Widgets.Dropdown exposing (dropdown, SelectWidget)
 
 {-| A dropdown widget.
 
-@docs dropdown, Msg
+@docs dropdown, SelectWidget
 
 -}
 
@@ -35,10 +35,17 @@ init variants v =
         |> Maybe.withDefault (List.Nonempty.head variants |> .id)
 
 
+{-| Signature for a widget that lets the user select a value from a
+list of variants.
+-}
+type alias SelectWidget a customError =
+    Widget String Msg a customError
+
+
 {-| Returns a widget that lets the user select a value from a list of
 variants.
 -}
-dropdown : Variants a -> Widget String Msg a customError
+dropdown : Variants a -> SelectWidget a customError
 dropdown variants =
     { init = init variants
     , value = fromString variants
