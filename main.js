@@ -5756,10 +5756,6 @@ var $elm$json$Json$Encode$list = F2(
 				_Json_emptyArray(_Utils_Tuple0),
 				entries));
 	});
-var $elm$core$Debug$log = _Debug_log;
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var $elm$core$List$takeReverse = F3(
 	function (n, list, kept) {
 		takeReverse:
@@ -5929,17 +5925,8 @@ var $author$project$FancyForms$Form$encodedUpdate = F5(
 				case 'Add':
 					if (_v0.b.$ === 'ArrayElement') {
 						var _v1 = _v0.a;
-						var _v2 = A2($elm$core$Debug$log, 'Adding', 'ArrayElement');
 						return _Utils_Tuple2(
 							function (list) {
-								var _v3 = A2(
-									$elm$core$Debug$log,
-									'Adding',
-									_List_fromArray(
-										[
-											widget.init(
-											A2($elm$core$Maybe$withDefault, widget._default, mbTemplate))
-										]));
 								return A2(
 									$elm$json$Json$Encode$list,
 									encodeModel,
@@ -5964,7 +5951,7 @@ var $author$project$FancyForms$Form$encodedUpdate = F5(
 					}
 				case 'Remove':
 					if (_v0.b.$ === 'ArrayElement') {
-						var _v4 = _v0.a;
+						var _v2 = _v0.a;
 						var i = _v0.b.a;
 						return _Utils_Tuple2(
 							A2(
@@ -5988,44 +5975,28 @@ var $author$project$FancyForms$Form$encodedUpdate = F5(
 					}
 				default:
 					var msgVal = _v0.a.a;
-					var sf = _v0.b;
-					var _v5 = _Utils_Tuple2(
+					var _v3 = _Utils_Tuple2(
 						A2($elm$json$Json$Decode$decodeValue, decoderMsg, msgVal),
 						A2($elm$json$Json$Decode$decodeValue, decodeSubfield, modelVal));
-					if (_v5.a.$ === 'Ok') {
-						if (_v5.b.$ === 'Ok') {
-							var msg = _v5.a.a;
-							var model = _v5.b.a;
+					if (_v3.a.$ === 'Ok') {
+						if (_v3.b.$ === 'Ok') {
+							var msg = _v3.a.a;
+							var model = _v3.b.a;
 							var updateResult = A2(widget.update, msg, model);
-							var _v6 = A2(
-								$elm$core$Debug$log,
-								'update3',
-								_Utils_Tuple2(msg, model));
 							return _Utils_Tuple2(
 								encodeSubfield(updateResult.model),
 								updateResult.effect);
 						} else {
-							var msg = _v5.a.a;
-							var e = _v5.b;
+							var msg = _v3.a.a;
 							var updateResult = A2(
 								widget.update,
 								msg,
 								widget.init(widget._default));
-							var _v7 = A2($elm$core$Debug$log, 'update2', e);
 							return _Utils_Tuple2(
 								encodeSubfield(updateResult.model),
 								updateResult.effect);
 						}
 					} else {
-						var e1 = _v5.a;
-						var e2 = _v5.b;
-						var _v8 = A2(
-							$elm$core$Debug$log,
-							'update1',
-							_Utils_Tuple3(
-								sf,
-								e1,
-								A2($elm$json$Json$Encode$encode, -1, msgVal)));
 						return _Utils_Tuple2(modelVal, $author$project$FancyForms$FormState$NoEffect);
 					}
 			}
@@ -6227,7 +6198,7 @@ var $author$project$FancyForms$Form$mkField = F3(
 				}(
 					widget.encodeMsg(msg));
 			};
-			var fieldErrors = A3($author$project$FancyForms$FormState$wasAtLeast, $author$project$FancyForms$FormState$Blurred, fieldId, formState) ? errors_(formState) : A2($elm$core$Debug$log, 'was not blurred', _List_Nil);
+			var fieldErrors = A3($author$project$FancyForms$FormState$wasAtLeast, $author$project$FancyForms$FormState$Blurred, fieldId, formState) ? errors_(formState) : _List_Nil;
 			var innerAttrs = A2(
 				$elm$core$Maybe$withDefault,
 				_List_Nil,
@@ -7087,10 +7058,6 @@ var $author$project$FancyForms$Form$toWidget = function (f) {
 				var fieldId = m.a;
 				var subfieldId = m.b;
 				var fieldOperation = m.c;
-				var _v0 = A2(
-					$elm$core$Debug$log,
-					'toWidget.decoderMsg',
-					_Utils_Tuple3(fieldId, subfieldId, fieldOperation));
 				return $elm$json$Json$Decode$succeed(m);
 			},
 			$author$project$FancyForms$Form$decoderFormMsg),
@@ -7104,14 +7071,10 @@ var $author$project$FancyForms$Form$toWidget = function (f) {
 		innerAttributes: $author$project$FancyForms$FormState$noAttributes,
 		isConsistent: f.isConsistent,
 		update: F2(
-			function (_v1, model) {
-				var fieldId = _v1.a;
-				var subfieldId = _v1.b;
-				var value = _v1.c;
-				var _v2 = A2(
-					$elm$core$Debug$log,
-					'toWidget.update',
-					_Utils_Tuple3(fieldId, subfieldId, value));
+			function (_v0, model) {
+				var fieldId = _v0.a;
+				var subfieldId = _v0.b;
+				var value = _v0.c;
 				return $author$project$FancyForms$FormState$justChanged(
 					A5($author$project$FancyForms$Form$updateField, f, fieldId, subfieldId, value, model));
 			}),
@@ -7853,6 +7816,7 @@ var $author$project$Examples$Variants$emailForm = A3(
 					})
 			};
 		}));
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Dict$map = F2(
 	function (func, dict) {
 		if (dict.$ === 'RBEmpty_elm_builtin') {
@@ -7872,6 +7836,9 @@ var $elm$core$Dict$map = F2(
 				A2($elm$core$Dict$map, func, right));
 		}
 	});
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
 var $author$project$FancyForms$Form$debugFormState = function (fs) {
 	var values = fs.a.values;
 	var dbg = F2(
@@ -8038,7 +8005,6 @@ var $author$project$FancyForms$Widgets$VariantSelect$selectedValue = F3(
 					selectedWidget.decoderModel,
 					A2($author$project$FancyForms$FormState$read, selectedVariantName, model))));
 	});
-var $elm$core$Debug$todo = _Debug_todo;
 var $author$project$FancyForms$FormState$encodedUpdate = F4(
 	function (widget, subfieldId, operation, modelVal) {
 		var decoderMsg = widget.decoderMsg;
@@ -8090,13 +8056,7 @@ var $author$project$FancyForms$FormState$encodedUpdate = F4(
 									list,
 									_List_fromArray(
 										[
-											widget.init(
-											_Debug_todo(
-												'FancyForms.FormState',
-												{
-													start: {line: 453, column: 49},
-													end: {line: 453, column: 59}
-												})('needs template object'))
+											widget.init(widget._default)
 										])));
 						}(
 							A2(
@@ -8136,16 +8096,11 @@ var $author$project$FancyForms$FormState$encodedUpdate = F4(
 					var _v3 = _Utils_Tuple2(
 						A2($elm$json$Json$Decode$decodeValue, decoderMsg, msgVal),
 						A2($elm$json$Json$Decode$decodeValue, decodeSubfield, modelVal));
-					if (_v3.a.$ === 'Ok') {
-						if (_v3.b.$ === 'Ok') {
-							var msg = _v3.a.a;
-							var model = _v3.b.a;
-							return encodeSubfield(
-								A2(widget.update, msg, model).model);
-						} else {
-							var msg = _v3.a.a;
-							return modelVal;
-						}
+					if ((_v3.a.$ === 'Ok') && (_v3.b.$ === 'Ok')) {
+						var msg = _v3.a.a;
+						var model = _v3.b.a;
+						return encodeSubfield(
+							A2(widget.update, msg, model).model);
 					} else {
 						return modelVal;
 					}
@@ -9011,10 +8966,6 @@ var $author$project$FancyForms$Form$update = F3(
 		var fieldId = _v0.a;
 		var subfieldId = _v0.b;
 		var op = _v0.c;
-		var _v1 = A2(
-			$elm$core$Debug$log,
-			'Form.update',
-			_Utils_Tuple3(fieldId, subfieldId, op));
 		return A5($author$project$FancyForms$Form$updateField, form_, fieldId, subfieldId, op, formState);
 	});
 var $author$project$Examples$Combination$update = F2(
