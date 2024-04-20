@@ -36,7 +36,7 @@ type Msg
 -}
 notBlank : Validator String customError
 notBlank model =
-    if Debug.log "notBlank" model == "" then
+    if model == "" then
         [ MustNotBeBlank ]
 
     else

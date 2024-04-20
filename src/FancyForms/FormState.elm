@@ -1,8 +1,7 @@
 module FancyForms.FormState exposing
     ( DomId, Error(..), FormState(..), Validator, Widget
     , alwaysValid, blurAll, init
-    , blurChildren, Effect(..), FieldId, FieldOperation(..), FieldStatus(..), SubfieldId(..), UpdateResult, encodedUpdate, formStateDecoder, formStateEncode, justChanged, justChangedInternally, read, subId, updateFieldStatus, wasAtLeast, withBlur, withFocus, write, withInnerAttributes
-    , noAttributes
+    , blurChildren, Effect(..), FieldId, FieldOperation(..), FieldStatus(..), SubfieldId(..), UpdateResult, encodedUpdate, formStateDecoder, formStateEncode, justChanged, justChangedInternally, read, subId, updateFieldStatus, wasAtLeast, withBlur, withFocus, write, withInnerAttributes, noAttributes
     )
 
 {-| Exposes various types used to track state of the form.
@@ -248,7 +247,7 @@ noAttributes _ _ =
 
 {-| You can provide a function that generates a list of attributes for the inner widget.
 This function can use the current value and errors to generate the attributes.
--} 
+-}
 withInnerAttributes :
     (List (Error customError) -> value -> List (Html.Attribute msg))
     -> Widget model msg value customError
@@ -450,7 +449,7 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
                 |> Result.withDefault []
                 |> (\list ->
                         list
-                            ++ [ widget.init <| Debug.todo "needs template object" ]
+                            ++ [ widget.init widget.default ]
                             |> E.list encodeModel
                    )
 
@@ -464,9 +463,6 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) subfieldId o
             case ( D.decodeValue decoderMsg msgVal, D.decodeValue decodeSubfield modelVal ) of
                 ( Ok msg, Ok model ) ->
                     widget.update msg model |> .model |> encodeSubfield
-
-                ( Ok msg, _ ) ->
-                    modelVal
 
                 _ ->
                     modelVal

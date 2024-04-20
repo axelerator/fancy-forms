@@ -1,10 +1,9 @@
 module FancyForms.Form exposing
-    ( Form, PartialForm, form, FieldWithErrors, validate, field
-    , Msg, update, extract, init, render
+    ( Form, form, field, isValid, validate, FieldWithErrors, PartialForm
+    , Msg, init, update, render, extract
     , listField, FieldWithRemoveButton, ListWithAddButton
     , fieldWithVariants, Variant, Variants
     , toWidget, wrap
-    , isValid
     )
 
 {-| FancyForms is a library for building forms in Elm. It is designed with the following goals in mind:
@@ -44,7 +43,7 @@ module FancyForms.Form exposing
 -}
 
 import Dict exposing (Dict)
-import FancyForms.FormState as FormState exposing (DomId, Effect(..), Error(..), FieldId, FieldOperation(..), FieldStatus(..), FormState(..), SubfieldId(..), Validator, Widget, blurAll, blurChildren, formStateDecoder, formStateEncode, justChanged, read, updateFieldStatus, wasAtLeast, write)
+import FancyForms.FormState as FormState exposing (DomId, Effect(..), Error(..), FieldId, FieldOperation(..), FieldStatus(..), FormState(..), SubfieldId(..), Validator, Widget, blurAll, blurChildren, formStateDecoder, formStateEncode, justChanged, noAttributes, read, updateFieldStatus, wasAtLeast, write)
 import FancyForms.Widgets.VariantSelect exposing (variantWidget, variantWidgetInit)
 import Html exposing (Html)
 import Json.Decode as D exposing (Decoder)
@@ -53,7 +52,6 @@ import List.Nonempty exposing (ListNonempty)
 import Maybe exposing (withDefault)
 import String exposing (fromInt, toInt)
 import Tuple
-import FancyForms.FormState exposing (noAttributes)
 
 
 {-| The message type for the form.
@@ -119,10 +117,6 @@ addInvalidIfInconsistent form_ formState errors =
 -}
 update : Form a customError -> Msg -> FormState -> FormState
 update form_ (FormMsg fieldId subfieldId op) formState =
-    let
-        _ = Debug.log "Form.update" (fieldId, subfieldId, op)
-    in
-    
     updateField form_ fieldId subfieldId op formState
 
 
@@ -189,7 +183,7 @@ mkField fieldWithErrors fieldId widget =
                         errors_ formState
 
                     else
-                        Debug.log "was not blurred" []
+                        []
 
                 widgetModel : Maybe model
                 widgetModel =
@@ -198,14 +192,14 @@ mkField fieldWithErrors fieldId widget =
                 innerAttrs : List (Html.Attribute msg)
                 innerAttrs =
                     widgetModel
-                    |> Maybe.map widget.value 
-                    |> Maybe.map (\v -> widget.innerAttributes fieldErrors v)
-                    |> Maybe.withDefault []
+                        |> Maybe.map widget.value
+                        |> Maybe.map (\v -> widget.innerAttributes fieldErrors v)
+                        |> Maybe.withDefault []
 
                 inputHtml : List (Html Msg)
                 inputHtml =
                     widgetModel
-                        |> Maybe.map (widget.view (parentDomId ++ "f-" ++ fieldId) innerAttrs) 
+                        |> Maybe.map (widget.view (parentDomId ++ "f-" ++ fieldId) innerAttrs)
                         |> Maybe.withDefault []
                         |> List.map (Html.map toMsg)
             in
@@ -401,7 +395,7 @@ Takes four arguments:
             Form.form
                 (\errors_ html -> html)
                 (\data -> [])
-                 "minimal-example"
+                "minimal-example"
                 (\amount ->
                     { view = \formState _ -> amount.view formState
                     , combine = \formState -> amount.value formState
@@ -745,17 +739,9 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) mbTemplate s
     in
     case ( operation, subfieldId ) of
         ( Add, ArrayElement _ ) ->
-            let
-                _ = Debug.log "Adding" "ArrayElement"
-            in
-            
             ( D.decodeValue (D.list decoderModel) modelVal
                 |> Result.withDefault []
                 |> (\list ->
-                    let
-                        _ = Debug.log "Adding" [widget.init <| withDefault widget.default mbTemplate ]
-                    in
-                    
                         list
                             ++ [ widget.init <| withDefault widget.default mbTemplate ]
                             |> E.list encodeModel
@@ -771,35 +757,27 @@ encodedUpdate ({ decoderMsg, decoderModel, encodeModel } as widget) mbTemplate s
             , WasChanged
             )
 
-        ( Update msgVal, sf ) ->
+        ( Update msgVal, _ ) ->
             case ( D.decodeValue decoderMsg msgVal, D.decodeValue decodeSubfield modelVal ) of
                 ( Ok msg, Ok model ) ->
                     let
                         updateResult =
                             widget.update msg model
-                        _ = Debug.log "update3" (msg, model)
                     in
                     ( encodeSubfield updateResult.model
                     , updateResult.effect
                     )
 
-                ( Ok msg, e ) ->
+                ( Ok msg, _ ) ->
                     let
                         updateResult =
                             widget.update msg (widget.init widget.default)
-                        _ = Debug.log "update2" e
                     in
                     ( encodeSubfield updateResult.model
                     , updateResult.effect
                     )
 
-                ( e1, e2 ) ->
-                    let
-                        
-                        
-                        _ = Debug.log "update1" (sf, e1, E.encode -1 msgVal)
-                    in
-                    
+                _ ->
                     ( modelVal
                     , NoEffect
                     )
@@ -826,23 +804,17 @@ toWidget f =
     , isConsistent = f.isConsistent
     , view =
         \domId innerAttrs ((FormState model) as fs) ->
-            f.fn.view (FormState { model | parentDomId = domId }) (f.validator <| value_  fs)
-    , update = (\(FormMsg fieldId subfieldId value) model -> 
-        let
-            _ = Debug.log "toWidget.update" (fieldId, subfieldId, value)
-        in
-        
-        updateField f fieldId subfieldId value model |> justChanged
-        )
+            f.fn.view (FormState { model | parentDomId = domId }) (f.validator <| value_ fs)
+    , update =
+        \(FormMsg fieldId subfieldId value) model ->
+            updateField f fieldId subfieldId value model |> justChanged
     , encodeMsg = encodeFormMsg
-    , decoderMsg = decoderFormMsg |> D.andThen (\((FormMsg fieldId subfieldId fieldOperation) as m )->
-        let
-            _ = Debug.log "toWidget.decoderMsg" (fieldId, subfieldId, fieldOperation)
-        in
-            D.succeed m
-        
-
-    )
+    , decoderMsg =
+        decoderFormMsg
+            |> D.andThen
+                (\((FormMsg fieldId subfieldId fieldOperation) as m) ->
+                    D.succeed m
+                )
     , encodeModel = formStateEncode
     , decoderModel = formStateDecoder
     , blur = blurAll
@@ -954,6 +926,7 @@ extract : Form data customError -> FormState -> data
 extract { fn } =
     fn.combine
 
+
 {-| Returns true if the data entered in the form is valid
 -}
 isValid : Form data customError -> FormState -> Bool
@@ -961,4 +934,4 @@ isValid ({ fn, validator } as form_) formState =
     fn.combine formState
         |> validator
         |> addInvalidIfInconsistent form_ formState
-        |> List.isEmpty 
+        |> List.isEmpty
