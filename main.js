@@ -7816,86 +7816,6 @@ var $author$project$Examples$Variants$emailForm = A3(
 					})
 			};
 		}));
-var $elm$core$Debug$log = _Debug_log;
-var $elm$core$Dict$map = F2(
-	function (func, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return $elm$core$Dict$RBEmpty_elm_builtin;
-		} else {
-			var color = dict.a;
-			var key = dict.b;
-			var value = dict.c;
-			var left = dict.d;
-			var right = dict.e;
-			return A5(
-				$elm$core$Dict$RBNode_elm_builtin,
-				color,
-				key,
-				A2(func, key, value),
-				A2($elm$core$Dict$map, func, left),
-				A2($elm$core$Dict$map, func, right));
-		}
-	});
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
-var $author$project$FancyForms$Form$debugFormState = function (fs) {
-	var values = fs.a.values;
-	var dbg = F2(
-		function (k, v) {
-			return A2(
-				$elm$core$Debug$log,
-				k,
-				A2($elm$json$Json$Encode$encode, -1, v));
-		});
-	var _v0 = A2($elm$core$Dict$map, dbg, values);
-	return fs;
-};
-var $author$project$FancyForms$Widgets$VariantSelect$selectorFieldId = 'selectorValue';
-var $elm$core$Dict$singleton = F2(
-	function (key, value) {
-		return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
-	});
-var $author$project$FancyForms$Widgets$VariantSelect$variantWidgetInit = F3(
-	function (variantWidgets, extractVariantName, value_) {
-		var variantInit = F2(
-			function (_v0, dict) {
-				var variantName = _v0.a;
-				var variantW = _v0.b;
-				return function (v) {
-					return A3($elm$core$Dict$insert, variantName, v, dict);
-				}(
-					variantW.encodeModel(
-						variantW.init(value_)));
-			});
-		var values = A2(
-			$elm$core$Dict$singleton,
-			$author$project$FancyForms$Widgets$VariantSelect$selectorFieldId,
-			$elm$json$Json$Encode$string(
-				extractVariantName(value_)));
-		var values_ = A3(
-			$elm$core$List$foldl,
-			variantInit,
-			values,
-			$coreygirard$elm_nonempty_list$List$Nonempty$toList(variantWidgets));
-		return $author$project$FancyForms$FormState$FormState(
-			{allBlurred: false, fieldStatus: $elm$core$Dict$empty, parentDomId: '0', values: values_});
-	});
-var $author$project$FancyForms$Form$extractVariantInit = F5(
-	function (variantsWithWidgets, fieldId, valueExtractor, formModel, formState) {
-		var variantNameExtractor = function (v) {
-			var _v1 = valueExtractor(v);
-			var variantName_ = _v1.a;
-			return variantName_;
-		};
-		var _v0 = valueExtractor(formModel);
-		var variantName = _v0.a;
-		var value = _v0.b;
-		var encodedValue = $author$project$FancyForms$FormState$formStateEncode(
-			A3($author$project$FancyForms$Widgets$VariantSelect$variantWidgetInit, variantsWithWidgets, variantNameExtractor, value));
-		return $author$project$FancyForms$Form$debugFormState(
-			A4($author$project$FancyForms$FormState$write, fieldId, $author$project$FancyForms$FormState$SingleValue, formState, encodedValue));
-	});
 var $coreygirard$elm_nonempty_list$List$Nonempty$map = F2(
 	function (f, _v0) {
 		var a = _v0.a;
@@ -7904,6 +7824,7 @@ var $coreygirard$elm_nonempty_list$List$Nonempty$map = F2(
 			f(a),
 			A2($elm$core$List$map, f, b));
 	});
+var $author$project$FancyForms$Widgets$VariantSelect$selectorFieldId = 'selectorValue';
 var $author$project$FancyForms$Widgets$VariantSelect$blur = F3(
 	function (variantSelector, variantWidgets, formState) {
 		var withBlurredSelector = A3($author$project$FancyForms$FormState$blurChildren, $author$project$FancyForms$Widgets$VariantSelect$selectorFieldId, variantSelector, formState);
@@ -8005,6 +7926,7 @@ var $author$project$FancyForms$Widgets$VariantSelect$selectedValue = F3(
 					selectedWidget.decoderModel,
 					A2($author$project$FancyForms$FormState$read, selectedVariantName, model))));
 	});
+var $elm$core$Debug$todo = _Debug_todo;
 var $author$project$FancyForms$FormState$encodedUpdate = F4(
 	function (widget, subfieldId, operation, modelVal) {
 		var decoderMsg = widget.decoderMsg;
@@ -8243,9 +8165,12 @@ var $author$project$FancyForms$Widgets$VariantSelect$variantWidget = F4(
 			_default: $coreygirard$elm_nonempty_list$List$Nonempty$head(variantWidgets).b._default,
 			encodeModel: $author$project$FancyForms$FormState$formStateEncode,
 			encodeMsg: $author$project$FancyForms$Widgets$VariantSelect$encodeMsg,
-			init: function (v) {
-				return A3($author$project$FancyForms$Widgets$VariantSelect$variantWidgetInit, variantWidgets, variantNameExtractor, v);
-			},
+			init: _Debug_todo(
+				'FancyForms.Widgets.VariantSelect',
+				{
+					start: {line: 29, column: 14},
+					end: {line: 29, column: 24}
+				})(''),
 			innerAttributes: $author$project$FancyForms$FormState$noAttributes,
 			isConsistent: function (_v0) {
 				return true;
@@ -8264,8 +8189,8 @@ var $author$project$FancyForms$Widgets$VariantSelect$variantWidget = F4(
 				$coreygirard$elm_nonempty_list$List$Nonempty$toList(variantWidgets))
 		};
 	});
-var $author$project$FancyForms$Form$fieldWithVariants = F5(
-	function (variantSelector, defaultVariant, otherVariants, extractDefault, _v0) {
+var $author$project$FancyForms$Form$fieldWithVariants = F6(
+	function (extractDefault_, variantSelector, defaultVariant, otherVariants, extractDefault, _v0) {
 		var fn = _v0.fn;
 		var count = _v0.count;
 		var updates = _v0.updates;
@@ -8310,10 +8235,7 @@ var $author$project$FancyForms$Form$fieldWithVariants = F5(
 			fieldWithErrors: fieldWithErrors,
 			fn: fn(
 				A3($author$project$FancyForms$Form$mkField, fieldWithErrors, fieldId, widget)),
-			initWithData: A2(
-				$author$project$FancyForms$Form$extendInit,
-				initWithData,
-				A3($author$project$FancyForms$Form$extractVariantInit, variantsWithWidgets, fieldId, extractDefault)),
+			initWithData: initWithData,
 			isConsistent: A2(
 				$author$project$FancyForms$Form$extendConsistencyCheck,
 				isConsistent,
@@ -8505,8 +8427,9 @@ var $author$project$FancyForms$Widgets$RadioButtons$radioButtons = function (var
 	};
 };
 var $author$project$Examples$Variants$myForm = function (useRadioButtons) {
-	return A5(
+	return A6(
 		$author$project$FancyForms$Form$fieldWithVariants,
+		$elm$core$Basics$identity,
 		useRadioButtons ? $author$project$FancyForms$Widgets$RadioButtons$radioButtons : $author$project$FancyForms$Widgets$Dropdown$dropdown,
 		_Utils_Tuple2('email', $author$project$Examples$Variants$emailForm),
 		_List_fromArray(
@@ -9692,7 +9615,7 @@ var $author$project$Examples$Code$Decoration$code = '\nmodule Examples.Decoratio
 var $author$project$Examples$Code$Lists$code = '\nmodule Examples.Lists exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, listField)\nimport FancyForms.FormState exposing (FormState, alwaysValid)\nimport FancyForms.Widgets.Text exposing (textInput)\nimport Html exposing (Attribute, button, div, fieldset, p, text)\nimport Html.Attributes exposing (attribute)\nimport Html.Events exposing (onClick)\n\n\ntype alias Model =\n    { formState : FormState }\n\n\ntype Msg\n    = ForForm Form.Msg\n\n\nmyForm : Form (List String) ()\nmyForm =\n    Form.form\n        (\\_ html -> html) -- omitting errors for brevity\n        alwaysValid -- no custom validations\n        "lists-example"\n        (\\todos ->\n            { view = \\formState _ -> todos.view formState\n            , combine = \\formState -> todos.value formState\n            }\n        )\n        |> listField\n            listWithAddButton\n            fieldWithRemoveButton\n            "a new todo"\n            identity\n            (textInput [])\n\nfieldWithRemoveButton removeMsg input =\n    [ fieldset [ role "group" ] <|\n        input\n            ++ [ button [ onClick removeMsg ] [ text "Remove" ] ]\n    ]\n\nlistWithAddButton addMsg items =\n    [ div [] <|\n        items\n            ++ [ button [ onClick addMsg ] [ text "Add todo" ] ]\n    ]\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            (text "The user entered: "\n                :: (List.map (\\todo -> div [] [ text todo ]) <| Form.extract myForm model.formState)\n            )\n        ]\n\n\ninit =\n    { formState = Form.init myForm [ "yay!" ] }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n\n\nrole : String -> Attribute msg\nrole value =\n    attribute "role" value\n';
 var $author$project$Examples$Code$Minimal$code = '\nmodule Examples.Minimal exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, field)\nimport FancyForms.FormState exposing (FormState, alwaysValid)\nimport FancyForms.Widgets.Int exposing (integerInput)\nimport Html exposing (div, p, text)\nimport String exposing (fromInt)\nimport FancyForms.Form exposing (validate)\nimport FancyForms.Widgets.Int exposing (greaterThan)\n\n\ntype alias Model =\n    { formState : FormState }\n\ntype Msg\n    = ForForm Form.Msg\n\nmyForm : Form Int ()\nmyForm =\n    Form.form\n        (\\errors_ html -> html) -- omitting errors for brevity\n        alwaysValid -- no custom validations\n         "minimal-example" -- unique id to be used in DOM\n        (\\amount ->\n            { view = \\formState _ -> amount.view formState\n            , combine = \\formState -> amount.value formState\n            }\n        )\n        |> field identity (integerInput [] |> validate [greaterThan 0])\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            [ text "The user entered: "\n            , text <| fromInt <| Form.extract myForm model.formState\n            ]\n        ]\n\ninit =\n    { formState = Form.init myForm 42 }\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n';
 var $author$project$Examples$Code$Validation$code = '\nmodule Examples.Validation exposing (..)\n\nimport FancyForms.Form as Form exposing (FieldWithErrors, Form, field, validate)\nimport FancyForms.FormState exposing (Error(..), FormState)\nimport FancyForms.Widgets.Int exposing (greaterThan, integerInput, lesserThan)\nimport Html exposing (Html, button, div, label, p, text)\nimport Html.Attributes exposing (class, classList, disabled)\nimport Html.Events exposing (onClick)\nimport String exposing (fromInt)\nimport Html.Attributes exposing (attribute)\nimport Html exposing (small)\n\n\ntype alias Model =\n    { formState : FormState }\n\n\ntype Msg\n    = ForForm Form.Msg\n    | Submit\n\n\ntype alias Date =\n    { day : Int\n    , month : Int\n    , year : Int\n    }\n\n\ntype MyError\n    = MustNotBeGreaterThanDaysInMonth Int\n\n\ndaysOfMonthValidator : Date -> List (Error MyError)\ndaysOfMonthValidator { day, month, year } =\n    if day > daysInMonth month year then\n        [ CustomError <| MustNotBeGreaterThanDaysInMonth (daysInMonth month year) ]\n\n    else\n        []\n\n\nviewErrors : List (Error MyError) -> Html msg\nviewErrors errors =\n    if List.isEmpty errors then\n        text ""\n\n    else\n        small []\n            [ List.map errorToString errors\n                |> String.join " "\n                |> text\n            ]\n\n\nfieldWithErrors : FieldWithErrors MyError\nfieldWithErrors errors html =\n    [ div [ classList [ ( "has-error", not <| List.isEmpty errors ) ] ]\n        (html ++ [ viewErrors errors ])\n    ]\n\n\nmyForm : Form Date MyError\nmyForm =\n    Form.form \n        fieldWithErrors\n        daysOfMonthValidator\n        "validation-example"\n        (\\day month year ->\n            { view =\n                \\formState errors ->\n                    [ div [ class "errors" ]\n                        [ List.map errorToString errors\n                            |> String.join " "\n                            |> text\n                        ]\n                    , div [ class "grid" ] <|\n                        [ label [] <| text "Day:" :: day.view formState\n                        , label [] <| text "Month:" :: month.view formState\n                        , label [] <| text "Year: " :: year.view formState\n                        ]\n                    ]\n            , combine =\n                \\formState ->\n                    { day = day.value formState\n                    , month = month.value formState\n                    , year = year.value formState\n                    }\n            }\n        )\n        |> field .day (integerInput [] |> validate [ greaterThan 0 ])\n        |> field .month (integerInput [] |> validate [ greaterThan 0, lesserThan 13 ])\n        |> field .year (integerInput [] |> validate [ greaterThan 1900 ])\n\nmarkAsInvalid errors _ =\n    if List.isEmpty errors then\n        []\n    else\n        [attribute "aria-invalid" "true"]\n\ntakeDay : Date -> Int\ntakeDay { day } =\n    day\n\n\nerrorToString : Error MyError -> String\nerrorToString e =\n    case e of\n        NotValid ->\n            ""\n\n        MustNotBeBlank ->\n            "must not be blank"\n\n        MustBeGreaterThan n ->\n            "must be greater than " ++ n\n\n        MustBeLesserThan n ->\n            "must be lower than " ++ n\n\n        CustomError ce ->\n            case ce of\n                MustNotBeGreaterThanDaysInMonth daysInMonth_ ->\n                    "There are only " ++ String.fromInt daysInMonth_ ++ " days in this month"\n\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , div []\n            [ button\n                [ onClick Submit\n                , disabled <| not <| Form.isValid myForm model.formState\n                ]\n                [ text "Submit" ]\n            ]\n        , p [] [ text "The user entered: " ]\n        , viewDate <| Form.extract myForm model.formState\n        ]\n\n\ninit =\n    { formState = Form.init myForm { day = 1, month = 1, year = 2000 } }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n\n        Submit ->\n            model\n\n\nviewDate { day, month, year } =\n    div []\n        [ div []\n            [ text "day: "\n            , text <| fromInt day\n            , text " month: "\n            , text <| fromInt month\n            , text " year: "\n            , text <| fromInt year\n            ]\n        ]\n\n\ndaysInMonth : Int -> Int -> Int\ndaysInMonth month year =\n    case month of\n        1 ->\n            31\n\n        2 ->\n            if (modBy 4 year == 0) && (modBy 100 year /= 0) || (modBy 400 year == 0) then\n                29\n\n            else\n                28\n\n        3 ->\n            31\n\n        5 ->\n            31\n\n        7 ->\n            31\n\n        8 ->\n            31\n\n        10 ->\n            31\n\n        12 ->\n            31\n\n        _ ->\n            30\n';
-var $author$project$Examples$Code$Variants$code = '\nmodule Examples.Variants exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, field, fieldWithVariants)\nimport FancyForms.FormState exposing (FormState, alwaysValid)\nimport FancyForms.Widgets.Dropdown exposing (dropdown)\nimport FancyForms.Widgets.RadioButtons exposing (radioButtons)\nimport FancyForms.Widgets.Int exposing (integerInput)\nimport FancyForms.Widgets.Text exposing (textInput)\nimport Html exposing (div, p, text)\nimport Html.Attributes exposing (class)\nimport String exposing (fromInt)\n\n\ntype alias Model =\n    { formState : FormState \n    , useRadioButtons : Bool\n    }\n\n\ntype Msg\n    = ForForm Form.Msg\n    | ToggleSwitcher\n\n\ntype Contact\n    = Email String\n    | Phone Int Int\n\n\nmyForm : Bool -> Form Contact ()\nmyForm useRadioButtons =\n    Form.form \n        (\\errors_ html -> html) -- omitting errors for brevity\n        alwaysValid -- no custom validations\n        "variant-example"\n        (\\contact ->\n            { view = \\formState _ -> contact.view formState\n            , combine = \\formState -> contact.value formState\n            }\n        )\n        |> fieldWithVariants \n            (if useRadioButtons then radioButtons else dropdown)\n            ( "email", emailForm )\n            [ ( "phone", phoneForm ) ]\n            fromForm\n\n\nfromForm : Contact -> ( String, Contact )\nfromForm c =\n    case c of\n        Email _ ->\n            ( "email", c )\n\n        Phone _ _ ->\n            ( "phone", c )\n\n\nemailForm : Form Contact ()\nemailForm =\n    Form.form\n        (\\errors_ html -> html) -- omitting errors for brevity\n        alwaysValid -- no custom validations\n         "email-form"\n        (\\email ->\n            { view = \\formState _ -> email.view formState\n            , combine = \\formState -> Email <| email.value formState\n            }\n        )\n        |> field email_ (textInput [])\n\n\nemail_ : Contact -> String\nemail_ c =\n    case c of\n        Email email ->\n            email\n\n        Phone _ _ ->\n            ""\n\n\nphoneForm : Form Contact ()\nphoneForm =\n    Form.form\n        (\\errors_ html -> html) -- omitting errors for brevity\n        alwaysValid -- no custom validations\n        "email-form"\n        (\\countryCode number ->\n            { view =\n                \\formState _ ->\n                    [ div [ class "grid" ]\n                        [ div [] <| countryCode.view formState\n                        , div [] <| number.view formState\n                        ]\n                    ]\n            , combine = \\formState -> Phone (countryCode.value formState) (number.value formState)\n            }\n        )\n        |> field countryCode_ (integerInput [])\n        |> field number_ (integerInput [])\n\n\ncountryCode_ : Contact -> Int\ncountryCode_ c =\n    case c of\n        Email _ ->\n            0\n\n        Phone cc _ ->\n            cc\n\n\nnumber_ : Contact -> Int\nnumber_ c =\n    case c of\n        Email _ ->\n            0\n\n        Phone _ n ->\n            n\n\n\nview {formState, useRadioButtons} =\n    div []\n        [ div [] <| Form.render ForForm (myForm useRadioButtons) formState\n        , p []\n            [ text "The user entered: "\n            , case Form.extract (myForm False) formState of\n                Email email ->\n                    text <| "Email: " ++ email\n\n                Phone countryCode number ->\n                    text <| "Phone: " ++ fromInt countryCode ++ " " ++ fromInt number\n            ]\n        ]\n\n\ndefault =\n    Phone 1 1234\n\n\ninit =\n    { formState = Form.init (myForm False) default \n    , useRadioButtons = False\n    }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update (myForm False) formMsg model.formState }\n        ToggleSwitcher ->\n            { model | useRadioButtons = not model.useRadioButtons }\n';
+var $author$project$Examples$Code$Variants$code = '\nmodule Examples.Variants exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, field, fieldWithVariants)\nimport FancyForms.FormState exposing (FormState, alwaysValid)\nimport FancyForms.Widgets.Dropdown exposing (dropdown)\nimport FancyForms.Widgets.RadioButtons exposing (radioButtons)\nimport FancyForms.Widgets.Int exposing (integerInput)\nimport FancyForms.Widgets.Text exposing (textInput)\nimport Html exposing (div, p, text)\nimport Html.Attributes exposing (class)\nimport String exposing (fromInt)\n\n\ntype alias Model =\n    { formState : FormState \n    , useRadioButtons : Bool\n    }\n\n\ntype Msg\n    = ForForm Form.Msg\n    | ToggleSwitcher\n\n\ntype Contact\n    = Email String\n    | Phone Int Int\n\n\nmyForm : Bool -> Form Contact ()\nmyForm useRadioButtons =\n    Form.form \n        (\\errors_ html -> html) -- omitting errors for brevity\n        alwaysValid -- no custom validations\n        "variant-example"\n        (\\contact ->\n            { view = \\formState _ -> contact.view formState\n            , combine = \\formState -> contact.value formState\n            }\n        )\n        |> fieldWithVariants \n            identity\n            (if useRadioButtons then radioButtons else dropdown)\n            ( "email", emailForm )\n            [ ( "phone", phoneForm ) ]\n            fromForm\n\ntype alias WithContact =\n    { contact : Contact }\n\nmyForm2 : Bool -> Form WithContact ()\nmyForm2 useRadioButtons =\n    Form.form \n        (\\errors_ html -> html) -- omitting errors for brevity\n        alwaysValid -- no custom validations\n        "variant-example"\n        (\\contact ->\n            { view = \\formState _ -> contact.view formState\n            , combine = \\formState -> {contact = contact.value formState}\n            }\n        )\n        |> fieldWithVariants \n            .contact\n            (if useRadioButtons then radioButtons else dropdown)\n            ( "email", emailForm )\n            [ ( "phone", phoneForm ) ]\n            fromForm2\n\nfromForm2 : WithContact -> ( String, Contact )\nfromForm2 wc =\n    let\n        c = wc.contact\n    in\n    \n    case c of\n        Email _ ->\n            ( "email", c )\n\n        Phone _ _ ->\n            ( "phone", c )\n\n\n\nfromForm : Contact -> ( String, Contact )\nfromForm c =\n    case c of\n        Email _ ->\n            ( "email", c )\n\n        Phone _ _ ->\n            ( "phone", c )\n\n\nemailForm : Form Contact ()\nemailForm =\n    Form.form\n        (\\errors_ html -> html) -- omitting errors for brevity\n        alwaysValid -- no custom validations\n         "email-form"\n        (\\email ->\n            { view = \\formState _ -> email.view formState\n            , combine = \\formState -> Email <| email.value formState\n            }\n        )\n        |> field email_ (textInput [])\n\n\nemail_ : Contact -> String\nemail_ c =\n    case c of\n        Email email ->\n            email\n\n        Phone _ _ ->\n            ""\n\n\nphoneForm : Form Contact ()\nphoneForm =\n    Form.form\n        (\\errors_ html -> html) -- omitting errors for brevity\n        alwaysValid -- no custom validations\n        "email-form"\n        (\\countryCode number ->\n            { view =\n                \\formState _ ->\n                    [ div [ class "grid" ]\n                        [ div [] <| countryCode.view formState\n                        , div [] <| number.view formState\n                        ]\n                    ]\n            , combine = \\formState -> Phone (countryCode.value formState) (number.value formState)\n            }\n        )\n        |> field countryCode_ (integerInput [])\n        |> field number_ (integerInput [])\n\n\ncountryCode_ : Contact -> Int\ncountryCode_ c =\n    case c of\n        Email _ ->\n            0\n\n        Phone cc _ ->\n            cc\n\n\nnumber_ : Contact -> Int\nnumber_ c =\n    case c of\n        Email _ ->\n            0\n\n        Phone _ n ->\n            n\n\n\nview {formState, useRadioButtons} =\n    div []\n        [ div [] <| Form.render ForForm (myForm useRadioButtons) formState\n        , p []\n            [ text "The user entered: "\n            , case Form.extract (myForm False) formState of\n                Email email ->\n                    text <| "Email: " ++ email\n\n                Phone countryCode number ->\n                    text <| "Phone: " ++ fromInt countryCode ++ " " ++ fromInt number\n            ]\n        ]\n\n\ndefault =\n    Phone 1 1234\n\n\ninit =\n    { formState = Form.init (myForm False) default \n    , useRadioButtons = False\n    }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update (myForm False) formMsg model.formState }\n        ToggleSwitcher ->\n            { model | useRadioButtons = not model.useRadioButtons }\n';
 var $author$project$Main$examples = _List_fromArray(
 	[
 		{
@@ -10145,6 +10068,9 @@ var $elm$parser$Parser$Advanced$fromState = F2(
 			A4($elm$parser$Parser$Advanced$DeadEnd, s.row, s.col, x, s.context));
 	});
 var $elm$parser$Parser$Advanced$isSubString = _Parser_isSubString;
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
 var $elm$parser$Parser$Advanced$token = function (_v0) {
 	var str = _v0.a;
 	var expecting = _v0.b;
