@@ -1,4 +1,4 @@
-module FancyForms.Widgets.VariantSelect exposing (variantWidget, variantWidgetInit)
+module FancyForms.Widgets.VariantSelect exposing (variantWidget, Model, Msg, variantWidgetInit)
 
 import Dict
 import FancyForms.FormState exposing (DomId, FieldId, FieldOperation(..), FormState(..), SubfieldId(..), Widget, alwaysValid, blurChildren, encodedUpdate, formStateDecoder, formStateEncode, justChanged, read, subId, write)
@@ -26,12 +26,7 @@ variantWidget :
     -> ListNonempty ( String, Widget widgetModel msg2 value customError )
     -> Widget Model Msg value customError
 variantWidget variantSelector variantNameExtractor defaultVariantName variantWidgets =
-    -- TODO: init from given value
-    { init = \v -> 
-        variantWidgetInit 
-            variantWidgets 
-            variantNameExtractor 
-            v
+    { init = variantWidgetInit variantWidgets variantNameExtractor
     , value = selectedValue variantSelector variantWidgets
     , default = List.Nonempty.head variantWidgets |> Tuple.second |> .default
     , validate = alwaysValid -- Delegate: Include validation result of currently selected variant
@@ -129,6 +124,7 @@ encodeMsg msg =
                 , ( "variantName", E.string variantName )
                 , ( "value", v )
                 ]
+
 
 
 variantWidgetInit :

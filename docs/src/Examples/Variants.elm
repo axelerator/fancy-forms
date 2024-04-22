@@ -39,20 +39,21 @@ myForm useRadioButtons =
             }
         )
         |> fieldWithVariants 
+            identity
             (if useRadioButtons then radioButtons else dropdown)
             ( "email", emailForm )
             [ ( "phone", phoneForm ) ]
-            fromForm
+            variantToString
 
 
-fromForm : Contact -> ( String, Contact )
-fromForm c =
+variantToString : Contact -> String
+variantToString c =
     case c of
         Email _ ->
-            ( "email", c )
+            "email"
 
         Phone _ _ ->
-            ( "phone", c )
+            "phone"
 
 
 emailForm : Form Contact ()

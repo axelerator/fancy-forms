@@ -1,5 +1,5 @@
 module FancyForms.Form exposing
-    ( Form, form, field, isValid, validate, FieldWithErrors, PartialForm
+    ( Form, form, field, Field, isValid, validate, FieldWithErrors, PartialForm
     , Msg, init, update, render, extract
     , listField, FieldWithRemoveButton, ListWithAddButton
     , fieldWithVariants, Variant, Variants
@@ -18,7 +18,7 @@ module FancyForms.Form exposing
 
 # Definition
 
-@docs Form, form, field, isValid, validate, FieldWithErrors, PartialForm
+@docs Form, form, field, Field, isValid, validate, FieldWithErrors, PartialForm
 
 
 # Wiring
@@ -153,6 +153,8 @@ updateField { updates } fieldId subfieldId operation ((FormState formState) as f
         }
 
 
+{-| The type of a field in the form.
+-}
 type alias Field a customError =
     { id : FieldId
     , value : FormState -> a
@@ -331,29 +333,22 @@ extractListInit widget fieldId valueExtractor formModel formState =
 extractVariantInit :
     List.Nonempty.ListNonempty ( String, Widget model msg value customError )
     -> FieldId
-    -> (value -> ( String, value ))
-    -> value
+    -> (data -> value)
+    -> (value -> String)
+    -> data
     -> FormState
     -> FormState
-extractVariantInit variantsWithWidgets fieldId valueExtractor formModel formState =
+extractVariantInit variantsWithWidgets fieldId valueExtractor variantNameExtractor formModel formState =
     let
-        ( variantName, value ) =
+        value =
             valueExtractor formModel
-
-        variantNameExtractor : value -> String
-        variantNameExtractor v =
-            let
-                ( variantName_, _ ) =
-                    valueExtractor v
-            in
-            variantName_
 
         encodedValue : Value
         encodedValue =
             variantWidgetInit variantsWithWidgets variantNameExtractor value
                 |> FormState.formStateEncode
     in
-    debugFormState <| write fieldId SingleValue formState encodedValue
+    write fieldId SingleValue formState encodedValue
 
 
 extendInit : (data -> FormState -> FormState) -> (data -> FormState -> FormState) -> data -> FormState -> FormState
@@ -480,13 +475,14 @@ The function takes the following arguments:
 
 -}
 fieldWithVariants :
-    (Variants String -> Widget String msg String customError)
-    -> ( String, Form data customError )
-    -> List ( String, Form data customError )
-    -> (data -> ( String, data ))
-    -> PartialForm (Field data customError -> c) customError data
+    (data -> value)
+    -> (Variants String -> Widget String msg String customError)
+    -> ( String, Form value customError )
+    -> List ( String, Form value customError )
+    -> (value -> String)
+    -> PartialForm (Field value customError -> c) customError data
     -> PartialForm c customError data
-fieldWithVariants variantSelector defaultVariant otherVariants extractDefault { fn, count, updates, fieldWithErrors, validator, blur, domId, isConsistent, initWithData } =
+fieldWithVariants extractDefault variantSelector defaultVariant otherVariants extractVariantName { fn, count, updates, fieldWithErrors, validator, blur, domId, isConsistent, initWithData } =
     let
         toWidgetVariant ( n, f ) =
             ( n, toWidget f )
@@ -505,13 +501,13 @@ fieldWithVariants variantSelector defaultVariant otherVariants extractDefault { 
         fieldId =
             fromInt count
 
-        variantNameExtractor data =
-            extractDefault data |> Tuple.first
-
+        widget : Widget FancyForms.Widgets.VariantSelect.Model FancyForms.Widgets.VariantSelect.Msg value customError
         widget =
             variantWidget
-                (variantSelector <| List.Nonempty.map mkVariant variantsWithWidgets)
-                variantNameExtractor
+                (variantSelector <|
+                    List.Nonempty.map mkVariant variantsWithWidgets
+                )
+                extractVariantName
                 (Tuple.first <| List.Nonempty.head variantsWithWidgets)
                 variantsWithWidgets
     in
@@ -530,7 +526,7 @@ fieldWithVariants variantSelector defaultVariant otherVariants extractDefault { 
     , initWithData =
         extendInit
             initWithData
-            (extractVariantInit variantsWithWidgets fieldId extractDefault)
+            (extractVariantInit variantsWithWidgets fieldId extractDefault extractVariantName)
     }
 
 
