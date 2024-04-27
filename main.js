@@ -7932,9 +7932,12 @@ var $author$project$FancyForms$Widgets$VariantSelect$value = F3(
 			$elm$core$Result$withDefault,
 			defaultVariantName,
 			A2(
-				$elm$json$Json$Decode$decodeValue,
-				widget.decoderModel,
-				A2($author$project$FancyForms$FormState$read, $author$project$FancyForms$Widgets$VariantSelect$selectorFieldId, formState)));
+				$elm$core$Result$map,
+				widget.value,
+				A2(
+					$elm$json$Json$Decode$decodeValue,
+					widget.decoderModel,
+					A2($author$project$FancyForms$FormState$read, $author$project$FancyForms$Widgets$VariantSelect$selectorFieldId, formState))));
 	});
 var $author$project$FancyForms$Widgets$VariantSelect$selectedValue = F3(
 	function (variantSelectWidget, variantWidgets, model) {
@@ -8174,7 +8177,7 @@ var $author$project$FancyForms$Widgets$VariantSelect$view = F6(
 				variantSelectWidget.view,
 				A3($author$project$FancyForms$FormState$subId, domId, $author$project$FancyForms$Widgets$VariantSelect$selectorFieldId, $author$project$FancyForms$FormState$SingleValue),
 				_List_Nil,
-				selectedVariantName));
+				variantSelectWidget.init(selectedVariantName)));
 		var variantsHtml = $elm$core$List$concat(
 			A2(
 				$elm$core$List$map,
