@@ -3,7 +3,7 @@
     "name": "axelerator/fancy-forms",
     "summary": "A modular form library with support for custom input widgets",
     "license": "MIT",
-    "version": "5.0.0",
+    "version": "6.0.0",
     "exposed-modules": [
         "FancyForms.Form",
         "FancyForms.FormState",
