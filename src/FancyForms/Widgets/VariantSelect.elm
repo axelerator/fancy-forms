@@ -1,13 +1,12 @@
-module FancyForms.Widgets.VariantSelect exposing (variantWidget, Model, Msg, variantWidgetInit)
+module FancyForms.Widgets.VariantSelect exposing (Model, Msg, variantWidget, variantWidgetInit)
 
 import Dict
-import FancyForms.FormState exposing (DomId, FieldId, FieldOperation(..), FormState(..), SubfieldId(..), Widget, alwaysValid, blurChildren, encodedUpdate, formStateDecoder, formStateEncode, justChanged, read, subId, write)
+import FancyForms.FormState exposing (DomId, FieldId, FieldOperation(..), FormState(..), SubfieldId(..), Widget, alwaysValid, blurChildren, encodedUpdate, formStateDecoder, formStateEncode, justChanged, noAttributes, read, subId, write)
 import Html exposing (Html, text)
 import Json.Decode as D exposing (Decoder, Error(..))
 import Json.Encode as E exposing (Value)
 import List.Nonempty exposing (ListNonempty)
 import Maybe exposing (withDefault)
-import FancyForms.FormState exposing (noAttributes)
 
 
 type Msg
@@ -20,7 +19,7 @@ type alias Model =
 
 
 variantWidget :
-    Widget String msg String customError
+    Widget model msg String customError
     -> (value -> String)
     -> String
     -> ListNonempty ( String, Widget widgetModel msg2 value customError )
@@ -43,7 +42,7 @@ variantWidget variantSelector variantNameExtractor defaultVariantName variantWid
 
 
 blur :
-    Widget String msg String customError
+    Widget model msg String customError
     -> List ( String, Widget widgetModel msg2 value customError )
     -> Model
     -> Model
@@ -71,7 +70,7 @@ widgetByName variantWidgets variantName =
 
 
 update :
-    Widget String msg String customError
+    Widget model msg String customError
     -> ListNonempty ( String, Widget widgetModel msg2 value customError )
     -> Msg
     -> Model
@@ -126,7 +125,6 @@ encodeMsg msg =
                 ]
 
 
-
 variantWidgetInit :
     ListNonempty ( String, Widget widgetModel msg2 value customError )
     -> (value -> String)
@@ -156,22 +154,25 @@ selectorFieldId =
 
 value :
     String
-    -> Widget String msg String customError
+    -> Widget model msg String customError
     -> FormState
     -> String
 value defaultVariantName widget formState =
     D.decodeValue widget.decoderModel (read selectorFieldId formState)
+        |> Result.map widget.value
         |> Result.withDefault defaultVariantName
 
 
 selectedValue :
-    Widget String msg String customError
+    Widget model msg String customError
     -> ListNonempty ( String, Widget widgetModel msg2 value customError )
     -> Model
     -> value
 selectedValue variantSelectWidget variantWidgets model =
     let
-        defaultVariantName = List.Nonempty.head variantWidgets |> Tuple.first
+        defaultVariantName =
+            List.Nonempty.head variantWidgets |> Tuple.first
+
         selectedVariantName =
             value defaultVariantName variantSelectWidget model
 
@@ -185,12 +186,12 @@ selectedValue variantSelectWidget variantWidgets model =
     read selectedVariantName model
         |> D.decodeValue selectedWidget.decoderModel
         |> Result.map selectedWidget.value
-        |> Result.withDefault (selectedWidget.default)
+        |> Result.withDefault selectedWidget.default
 
 
 view :
     String
-    -> Widget String msg String customError
+    -> Widget model msg String customError
     -> List ( String, Widget widgetModel msg2 value customError )
     -> DomId
     -> List (Html.Attribute Msg)
@@ -205,6 +206,7 @@ view defaultVariantName variantSelectWidget variantWidgets domId innerAttrs mode
         variantSelectorHtml : List (Html Msg)
         variantSelectorHtml =
             selectedVariantName
+                |> variantSelectWidget.init
                 |> variantSelectWidget.view (subId domId selectorFieldId SingleValue) []
                 |> List.map (Html.map (\msg -> ForVariantSelect <| variantSelectWidget.encodeMsg msg))
 
@@ -214,7 +216,7 @@ view defaultVariantName variantSelectWidget variantWidgets domId innerAttrs mode
                 |> D.decodeValue variantW.decoderModel
                 |> Result.map
                     (\variantModel ->
-                        variantW.view (domId ++ variantName) [] variantModel 
+                        variantW.view (domId ++ variantName) [] variantModel
                             |> List.map (\html -> Html.map (\m -> ForVariant variantName <| variantW.encodeMsg m) html)
                     )
                 |> Result.withDefault

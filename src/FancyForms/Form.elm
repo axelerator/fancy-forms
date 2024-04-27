@@ -476,7 +476,7 @@ The function takes the following arguments:
 -}
 fieldWithVariants :
     (data -> value)
-    -> (Variants String -> Widget String msg String customError)
+    -> (Variants String -> Widget model msg String customError)
     -> ( String, Form value customError )
     -> List ( String, Form value customError )
     -> (value -> String)
