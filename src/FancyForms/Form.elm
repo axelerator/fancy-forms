@@ -48,7 +48,7 @@ import FancyForms.Widgets.VariantSelect exposing (variantWidget, variantWidgetIn
 import Html exposing (Html)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E exposing (Value)
-import List.Nonempty exposing (ListNonempty)
+import List.Nonempty exposing (Nonempty)
 import Maybe exposing (withDefault)
 import String exposing (fromInt, toInt)
 import Tuple
@@ -360,7 +360,7 @@ extractListInit widget fieldId valueExtractor formModel formState =
 
 
 extractVariantInit :
-    List.Nonempty.ListNonempty ( String, Widget model msg value customError )
+    List.Nonempty.Nonempty ( String, Widget model msg value customError )
     -> FieldId
     -> (data -> value)
     -> (value -> String)
@@ -490,7 +490,7 @@ type alias Variant a =
 {-| A nonempty list of variants.
 -}
 type alias Variants a =
-    ListNonempty (Variant a)
+    Nonempty (Variant a)
 
 
 {-| Adds a new field to with different variants to the form.
@@ -516,10 +516,19 @@ fieldWithVariants extractDefault variantSelector defaultVariant otherVariants ex
         toWidgetVariant ( n, f ) =
             ( n, toWidget f )
 
+        defaultAsNonEmptyList =
+            List.Nonempty.singleton (defaultVariant |> toWidgetVariant)
+
+        otherAsNonEmptyList =
+            List.Nonempty.fromList (List.map toWidgetVariant otherVariants)
+
         variantsWithWidgets =
-            ( defaultVariant |> toWidgetVariant
-            , otherVariants |> List.map toWidgetVariant
-            )
+            case otherAsNonEmptyList of
+                Just nel ->
+                    List.Nonempty.append defaultAsNonEmptyList nel
+
+                Nothing ->
+                    defaultAsNonEmptyList
 
         mkVariant ( name, _ ) =
             { value = name

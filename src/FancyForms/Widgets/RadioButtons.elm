@@ -30,10 +30,9 @@ type alias Model =
 
 init : Variants a -> a -> Model
 init variants v =
-    List.Nonempty.filter (\{ value } -> value == v) variants
-        |> List.head
-        |> Maybe.map .id
-        |> Maybe.withDefault (List.Nonempty.head variants |> .id)
+    List.Nonempty.filter (\{ value } -> value == v) (List.Nonempty.head variants) variants
+        |> List.Nonempty.head
+        |> .id
 
 
 {-| Returns a widget that lets the user select a value from a list of
@@ -63,16 +62,15 @@ update id _ =
 
 
 fromString : Variants a -> String -> a
-fromString ( first, others ) s =
-    List.filter (\{ id } -> s == id) (first :: others)
-        |> List.head
-        |> Maybe.map .value
-        |> Maybe.withDefault first.value
+fromString nel s =
+    List.Nonempty.filter (\{ id } -> s == id) (List.Nonempty.head nel) nel
+        |> List.Nonempty.head
+        |> .value
 
 
 all : Variants a -> List (Variant a)
-all ( first, others ) =
-    first :: others
+all =
+    List.Nonempty.toList
 
 
 view : Variants a -> DomId -> List (Html.Attribute Msg) -> Model -> List (Html Msg)

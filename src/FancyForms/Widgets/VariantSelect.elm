@@ -5,7 +5,7 @@ import FancyForms.FormState exposing (DomId, FieldId, FieldOperation(..), FormSt
 import Html exposing (Html, text)
 import Json.Decode as D exposing (Decoder, Error(..))
 import Json.Encode as E exposing (Value)
-import List.Nonempty exposing (ListNonempty)
+import List.Nonempty exposing (Nonempty)
 import Maybe exposing (withDefault)
 
 
@@ -22,7 +22,7 @@ variantWidget :
     Widget model msg String customError
     -> (value -> String)
     -> String
-    -> ListNonempty ( String, Widget widgetModel msg2 value customError )
+    -> Nonempty ( String, Widget widgetModel msg2 value customError )
     -> Widget Model Msg value customError
 variantWidget variantSelector variantNameExtractor defaultVariantName variantWidgets =
     { init = variantWidgetInit variantWidgets variantNameExtractor
@@ -58,12 +58,13 @@ blur variantSelector variantWidgets formState =
 
 
 widgetByName :
-    ListNonempty ( String, Widget widgetModel msg2 value customError )
+    Nonempty ( String, Widget widgetModel msg2 value customError )
     -> String
     -> Widget widgetModel msg2 value customError
 widgetByName variantWidgets variantName =
     variantWidgets
-        |> List.Nonempty.filter (\( name, _ ) -> name == variantName)
+        |> List.Nonempty.toList
+        |> List.filter (\( name, _ ) -> name == variantName)
         |> List.map Tuple.second
         |> List.head
         |> withDefault (List.Nonempty.head variantWidgets |> Tuple.second)
@@ -71,7 +72,7 @@ widgetByName variantWidgets variantName =
 
 update :
     Widget model msg String customError
-    -> ListNonempty ( String, Widget widgetModel msg2 value customError )
+    -> Nonempty ( String, Widget widgetModel msg2 value customError )
     -> Msg
     -> Model
     -> Model
@@ -126,7 +127,7 @@ encodeMsg msg =
 
 
 variantWidgetInit :
-    ListNonempty ( String, Widget widgetModel msg2 value customError )
+    Nonempty ( String, Widget widgetModel msg2 value customError )
     -> (value -> String)
     -> value
     -> Model
@@ -165,7 +166,7 @@ value defaultVariantName widget formState =
 
 selectedValue :
     Widget model msg String customError
-    -> ListNonempty ( String, Widget widgetModel msg2 value customError )
+    -> Nonempty ( String, Widget widgetModel msg2 value customError )
     -> Model
     -> value
 selectedValue variantSelectWidget variantWidgets model =
@@ -178,7 +179,8 @@ selectedValue variantSelectWidget variantWidgets model =
 
         selectedWidget =
             variantWidgets
-                |> List.Nonempty.filter (\( name, _ ) -> name == selectedVariantName)
+                |> List.Nonempty.toList
+                |> List.filter (\( name, _ ) -> name == selectedVariantName)
                 |> List.head
                 |> withDefault (List.Nonempty.head variantWidgets)
                 |> Tuple.second
