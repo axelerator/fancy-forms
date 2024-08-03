@@ -1,5 +1,9 @@
 # Changelog
 
+## [7.0.1] - 2024-08-03
+
+- Fix bug where custom events would only be emitted from top level forms but not from nested forms
+
 ## [7.0.0] - 2024-08-02
 
 - Swap NonEmptyList implementation to resolve [problem with deps](https://github.com/axelerator/fancy-forms/issues/2)
