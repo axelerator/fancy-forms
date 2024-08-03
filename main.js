@@ -6717,9 +6717,16 @@ var $author$project$Examples$Validation$myForm = A3(
 								})
 						};
 					})))));
+var $author$project$FancyForms$Form$CustomEvent = function (a) {
+	return {$: 'CustomEvent', a: a};
+};
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$FancyForms$Form$decoderCustomFormMsg = A2(
+	$elm$json$Json$Decode$map,
+	$author$project$FancyForms$Form$CustomEvent,
+	A2($elm$json$Json$Decode$field, 'customEvent', $elm$json$Json$Decode$value));
 var $author$project$FancyForms$FormState$Add = {$: 'Add'};
 var $author$project$FancyForms$FormState$Remove = {$: 'Remove'};
-var $elm$json$Json$Decode$value = _Json_decodeValue;
 var $author$project$FancyForms$Form$decoderFieldOperation = A2(
 	$elm$json$Json$Decode$andThen,
 	function (kind) {
@@ -6755,12 +6762,15 @@ var $author$project$FancyForms$Form$decoderSubFieldId = $elm$json$Json$Decode$on
 			$elm$json$Json$Decode$null($author$project$FancyForms$FormState$SingleValue)
 		]));
 var $elm$json$Json$Decode$map3 = _Json_map3;
-var $author$project$FancyForms$Form$decoderFormMsg = A4(
+var $author$project$FancyForms$Form$decoderFormMsg_ = A4(
 	$elm$json$Json$Decode$map3,
 	$author$project$FancyForms$Form$FormMsg,
 	A2($elm$json$Json$Decode$field, 'fieldId', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'subFieldId', $author$project$FancyForms$Form$decoderSubFieldId),
 	A2($elm$json$Json$Decode$field, 'operation', $author$project$FancyForms$Form$decoderFieldOperation));
+var $author$project$FancyForms$Form$decoderFormMsg = $elm$json$Json$Decode$oneOf(
+	_List_fromArray(
+		[$author$project$FancyForms$Form$decoderCustomFormMsg, $author$project$FancyForms$Form$decoderFormMsg_]));
 var $author$project$FancyForms$Form$encodeFieldOperation = function (operation) {
 	switch (operation.$) {
 		case 'Add':
@@ -6799,23 +6809,32 @@ var $author$project$FancyForms$Form$encodeSubFieldId = function (subfieldId) {
 		return $elm$json$Json$Encode$int(i);
 	}
 };
-var $author$project$FancyForms$Form$encodeFormMsg = function (_v0) {
-	var fieldId = _v0.a;
-	var subfieldId = _v0.b;
-	var operation = _v0.c;
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'fieldId',
-				$elm$json$Json$Encode$string(fieldId)),
-				_Utils_Tuple2(
-				'subFieldId',
-				$author$project$FancyForms$Form$encodeSubFieldId(subfieldId)),
-				_Utils_Tuple2(
-				'operation',
-				$author$project$FancyForms$Form$encodeFieldOperation(operation))
-			]));
+var $author$project$FancyForms$Form$encodeFormMsg = function (msg) {
+	if (msg.$ === 'FormMsg') {
+		var fieldId = msg.a;
+		var subfieldId = msg.b;
+		var operation = msg.c;
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'fieldId',
+					$elm$json$Json$Encode$string(fieldId)),
+					_Utils_Tuple2(
+					'subFieldId',
+					$author$project$FancyForms$Form$encodeSubFieldId(subfieldId)),
+					_Utils_Tuple2(
+					'operation',
+					$author$project$FancyForms$Form$encodeFieldOperation(operation))
+				]));
+	} else {
+		var v = msg.a;
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2('customEvent', v)
+				]));
+	}
 };
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $author$project$FancyForms$FormState$Changed = {$: 'Changed'};
@@ -6950,6 +6969,9 @@ var $author$project$FancyForms$FormState$formStateEncode = function (_v0) {
 				$elm$json$Json$Encode$bool(allBlurred))
 			]));
 };
+var $author$project$FancyForms$FormState$justChangedInternally = function (model) {
+	return {effect: $author$project$FancyForms$FormState$NoEffect, model: model};
+};
 var $author$project$FancyForms$FormState$updateFieldStatus = F2(
 	function (status, effect) {
 		var _v0 = _Utils_Tuple2(status, effect);
@@ -7052,15 +7074,7 @@ var $author$project$FancyForms$Form$toWidget = function (f) {
 	return {
 		blur: $author$project$FancyForms$FormState$blurAll,
 		decoderModel: $author$project$FancyForms$FormState$formStateDecoder,
-		decoderMsg: A2(
-			$elm$json$Json$Decode$andThen,
-			function (m) {
-				var fieldId = m.a;
-				var subfieldId = m.b;
-				var fieldOperation = m.c;
-				return $elm$json$Json$Decode$succeed(m);
-			},
-			$author$project$FancyForms$Form$decoderFormMsg),
+		decoderMsg: $author$project$FancyForms$Form$decoderFormMsg,
 		_default: f.fn.combine(
 			A2($author$project$FancyForms$FormState$init, $elm$core$Dict$empty, '')),
 		encodeModel: $author$project$FancyForms$FormState$formStateEncode,
@@ -7071,12 +7085,16 @@ var $author$project$FancyForms$Form$toWidget = function (f) {
 		innerAttributes: $author$project$FancyForms$FormState$noAttributes,
 		isConsistent: f.isConsistent,
 		update: F2(
-			function (_v0, model) {
-				var fieldId = _v0.a;
-				var subfieldId = _v0.b;
-				var value = _v0.c;
-				return $author$project$FancyForms$FormState$justChanged(
-					A5($author$project$FancyForms$Form$updateField, f, fieldId, subfieldId, value, model));
+			function (msg, model) {
+				if (msg.$ === 'FormMsg') {
+					var fieldId = msg.a;
+					var subfieldId = msg.b;
+					var value = msg.c;
+					return $author$project$FancyForms$FormState$justChanged(
+						A5($author$project$FancyForms$Form$updateField, f, fieldId, subfieldId, value, model));
+				} else {
+					return $author$project$FancyForms$FormState$justChangedInternally(model);
+				}
 			}),
 		validate: f.validator,
 		value: value_,
@@ -7325,18 +7343,71 @@ var $author$project$Examples$Combination$myForm = A3(
 var $author$project$Examples$Combination$init = {
 	formState: A2($author$project$FancyForms$Form$init, $author$project$Examples$Combination$myForm, $author$project$Examples$Combination$formDefaults)
 };
-var $author$project$Examples$Decoration$default = {password: '', username: ''};
-var $author$project$Examples$Decoration$init = {
-	formState: A2($author$project$FancyForms$Form$init, $author$project$Examples$Decoration$myForm, $author$project$Examples$Decoration$default)
-};
 var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$html$Html$fieldset = _VirtualDom_node('fieldset');
+var $author$project$FancyForms$Form$customEvent = $author$project$FancyForms$Form$CustomEvent;
+var $elm$html$Html$hr = _VirtualDom_node('hr');
 var $elm$html$Html$Events$onClick = function (msg) {
 	return A2(
 		$elm$html$Html$Events$on,
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
+var $author$project$Examples$CustomEvents$doubleValues = _List_fromArray(
+	[
+		A2($elm$html$Html$hr, _List_Nil, _List_Nil),
+		A2(
+		$elm$html$Html$button,
+		_List_fromArray(
+			[
+				$elm$html$Html$Events$onClick(
+				$author$project$FancyForms$Form$customEvent(
+					$elm$json$Json$Encode$int(2)))
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text('Multiply')
+			]))
+	]);
+var $author$project$Examples$CustomEvents$myForm = A3(
+	$author$project$FancyForms$Form$field,
+	$elm$core$Basics$identity,
+	A2(
+		$author$project$FancyForms$Form$validate,
+		_List_fromArray(
+			[
+				$author$project$FancyForms$Widgets$Int$greaterThan(0)
+			]),
+		$author$project$FancyForms$Widgets$Int$integerInput(_List_Nil)),
+	A4(
+		$author$project$FancyForms$Form$form,
+		F2(
+			function (errors_, html) {
+				return html;
+			}),
+		$author$project$FancyForms$FormState$alwaysValid,
+		'minimal-example',
+		function (amount) {
+			return {
+				combine: function (formState) {
+					return amount.value(formState);
+				},
+				view: F2(
+					function (formState, _v0) {
+						return _Utils_ap(
+							$author$project$Examples$CustomEvents$doubleValues,
+							amount.view(formState));
+					})
+			};
+		}));
+var $author$project$Examples$CustomEvents$init = {
+	count: 0,
+	formState: A2($author$project$FancyForms$Form$init, $author$project$Examples$CustomEvents$myForm, 42)
+};
+var $author$project$Examples$Decoration$default = {password: '', username: ''};
+var $author$project$Examples$Decoration$init = {
+	formState: A2($author$project$FancyForms$Form$init, $author$project$Examples$Decoration$myForm, $author$project$Examples$Decoration$default)
+};
+var $elm$html$Html$fieldset = _VirtualDom_node('fieldset');
 var $elm$virtual_dom$VirtualDom$attribute = F2(
 	function (key, value) {
 		return A2(
@@ -7640,81 +7711,69 @@ var $author$project$Examples$Variants$Phone = F2(
 		return {$: 'Phone', a: a, b: b};
 	});
 var $author$project$Examples$Variants$default = A2($author$project$Examples$Variants$Phone, 1, 1234);
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
+var $mgold$elm_nonempty_list$List$Nonempty$Nonempty = F2(
+	function (a, b) {
+		return {$: 'Nonempty', a: a, b: b};
+	});
+var $mgold$elm_nonempty_list$List$Nonempty$filter = F3(
+	function (p, d, _v0) {
+		var x = _v0.a;
+		var xs = _v0.b;
+		if (p(x)) {
+			return A2(
+				$mgold$elm_nonempty_list$List$Nonempty$Nonempty,
+				x,
+				A2($elm$core$List$filter, p, xs));
+		} else {
+			var _v1 = A2($elm$core$List$filter, p, xs);
+			if (!_v1.b) {
+				return A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, d, _List_Nil);
+			} else {
+				var y = _v1.a;
+				var ys = _v1.b;
+				return A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, y, ys);
+			}
+		}
+	});
+var $mgold$elm_nonempty_list$List$Nonempty$head = function (_v0) {
+	var x = _v0.a;
+	var xs = _v0.b;
+	return x;
 };
 var $author$project$FancyForms$Widgets$Dropdown$fromString = F2(
-	function (_v0, s) {
-		var first = _v0.a;
-		var others = _v0.b;
-		return A2(
-			$elm$core$Maybe$withDefault,
-			first.value,
-			A2(
-				$elm$core$Maybe$map,
-				function ($) {
-					return $.value;
+	function (nel, s) {
+		return $mgold$elm_nonempty_list$List$Nonempty$head(
+			A3(
+				$mgold$elm_nonempty_list$List$Nonempty$filter,
+				function (_v0) {
+					var id = _v0.id;
+					return _Utils_eq(s, id);
 				},
-				$elm$core$List$head(
-					A2(
-						$elm$core$List$filter,
-						function (_v1) {
-							var id = _v1.id;
-							return _Utils_eq(s, id);
-						},
-						A2($elm$core$List$cons, first, others)))));
-	});
-var $coreygirard$elm_nonempty_list$List$Nonempty$head = function (_v0) {
-	var a = _v0.a;
-	var b = _v0.b;
-	return a;
-};
-var $coreygirard$elm_nonempty_list$List$Nonempty$toList = function (_v0) {
-	var a = _v0.a;
-	var b = _v0.b;
-	return A2($elm$core$List$cons, a, b);
-};
-var $coreygirard$elm_nonempty_list$List$Nonempty$filter = F2(
-	function (f, elems) {
-		return A2(
-			$elm$core$List$filter,
-			f,
-			$coreygirard$elm_nonempty_list$List$Nonempty$toList(elems));
+				$mgold$elm_nonempty_list$List$Nonempty$head(nel),
+				nel)).value;
 	});
 var $author$project$FancyForms$Widgets$Dropdown$init = F2(
 	function (variants, v) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			$coreygirard$elm_nonempty_list$List$Nonempty$head(variants).id,
-			A2(
-				$elm$core$Maybe$map,
-				function ($) {
-					return $.id;
+		return $mgold$elm_nonempty_list$List$Nonempty$head(
+			A3(
+				$mgold$elm_nonempty_list$List$Nonempty$filter,
+				function (_v0) {
+					var value = _v0.value;
+					return _Utils_eq(value, v);
 				},
-				$elm$core$List$head(
-					A2(
-						$coreygirard$elm_nonempty_list$List$Nonempty$filter,
-						function (_v0) {
-							var value = _v0.value;
-							return _Utils_eq(value, v);
-						},
-						variants))));
+				$mgold$elm_nonempty_list$List$Nonempty$head(variants),
+				variants)).id;
 	});
 var $author$project$FancyForms$Widgets$Dropdown$update = F2(
 	function (id, _v0) {
 		return $author$project$FancyForms$FormState$justChanged(id);
 	});
-var $author$project$FancyForms$Widgets$Dropdown$all = function (_v0) {
-	var first = _v0.a;
-	var others = _v0.b;
-	return A2($elm$core$List$cons, first, others);
+var $mgold$elm_nonempty_list$List$Nonempty$toList = function (_v0) {
+	var x = _v0.a;
+	var xs = _v0.b;
+	return A2($elm$core$List$cons, x, xs);
 };
+var $author$project$FancyForms$Widgets$Dropdown$all = $mgold$elm_nonempty_list$List$Nonempty$toList;
 var $elm$html$Html$option = _VirtualDom_node('option');
 var $elm$html$Html$select = _VirtualDom_node('select');
 var $elm$html$Html$Attributes$boolProperty = F2(
@@ -7767,7 +7826,7 @@ var $author$project$FancyForms$Widgets$Dropdown$dropdown = function (variants) {
 		blur: $elm$core$Basics$identity,
 		decoderModel: $elm$json$Json$Decode$string,
 		decoderMsg: $elm$json$Json$Decode$string,
-		_default: $coreygirard$elm_nonempty_list$List$Nonempty$head(variants).value,
+		_default: $mgold$elm_nonempty_list$List$Nonempty$head(variants).value,
 		encodeModel: $elm$json$Json$Encode$string,
 		encodeMsg: $elm$json$Json$Encode$string,
 		init: $author$project$FancyForms$Widgets$Dropdown$init(variants),
@@ -7816,6 +7875,19 @@ var $author$project$Examples$Variants$emailForm = A3(
 					})
 			};
 		}));
+var $mgold$elm_nonempty_list$List$Nonempty$append = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var xs = _v0.b;
+		var y = _v1.a;
+		var ys = _v1.b;
+		return A2(
+			$mgold$elm_nonempty_list$List$Nonempty$Nonempty,
+			x,
+			_Utils_ap(
+				xs,
+				A2($elm$core$List$cons, y, ys)));
+	});
 var $author$project$FancyForms$Widgets$VariantSelect$selectorFieldId = 'selectorValue';
 var $elm$core$Dict$singleton = F2(
 	function (key, value) {
@@ -7842,7 +7914,7 @@ var $author$project$FancyForms$Widgets$VariantSelect$variantWidgetInit = F3(
 			$elm$core$List$foldl,
 			variantInit,
 			values,
-			$coreygirard$elm_nonempty_list$List$Nonempty$toList(variantWidgets));
+			$mgold$elm_nonempty_list$List$Nonempty$toList(variantWidgets));
 		return $author$project$FancyForms$FormState$FormState(
 			{allBlurred: false, fieldStatus: $elm$core$Dict$empty, parentDomId: '0', values: values_});
 	});
@@ -7853,14 +7925,28 @@ var $author$project$FancyForms$Form$extractVariantInit = F6(
 			A3($author$project$FancyForms$Widgets$VariantSelect$variantWidgetInit, variantsWithWidgets, variantNameExtractor, value));
 		return A4($author$project$FancyForms$FormState$write, fieldId, $author$project$FancyForms$FormState$SingleValue, formState, encodedValue);
 	});
-var $coreygirard$elm_nonempty_list$List$Nonempty$map = F2(
+var $mgold$elm_nonempty_list$List$Nonempty$fromList = function (ys) {
+	if (ys.b) {
+		var x = ys.a;
+		var xs = ys.b;
+		return $elm$core$Maybe$Just(
+			A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, x, xs));
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $mgold$elm_nonempty_list$List$Nonempty$map = F2(
 	function (f, _v0) {
-		var a = _v0.a;
-		var b = _v0.b;
-		return _Utils_Tuple2(
-			f(a),
-			A2($elm$core$List$map, f, b));
+		var x = _v0.a;
+		var xs = _v0.b;
+		return A2(
+			$mgold$elm_nonempty_list$List$Nonempty$Nonempty,
+			f(x),
+			A2($elm$core$List$map, f, xs));
 	});
+var $mgold$elm_nonempty_list$List$Nonempty$singleton = function (x) {
+	return A2($mgold$elm_nonempty_list$List$Nonempty$Nonempty, x, _List_Nil);
+};
 var $author$project$FancyForms$Widgets$VariantSelect$blur = F3(
 	function (variantSelector, variantWidgets, formState) {
 		var withBlurredSelector = A3($author$project$FancyForms$FormState$blurChildren, $author$project$FancyForms$Widgets$VariantSelect$selectorFieldId, variantSelector, formState);
@@ -7926,6 +8012,15 @@ var $author$project$FancyForms$Widgets$VariantSelect$encodeMsg = function (msg) 
 				]));
 	}
 };
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
 var $author$project$FancyForms$Widgets$VariantSelect$value = F3(
 	function (defaultVariantName, widget, formState) {
 		return A2(
@@ -7941,19 +8036,19 @@ var $author$project$FancyForms$Widgets$VariantSelect$value = F3(
 	});
 var $author$project$FancyForms$Widgets$VariantSelect$selectedValue = F3(
 	function (variantSelectWidget, variantWidgets, model) {
-		var defaultVariantName = $coreygirard$elm_nonempty_list$List$Nonempty$head(variantWidgets).a;
+		var defaultVariantName = $mgold$elm_nonempty_list$List$Nonempty$head(variantWidgets).a;
 		var selectedVariantName = A3($author$project$FancyForms$Widgets$VariantSelect$value, defaultVariantName, variantSelectWidget, model);
 		var selectedWidget = A2(
 			$elm$core$Maybe$withDefault,
-			$coreygirard$elm_nonempty_list$List$Nonempty$head(variantWidgets),
+			$mgold$elm_nonempty_list$List$Nonempty$head(variantWidgets),
 			$elm$core$List$head(
 				A2(
-					$coreygirard$elm_nonempty_list$List$Nonempty$filter,
+					$elm$core$List$filter,
 					function (_v0) {
 						var name = _v0.a;
 						return _Utils_eq(name, selectedVariantName);
 					},
-					variantWidgets))).b;
+					$mgold$elm_nonempty_list$List$Nonempty$toList(variantWidgets)))).b;
 		return A2(
 			$elm$core$Result$withDefault,
 			selectedWidget._default,
@@ -8072,18 +8167,18 @@ var $author$project$FancyForms$Widgets$VariantSelect$widgetByName = F2(
 	function (variantWidgets, variantName) {
 		return A2(
 			$elm$core$Maybe$withDefault,
-			$coreygirard$elm_nonempty_list$List$Nonempty$head(variantWidgets).b,
+			$mgold$elm_nonempty_list$List$Nonempty$head(variantWidgets).b,
 			$elm$core$List$head(
 				A2(
 					$elm$core$List$map,
 					$elm$core$Tuple$second,
 					A2(
-						$coreygirard$elm_nonempty_list$List$Nonempty$filter,
+						$elm$core$List$filter,
 						function (_v0) {
 							var name = _v0.a;
 							return _Utils_eq(name, variantName);
 						},
-						variantWidgets))));
+						$mgold$elm_nonempty_list$List$Nonempty$toList(variantWidgets)))));
 	});
 var $author$project$FancyForms$Widgets$VariantSelect$update = F4(
 	function (variantSelector, variantWidgets, msg, model) {
@@ -8197,10 +8292,10 @@ var $author$project$FancyForms$Widgets$VariantSelect$variantWidget = F4(
 			blur: A2(
 				$author$project$FancyForms$Widgets$VariantSelect$blur,
 				variantSelector,
-				$coreygirard$elm_nonempty_list$List$Nonempty$toList(variantWidgets)),
+				$mgold$elm_nonempty_list$List$Nonempty$toList(variantWidgets)),
 			decoderModel: $author$project$FancyForms$FormState$formStateDecoder,
 			decoderMsg: $author$project$FancyForms$Widgets$VariantSelect$decoderMsg,
-			_default: $coreygirard$elm_nonempty_list$List$Nonempty$head(variantWidgets).b._default,
+			_default: $mgold$elm_nonempty_list$List$Nonempty$head(variantWidgets).b._default,
 			encodeModel: $author$project$FancyForms$FormState$formStateEncode,
 			encodeMsg: $author$project$FancyForms$Widgets$VariantSelect$encodeMsg,
 			init: A2($author$project$FancyForms$Widgets$VariantSelect$variantWidgetInit, variantWidgets, variantNameExtractor),
@@ -8219,7 +8314,7 @@ var $author$project$FancyForms$Widgets$VariantSelect$variantWidget = F4(
 				$author$project$FancyForms$Widgets$VariantSelect$view,
 				defaultVariantName,
 				variantSelector,
-				$coreygirard$elm_nonempty_list$List$Nonempty$toList(variantWidgets))
+				$mgold$elm_nonempty_list$List$Nonempty$toList(variantWidgets))
 		};
 	});
 var $author$project$FancyForms$Form$fieldWithVariants = F6(
@@ -8233,28 +8328,37 @@ var $author$project$FancyForms$Form$fieldWithVariants = F6(
 		var domId = _v0.domId;
 		var isConsistent = _v0.isConsistent;
 		var initWithData = _v0.initWithData;
-		var toWidgetVariant = function (_v2) {
-			var n = _v2.a;
-			var f = _v2.b;
+		var toWidgetVariant = function (_v3) {
+			var n = _v3.a;
+			var f = _v3.b;
 			return _Utils_Tuple2(
 				n,
 				$author$project$FancyForms$Form$toWidget(f));
 		};
-		var variantsWithWidgets = _Utils_Tuple2(
-			toWidgetVariant(defaultVariant),
+		var otherAsNonEmptyList = $mgold$elm_nonempty_list$List$Nonempty$fromList(
 			A2($elm$core$List$map, toWidgetVariant, otherVariants));
-		var mkVariant = function (_v1) {
-			var name = _v1.a;
+		var mkVariant = function (_v2) {
+			var name = _v2.a;
 			return {id: name, label: name, value: name};
 		};
+		var fieldId = $elm$core$String$fromInt(count);
+		var defaultAsNonEmptyList = $mgold$elm_nonempty_list$List$Nonempty$singleton(
+			toWidgetVariant(defaultVariant));
+		var variantsWithWidgets = function () {
+			if (otherAsNonEmptyList.$ === 'Just') {
+				var nel = otherAsNonEmptyList.a;
+				return A2($mgold$elm_nonempty_list$List$Nonempty$append, defaultAsNonEmptyList, nel);
+			} else {
+				return defaultAsNonEmptyList;
+			}
+		}();
 		var widget = A4(
 			$author$project$FancyForms$Widgets$VariantSelect$variantWidget,
 			variantSelector(
-				A2($coreygirard$elm_nonempty_list$List$Nonempty$map, mkVariant, variantsWithWidgets)),
+				A2($mgold$elm_nonempty_list$List$Nonempty$map, mkVariant, variantsWithWidgets)),
 			extractVariantName,
-			$coreygirard$elm_nonempty_list$List$Nonempty$head(variantsWithWidgets).a,
+			$mgold$elm_nonempty_list$List$Nonempty$head(variantsWithWidgets).a,
 			variantsWithWidgets);
-		var fieldId = $elm$core$String$fromInt(count);
 		return {
 			blur: A2(
 				$elm$core$Basics$composeR,
@@ -8348,54 +8452,34 @@ var $author$project$Examples$Variants$phoneForm = A3(
 					};
 				}))));
 var $author$project$FancyForms$Widgets$RadioButtons$fromString = F2(
-	function (_v0, s) {
-		var first = _v0.a;
-		var others = _v0.b;
-		return A2(
-			$elm$core$Maybe$withDefault,
-			first.value,
-			A2(
-				$elm$core$Maybe$map,
-				function ($) {
-					return $.value;
+	function (nel, s) {
+		return $mgold$elm_nonempty_list$List$Nonempty$head(
+			A3(
+				$mgold$elm_nonempty_list$List$Nonempty$filter,
+				function (_v0) {
+					var id = _v0.id;
+					return _Utils_eq(s, id);
 				},
-				$elm$core$List$head(
-					A2(
-						$elm$core$List$filter,
-						function (_v1) {
-							var id = _v1.id;
-							return _Utils_eq(s, id);
-						},
-						A2($elm$core$List$cons, first, others)))));
+				$mgold$elm_nonempty_list$List$Nonempty$head(nel),
+				nel)).value;
 	});
 var $author$project$FancyForms$Widgets$RadioButtons$init = F2(
 	function (variants, v) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			$coreygirard$elm_nonempty_list$List$Nonempty$head(variants).id,
-			A2(
-				$elm$core$Maybe$map,
-				function ($) {
-					return $.id;
+		return $mgold$elm_nonempty_list$List$Nonempty$head(
+			A3(
+				$mgold$elm_nonempty_list$List$Nonempty$filter,
+				function (_v0) {
+					var value = _v0.value;
+					return _Utils_eq(value, v);
 				},
-				$elm$core$List$head(
-					A2(
-						$coreygirard$elm_nonempty_list$List$Nonempty$filter,
-						function (_v0) {
-							var value = _v0.value;
-							return _Utils_eq(value, v);
-						},
-						variants))));
+				$mgold$elm_nonempty_list$List$Nonempty$head(variants),
+				variants)).id;
 	});
 var $author$project$FancyForms$Widgets$RadioButtons$update = F2(
 	function (id, _v0) {
 		return $author$project$FancyForms$FormState$justChanged(id);
 	});
-var $author$project$FancyForms$Widgets$RadioButtons$all = function (_v0) {
-	var first = _v0.a;
-	var others = _v0.b;
-	return A2($elm$core$List$cons, first, others);
-};
+var $author$project$FancyForms$Widgets$RadioButtons$all = $mgold$elm_nonempty_list$List$Nonempty$toList;
 var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
 var $author$project$FancyForms$Widgets$RadioButtons$view = F4(
 	function (variants, _v0, innerAttrs, selectedId) {
@@ -8438,7 +8522,7 @@ var $author$project$FancyForms$Widgets$RadioButtons$radioButtons = function (var
 		blur: $elm$core$Basics$identity,
 		decoderModel: $elm$json$Json$Decode$string,
 		decoderMsg: $elm$json$Json$Decode$string,
-		_default: $coreygirard$elm_nonempty_list$List$Nonempty$head(variants).value,
+		_default: $mgold$elm_nonempty_list$List$Nonempty$head(variants).value,
 		encodeModel: $elm$json$Json$Encode$string,
 		encodeMsg: $elm$json$Json$Encode$string,
 		init: $author$project$FancyForms$Widgets$RadioButtons$init(variants),
@@ -8501,7 +8585,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
-		{combination: $author$project$Examples$Combination$init, decoration: $author$project$Examples$Decoration$init, expanded: $elm$core$Set$empty, lists: $author$project$Examples$Lists$init, minimal: $author$project$Examples$Minimal$init, validation: $author$project$Examples$Validation$init, variants: $author$project$Examples$Variants$init},
+		{combination: $author$project$Examples$Combination$init, customEvents: $author$project$Examples$CustomEvents$init, decoration: $author$project$Examples$Decoration$init, expanded: $elm$core$Set$empty, lists: $author$project$Examples$Lists$init, minimal: $author$project$Examples$Minimal$init, validation: $author$project$Examples$Validation$init, variants: $author$project$Examples$Variants$init},
 		$elm$core$Platform$Cmd$none);
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
@@ -8518,8 +8602,10 @@ var $author$project$Main$exampleAsStr = function (example) {
 			return 'Combination';
 		case 'Lists':
 			return 'Lists';
-		default:
+		case 'Variants':
 			return 'Variants';
+		default:
+			return 'CustomEvents';
 	}
 };
 var $elm$core$Set$insert = F2(
@@ -8918,11 +9004,15 @@ var $elm$core$Set$remove = F2(
 			A2($elm$core$Dict$remove, key, dict));
 	});
 var $author$project$FancyForms$Form$update = F3(
-	function (form_, _v0, formState) {
-		var fieldId = _v0.a;
-		var subfieldId = _v0.b;
-		var op = _v0.c;
-		return A5($author$project$FancyForms$Form$updateField, form_, fieldId, subfieldId, op, formState);
+	function (form_, msg, formState) {
+		if (msg.$ === 'FormMsg') {
+			var fieldId = msg.a;
+			var subfieldId = msg.b;
+			var op = msg.c;
+			return A5($author$project$FancyForms$Form$updateField, form_, fieldId, subfieldId, op, formState);
+		} else {
+			return formState;
+		}
 	});
 var $author$project$Examples$Combination$update = F2(
 	function (msg, model) {
@@ -8932,6 +9022,51 @@ var $author$project$Examples$Combination$update = F2(
 			{
 				formState: A3($author$project$FancyForms$Form$update, $author$project$Examples$Combination$myForm, formMsg, model.formState)
 			});
+	});
+var $author$project$FancyForms$Form$getCustomEvent = function (msg) {
+	if (msg.$ === 'CustomEvent') {
+		var v = msg.a;
+		return $elm$core$Maybe$Just(v);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$FancyForms$Form$extract = function (_v0) {
+	var fn = _v0.fn;
+	return fn.combine;
+};
+var $author$project$Examples$CustomEvents$multiply = F2(
+	function (n, formState) {
+		return A2(
+			$author$project$FancyForms$Form$init,
+			$author$project$Examples$CustomEvents$myForm,
+			function (i) {
+				return i * n;
+			}(
+				A2($author$project$FancyForms$Form$extract, $author$project$Examples$CustomEvents$myForm, formState)));
+	});
+var $author$project$Examples$CustomEvents$update = F2(
+	function (msg, model) {
+		var formMsg = msg.a;
+		var _v1 = A2(
+			$elm$core$Maybe$map,
+			$elm$json$Json$Decode$decodeValue($elm$json$Json$Decode$int),
+			$author$project$FancyForms$Form$getCustomEvent(formMsg));
+		if ((_v1.$ === 'Just') && (_v1.a.$ === 'Ok')) {
+			var n = _v1.a.a;
+			return _Utils_update(
+				model,
+				{
+					count: model.count + 1,
+					formState: A2($author$project$Examples$CustomEvents$multiply, n, model.formState)
+				});
+		} else {
+			return _Utils_update(
+				model,
+				{
+					formState: A3($author$project$FancyForms$Form$update, $author$project$Examples$CustomEvents$myForm, formMsg, model.formState)
+				});
+		}
 	});
 var $author$project$Examples$Decoration$update = F2(
 	function (msg, model) {
@@ -9061,13 +9196,22 @@ var $author$project$Main$update = F2(
 							lists: A2($author$project$Examples$Lists$update, subMsg, model.lists)
 						}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 'ForVariants':
 				var subMsg = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
 							variants: A2($author$project$Examples$Variants$update, subMsg, model.variants)
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var subMsg = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							customEvents: A2($author$project$Examples$CustomEvents$update, subMsg, model.customEvents)
 						}),
 					$elm$core$Platform$Cmd$none);
 		}
@@ -9573,10 +9717,6 @@ var $author$project$Examples$Combination$ForForm = function (a) {
 	return {$: 'ForForm', a: a};
 };
 var $elm$html$Html$br = _VirtualDom_node('br');
-var $author$project$FancyForms$Form$extract = function (_v0) {
-	var fn = _v0.fn;
-	return fn.combine;
-};
 var $elm$html$Html$p = _VirtualDom_node('p');
 var $author$project$FancyForms$FormState$NotValid = {$: 'NotValid'};
 var $author$project$FancyForms$Form$addInvalidIfInconsistent = F3(
@@ -9638,12 +9778,14 @@ var $author$project$Examples$Combination$view = function (model) {
 					]))
 			]));
 };
+var $author$project$Main$CustomEvents = {$: 'CustomEvents'};
 var $author$project$Main$Decoration = {$: 'Decoration'};
 var $author$project$Main$Lists = {$: 'Lists'};
 var $author$project$Main$Minimal = {$: 'Minimal'};
 var $author$project$Main$Validation = {$: 'Validation'};
 var $author$project$Main$Variants = {$: 'Variants'};
 var $author$project$Examples$Code$Combination$code = '\nmodule Examples.Combination exposing (..)\n\nimport Examples.Decoration exposing (Login, withLabel)\nimport Examples.Validation exposing (Date, MyError)\nimport FancyForms.Form as Form exposing (Form, field)\nimport FancyForms.FormState exposing (FormState, alwaysValid)\nimport Html exposing (br, div, p, text)\nimport String exposing (fromInt)\n\n\ntype alias Model =\n    { formState : FormState }\n\n\ntype Msg\n    = ForForm Form.Msg\n\n\ntype alias Signup =\n    { login : Login\n    , birthday : Date\n    }\n\n\nloginInput =\n    Form.toWidget Examples.Decoration.myForm\n\n\ndateInput =\n    Form.toWidget Examples.Validation.myForm\n\n\nmyForm : Form Signup MyError\nmyForm =\n    Form.form\n        (\\errors_ html -> html) -- omitting errors for brevity\n        alwaysValid -- no custom validations\n        "combination-example"\n        (\\login birthday ->\n            { view =\n                \\formState _ ->\n                    List.concat\n                        [ login.view formState\n                        , birthday.view formState\n                        ]\n            , combine =\n                \\formState ->\n                    { login = login.value formState\n                    , birthday = birthday.value formState\n                    }\n            }\n        )\n        |> field .login loginInput\n        |> field .birthday (dateInput |> withLabel "birthday")\n\n\nview model =\n    let\n        data =\n            Form.extract myForm model.formState\n    in\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            [ text "The user entered: "\n            , br [] []\n            , text "login: "\n            , text <| data.login.username\n            , text ":"\n            , text <| data.login.password\n            ]\n        , p []\n            [ text "day: "\n            , text <| fromInt data.birthday.day\n            , text " month: "\n            , text <| fromInt data.birthday.month\n            , text " year: "\n            , text <| fromInt data.birthday.year\n            ]\n        ]\n\n\ninit =\n    { formState = Form.init myForm formDefaults }\n\n\nformDefaults =\n    { login = emptyLogin\n    , birthday = defaultDate\n    }\n\n\nemptyLogin =\n    { username = ""\n    , password = ""\n    }\n\n\ndefaultDate =\n    { day = 1\n    , month = 1\n    , year = 1970\n    }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n';
+var $author$project$Examples$Code$CustomEvents$code = '\nmodule Examples.CustomEvents exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, field, getCustomEvent)\nimport FancyForms.FormState exposing (FormState, alwaysValid)\nimport FancyForms.Widgets.Int exposing (integerInput)\nimport Html exposing (div, p, text)\nimport String exposing (fromInt)\nimport FancyForms.Form exposing (validate)\nimport FancyForms.Widgets.Int exposing (greaterThan)\nimport Html exposing (hr)\nimport Html exposing (button)\nimport Html.Events exposing (onClick)\nimport FancyForms.Form exposing (customEvent)\nimport Json.Encode\nimport Json.Decode\n\n\ntype alias Model =\n    { formState : FormState\n    , count : Int\n    }\n\ntype Msg\n    = ForForm Form.Msg\n\nmyForm : Form Int ()\nmyForm =\n    Form.form\n        (\\errors_ html -> html) -- omitting errors for brevity\n        alwaysValid -- no custom validations\n         "minimal-example" -- unique id to be used in DOM\n        (\\amount ->\n            { view = \\formState _ -> \n                amount.view formState\n                |> (++) doubleValues\n            , combine = \\formState -> amount.value formState\n            }\n        )\n        |> field identity (integerInput [] |> validate [greaterThan 0])\n\ndoubleValues = \n    [ hr [] []\n    , button \n        [ onClick <| customEvent <| Json.Encode.int 2 ] \n        [ text "Multiply"]\n    ]\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            [ text "The user entered: "\n            , text <| fromInt <| Form.extract myForm model.formState\n            ]\n        , p [] \n            [ text "The number of custom events is: "\n            , text <| fromInt model.count\n            ]\n        ]\n\ninit =\n    { formState = Form.init myForm 42\n    , count = 0\n    }\n\nmultiply : Int -> FormState -> FormState\nmultiply n formState =\n    Form.extract myForm formState \n    |> (\\i -> i * n)\n    |> Form.init myForm\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            case getCustomEvent formMsg |> Maybe.map (Json.Decode.decodeValue Json.Decode.int) of\n                Just (Ok n) -> \n                    { model \n                    | count = model.count + 1 \n                    , formState = multiply n model.formState\n                    }\n                _ -> \n                    { model | formState = Form.update myForm formMsg model.formState }\n';
 var $author$project$Examples$Code$Decoration$code = '\nmodule Examples.Decoration exposing (..)\n\nimport Examples.Validation exposing (MyError)\nimport FancyForms.Form as Form exposing (Form, field)\nimport FancyForms.FormState exposing (FormState, Widget, alwaysValid)\nimport FancyForms.Widgets.Text exposing (textInput)\nimport Html exposing (div, label, p, text)\nimport Html.Attributes exposing (for, type_)\n\n\ntype alias Model =\n    { formState : FormState }\n\n\ntype Msg\n    = ForForm Form.Msg\n\n\ntype alias Login =\n    { username : String\n    , password : String\n    }\n\n\ncontentWithLabel labelText domId content =\n    label [ for domId ] [ text labelText ] :: content\n\n\nwithLabel :\n    String\n    -> Widget widgetModel msg value customError\n    -> Widget widgetModel msg value customError\nwithLabel labelText wrapped =\n    Form.wrap wrapped <| contentWithLabel labelText\n\n\ntextInputWithLabel labelText =\n    textInput [] |> withLabel labelText\n\n\nmyForm : Form Login MyError\nmyForm =\n    Form.form\n        (\\errors_ html -> html) -- omitting errors for brevity\n        alwaysValid -- no custom validations\n        "decoration-example"\n        (\\user password ->\n            { view =\n                \\formState _ ->\n                    List.concat\n                        [ user.view formState\n                        , password.view formState\n                        ]\n            , combine =\n                \\formState ->\n                    { username = user.value formState\n                    , password = password.value formState\n                    }\n            }\n        )\n        |> field .username (textInputWithLabel "username")\n        |> field .password (textInput [ type_ "password" ] |> withLabel "password")\n\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            [ text "The user entered: "\n            , text <| .username <| Form.extract myForm model.formState\n            , text ":"\n            , text <| .password <| Form.extract myForm model.formState\n            ]\n        ]\n\n\ninit =\n    { formState = Form.init myForm default }\n\n\ndefault =\n    { username = ""\n    , password = ""\n    }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n';
 var $author$project$Examples$Code$Lists$code = '\nmodule Examples.Lists exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, listField)\nimport FancyForms.FormState exposing (FormState, alwaysValid)\nimport FancyForms.Widgets.Text exposing (textInput)\nimport Html exposing (Attribute, button, div, fieldset, p, text)\nimport Html.Attributes exposing (attribute)\nimport Html.Events exposing (onClick)\n\n\ntype alias Model =\n    { formState : FormState }\n\n\ntype Msg\n    = ForForm Form.Msg\n\n\nmyForm : Form (List String) ()\nmyForm =\n    Form.form\n        (\\_ html -> html) -- omitting errors for brevity\n        alwaysValid -- no custom validations\n        "lists-example"\n        (\\todos ->\n            { view = \\formState _ -> todos.view formState\n            , combine = \\formState -> todos.value formState\n            }\n        )\n        |> listField\n            listWithAddButton\n            fieldWithRemoveButton\n            "a new todo"\n            identity\n            (textInput [])\n\nfieldWithRemoveButton removeMsg input =\n    [ fieldset [ role "group" ] <|\n        input\n            ++ [ button [ onClick removeMsg ] [ text "Remove" ] ]\n    ]\n\nlistWithAddButton addMsg items =\n    [ div [] <|\n        items\n            ++ [ button [ onClick addMsg ] [ text "Add todo" ] ]\n    ]\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            (text "The user entered: "\n                :: (List.map (\\todo -> div [] [ text todo ]) <| Form.extract myForm model.formState)\n            )\n        ]\n\n\ninit =\n    { formState = Form.init myForm [ "yay!" ] }\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n\n\nrole : String -> Attribute msg\nrole value =\n    attribute "role" value\n';
 var $author$project$Examples$Code$Minimal$code = '\nmodule Examples.Minimal exposing (..)\n\nimport FancyForms.Form as Form exposing (Form, field)\nimport FancyForms.FormState exposing (FormState, alwaysValid)\nimport FancyForms.Widgets.Int exposing (integerInput)\nimport Html exposing (div, p, text)\nimport String exposing (fromInt)\nimport FancyForms.Form exposing (validate)\nimport FancyForms.Widgets.Int exposing (greaterThan)\n\n\ntype alias Model =\n    { formState : FormState }\n\ntype Msg\n    = ForForm Form.Msg\n\nmyForm : Form Int ()\nmyForm =\n    Form.form\n        (\\errors_ html -> html) -- omitting errors for brevity\n        alwaysValid -- no custom validations\n         "minimal-example" -- unique id to be used in DOM\n        (\\amount ->\n            { view = \\formState _ -> amount.view formState\n            , combine = \\formState -> amount.value formState\n            }\n        )\n        |> field identity (integerInput [] |> validate [greaterThan 0])\n\nview model =\n    div []\n        [ div [] <| Form.render ForForm myForm model.formState\n        , p []\n            [ text "The user entered: "\n            , text <| fromInt <| Form.extract myForm model.formState\n            ]\n        ]\n\ninit =\n    { formState = Form.init myForm 42 }\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n    case msg of\n        ForForm formMsg ->\n            { model | formState = Form.update myForm formMsg model.formState }\n';
@@ -9692,6 +9834,13 @@ var $author$project$Main$examples = _List_fromArray(
 		range: _Utils_Tuple2(13, 45),
 		subTitle: 'Letting the user choose between multiple sub forms',
 		title: 'Variants'
+	},
+		{
+		code: $author$project$Examples$Code$CustomEvents$code,
+		example: $author$project$Main$CustomEvents,
+		range: _Utils_Tuple2(25, 73),
+		subTitle: 'Emitting custom events from the form',
+		title: 'Custom events'
 	}
 	]);
 var $author$project$Main$findExample = function (example) {
@@ -11927,6 +12076,58 @@ var $author$project$Main$viewCombination = function (model) {
 		$author$project$Main$Combination,
 		$author$project$Examples$Combination$view(model.combination));
 };
+var $author$project$Main$ForCustomEvents = function (a) {
+	return {$: 'ForCustomEvents', a: a};
+};
+var $author$project$Main$customEventsMarkdown = A2($elm_explorations$markdown$Markdown$toHtml, _List_Nil, '\nOne thing we can\'t easily do is to send `Msg` from the outside app from __inside__ the form.    \nThe way the form widgets can be arbitrarily nested is thal all its messages get serialized to JSON and back.\n\nWe can\'t infer how to do that for message from the outside.\nInstead of adding another type parameter and functions for serializing to the form functions we offer a\nworkaround: You can emit a _"custom event"_ with arbitrary JSON data from within the form.\n\nThis obviously sacrifices a lot of type safety, but is the best we can do without making the general API\neven more complicated.\n\nThe user can use the `getCustomEvent` function during the `update` to extract the custom data.\nThese events can even be used to update the content of the form as shown in the following example.\n\nIn real life use one should use a symmetric pair of de-/encoders instead of de-/encoding\nin the view/update functions.\n');
+var $author$project$Examples$CustomEvents$ForForm = function (a) {
+	return {$: 'ForForm', a: a};
+};
+var $author$project$Examples$CustomEvents$view = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				A3($author$project$FancyForms$Form$render, $author$project$Examples$CustomEvents$ForForm, $author$project$Examples$CustomEvents$myForm, model.formState)),
+				A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('The user entered: '),
+						$elm$html$Html$text(
+						$elm$core$String$fromInt(
+							A2($author$project$FancyForms$Form$extract, $author$project$Examples$CustomEvents$myForm, model.formState)))
+					])),
+				A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('The number of custom events is: '),
+						$elm$html$Html$text(
+						$elm$core$String$fromInt(model.count))
+					]))
+			]));
+};
+var $author$project$Main$viewCustomEvents = function (model) {
+	var description = A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[$author$project$Main$customEventsMarkdown]));
+	return A5(
+		$author$project$Main$viewExample,
+		model,
+		description,
+		$author$project$Main$ForCustomEvents,
+		$author$project$Main$CustomEvents,
+		$author$project$Examples$CustomEvents$view(model.customEvents));
+};
 var $author$project$Main$ForDecoration = function (a) {
 	return {$: 'ForDecoration', a: a};
 };
@@ -12325,7 +12526,8 @@ var $author$project$Main$view = function (model) {
 				$author$project$Main$viewDecoration(model),
 				$author$project$Main$viewCombination(model),
 				$author$project$Main$viewLists(model),
-				$author$project$Main$viewVariants(model)
+				$author$project$Main$viewVariants(model),
+				$author$project$Main$viewCustomEvents(model)
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
