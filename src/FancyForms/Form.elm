@@ -207,7 +207,14 @@ mkField fieldWithErrors fieldId widget =
                 toMsg : msg -> Msg
                 toMsg msg =
                     widget.encodeMsg msg
-                        |> (\v -> FormMsg fieldId SingleValue (Update v))
+                        |> (\v ->
+                                case D.decodeValue customEventDecoder v of
+                                    Ok cev ->
+                                        CustomEvent cev
+
+                                    _ ->
+                                        FormMsg fieldId SingleValue (Update v)
+                           )
 
                 fieldErrors =
                     if wasAtLeast Blurred fieldId formState then
@@ -582,6 +589,11 @@ buildDomId parentDomId fieldId subfieldId =
            )
 
 
+customEventDecoder : Decoder Value
+customEventDecoder =
+    D.field "customEvent" D.value
+
+
 mkListField : FieldWithErrors customError -> ListWithAddButton Msg -> FieldWithRemoveButton Msg -> FieldId -> Widget model msg value customError -> Field (List value) customError
 mkListField fieldWithErrors listWithAddButton fieldWithRemoveButton fieldId widget =
     let
@@ -595,7 +607,20 @@ mkListField fieldWithErrors listWithAddButton fieldWithRemoveButton fieldId widg
             let
                 toMsg_ : Int -> Html msg -> Html Msg
                 toMsg_ i html =
-                    Html.map (\msg -> FormMsg fieldId (ArrayElement i) (Update (widget.encodeMsg msg))) html
+                    Html.map
+                        (\msg ->
+                            let
+                                encoded =
+                                    widget.encodeMsg msg
+                            in
+                            case D.decodeValue customEventDecoder encoded of
+                                Ok cev ->
+                                    CustomEvent cev
+
+                                _ ->
+                                    FormMsg fieldId (ArrayElement i) (Update encoded)
+                        )
+                        html
 
                 toMsg : Int -> List (Html msg) -> List (Html Msg)
                 toMsg i html =
