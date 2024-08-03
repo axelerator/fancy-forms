@@ -1,6 +1,6 @@
 module FancyForms.Form exposing
     ( Form, form, field, Field, isValid, validate, FieldWithErrors, PartialForm
-    , Msg, init, update, render, extract
+    , Msg, customEvent, getCustomEvent, init, update, render, extract
     , listField, FieldWithRemoveButton, ListWithAddButton
     , fieldWithVariants, Variant, Variants
     , toWidget, wrap
@@ -23,7 +23,7 @@ module FancyForms.Form exposing
 
 # Wiring
 
-@docs Msg, init, update, render, extract
+@docs Msg, customEvent, getCustomEvent, init, update, render, extract
 
 
 # List fields
@@ -43,7 +43,7 @@ module FancyForms.Form exposing
 -}
 
 import Dict exposing (Dict)
-import FancyForms.FormState as FormState exposing (DomId, Effect(..), Error(..), FieldId, FieldOperation(..), FieldStatus(..), FormState(..), SubfieldId(..), Validator, Widget, blurAll, blurChildren, formStateDecoder, formStateEncode, justChanged, noAttributes, read, updateFieldStatus, wasAtLeast, write)
+import FancyForms.FormState as FormState exposing (DomId, Effect(..), Error(..), FieldId, FieldOperation(..), FieldStatus(..), FormState(..), SubfieldId(..), Validator, Widget, blurAll, blurChildren, formStateDecoder, formStateEncode, justChanged, justChangedInternally, noAttributes, read, updateFieldStatus, wasAtLeast, write)
 import FancyForms.Widgets.VariantSelect exposing (variantWidget, variantWidgetInit)
 import Html exposing (Html)
 import Json.Decode as D exposing (Decoder)
@@ -58,6 +58,30 @@ import Tuple
 -}
 type Msg
     = FormMsg FieldId SubfieldId FieldOperation
+    | CustomEvent Value
+
+
+{-| Since all messages in the form have to be serializable to JSON, we just use a JSON
+value for msgs from the app. The dev needs to provide their own en-/decoder.
+It's a bit hacky but having to pass another type and decoders through the forms makes
+everything more complicated.
+-}
+customEvent : Value -> Msg
+customEvent =
+    CustomEvent
+
+
+{-| You can use this function to extract the custom event from the message in your
+update function.
+-}
+getCustomEvent : Msg -> Maybe Value
+getCustomEvent msg =
+    case msg of
+        CustomEvent v ->
+            Just v
+
+        _ ->
+            Nothing
 
 
 {-| Takes the following three arguments to display a form:
@@ -116,8 +140,13 @@ addInvalidIfInconsistent form_ formState errors =
 {-| Updates the form state based on the form message.
 -}
 update : Form a customError -> Msg -> FormState -> FormState
-update form_ (FormMsg fieldId subfieldId op) formState =
-    updateField form_ fieldId subfieldId op formState
+update form_ msg formState =
+    case msg of
+        FormMsg fieldId subfieldId op ->
+            updateField form_ fieldId subfieldId op formState
+
+        CustomEvent _ ->
+            formState
 
 
 updateField : PartialForm a customError data -> FieldId -> SubfieldId -> FieldOperation -> FormState -> FormState
@@ -802,15 +831,15 @@ toWidget f =
         \domId innerAttrs ((FormState model) as fs) ->
             f.fn.view (FormState { model | parentDomId = domId }) (f.validator <| value_ fs)
     , update =
-        \(FormMsg fieldId subfieldId value) model ->
-            updateField f fieldId subfieldId value model |> justChanged
+        \msg model ->
+            case msg of
+                FormMsg fieldId subfieldId value ->
+                    updateField f fieldId subfieldId value model |> justChanged
+
+                CustomEvent _ ->
+                    model |> justChangedInternally
     , encodeMsg = encodeFormMsg
-    , decoderMsg =
-        decoderFormMsg
-            |> D.andThen
-                (\((FormMsg fieldId subfieldId fieldOperation) as m) ->
-                    D.succeed m
-                )
+    , decoderMsg = decoderFormMsg
     , encodeModel = formStateEncode
     , decoderModel = formStateDecoder
     , blur = blurAll
@@ -819,16 +848,32 @@ toWidget f =
 
 
 encodeFormMsg : Msg -> Value
-encodeFormMsg (FormMsg fieldId subfieldId operation) =
-    E.object
-        [ ( "fieldId", E.string fieldId )
-        , ( "subFieldId", encodeSubFieldId subfieldId )
-        , ( "operation", encodeFieldOperation operation )
-        ]
+encodeFormMsg msg =
+    case msg of
+        FormMsg fieldId subfieldId operation ->
+            E.object
+                [ ( "fieldId", E.string fieldId )
+                , ( "subFieldId", encodeSubFieldId subfieldId )
+                , ( "operation", encodeFieldOperation operation )
+                ]
+
+        CustomEvent v ->
+            E.object [ ( "customEvent", v ) ]
 
 
 decoderFormMsg : Decoder Msg
 decoderFormMsg =
+    D.oneOf [ decoderCustomFormMsg, decoderFormMsg_ ]
+
+
+decoderCustomFormMsg : Decoder Msg
+decoderCustomFormMsg =
+    D.map CustomEvent
+        (D.field "customEvent" D.value)
+
+
+decoderFormMsg_ : Decoder Msg
+decoderFormMsg_ =
     D.map3 FormMsg
         (D.field "fieldId" D.string)
         (D.field "subFieldId" decoderSubFieldId)

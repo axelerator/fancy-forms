@@ -2,12 +2,14 @@ module Main exposing (main)
 
 import Browser
 import Examples.Code.Combination as Combination
+import Examples.Code.CustomEvents as CustomEvents
 import Examples.Code.Decoration as Decoration
 import Examples.Code.Lists as Lists
 import Examples.Code.Minimal as Minimal
 import Examples.Code.Validation as Validation
 import Examples.Code.Variants as Variants
 import Examples.Combination as Combination
+import Examples.CustomEvents as CustomEvents
 import Examples.Decoration as Decoration
 import Examples.Lists as Lists
 import Examples.Minimal as Minimal
@@ -36,6 +38,7 @@ type alias Model =
     , combination : Combination.Model
     , lists : Lists.Model
     , variants : Variants.Model
+    , customEvents : CustomEvents.Model
     , expanded : Set String
     }
 
@@ -47,6 +50,7 @@ type Example
     | Combination
     | Lists
     | Variants
+    | CustomEvents
 
 
 exampleAsStr : Example -> String
@@ -70,6 +74,9 @@ exampleAsStr example =
         Variants ->
             "Variants"
 
+        CustomEvents ->
+            "CustomEvents"
+
 
 type Msg
     = ForMinimal Minimal.Msg
@@ -78,6 +85,7 @@ type Msg
     | ForCombination Combination.Msg
     | ForLists Lists.Msg
     | ForVariants Variants.Msg
+    | ForCustomEvents CustomEvents.Msg
     | Toggle Example
 
 
@@ -99,6 +107,7 @@ init _ =
       , combination = Combination.init
       , lists = Lists.init
       , variants = Variants.init
+      , customEvents = CustomEvents.init
       , expanded = Set.empty
       }
     , Cmd.none
@@ -149,7 +158,10 @@ update msg model =
             , Cmd.none
             )
 
-
+        ForCustomEvents subMsg ->
+            ( { model | customEvents = CustomEvents.update subMsg model.customEvents }
+            , Cmd.none
+            )
 
 
 view : Model -> Html Msg
@@ -164,6 +176,7 @@ view model =
         , viewCombination model
         , viewLists model
         , viewVariants model
+        , viewCustomEvents model
         ]
 
 
@@ -240,6 +253,12 @@ examples =
       , range = ( 13, 45 )
       , title = "Variants"
       , subTitle = "Letting the user choose between multiple sub forms"
+      }
+    , { example = CustomEvents
+      , code = CustomEvents.code
+      , range = ( 25, 73 )
+      , title = "Custom events"
+      , subTitle = "Emitting custom events from the form"
       }
     ]
 
@@ -381,6 +400,7 @@ The first argument is the widget that will be used to let the user choose the ki
 In this case we use the `dropdown` widget.
 """ |> Markdown.toHtml []
 
+
 variantsMarkdown2 =
     """
 The next argument provides the default variant. Each variant is a `Tuple` of the label and the sub form.
@@ -399,15 +419,48 @@ viewVariants : Model -> Html Msg
 viewVariants model =
     let
         description =
-            div [] 
-              [ variantsMarkdown1
-              , text "But we could also use the ", small [] [button [onClick <| ForVariants Variants.ToggleSwitcher] [ text "radioButtons"]], text " widget."
-              , variantsMarkdown2
-              ]
+            div []
+                [ variantsMarkdown1
+                , text "But we could also use the "
+                , small [] [ button [ onClick <| ForVariants Variants.ToggleSwitcher ] [ text "radioButtons" ] ]
+                , text " widget."
+                , variantsMarkdown2
+                ]
     in
-
     Variants.view model.variants
         |> viewExample model description ForVariants Variants
+
+
+viewCustomEvents : Model -> Html Msg
+viewCustomEvents model =
+    let
+        description =
+            div []
+                [ customEventsMarkdown
+                ]
+    in
+    CustomEvents.view model.customEvents
+        |> viewExample model description ForCustomEvents CustomEvents
+
+
+customEventsMarkdown =
+    """
+One thing we can't easily do is to send `Msg` from the outside app from __inside__ the form.    
+The way the form widgets can be arbitrarily nested is thal all its messages get serialized to JSON and back.
+
+We can't infer how to do that for message from the outside.
+Instead of adding another type parameter and functions for serializing to the form functions we offer a
+workaround: You can emit a _"custom event"_ with arbitrary JSON data from within the form.
+
+This obviously sacrifices a lot of type safety, but is the best we can do without making the general API
+even more complicated.
+
+The user can use the `getCustomEvent` function during the `update` to extract the custom data.
+These events can even be used to update the content of the form as shown in the following example.
+
+In real life use one should use a symmetric pair of de-/encoders instead of de-/encoding
+in the view/update functions.
+""" |> Markdown.toHtml []
 
 
 viewExample model description toMsg example subView =
