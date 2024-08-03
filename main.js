@@ -6070,6 +6070,9 @@ var $author$project$FancyForms$Form$extractInit = F5(
 		return A4($author$project$FancyForms$FormState$write, fieldId, $author$project$FancyForms$FormState$SingleValue, formState, encodedValue);
 	});
 var $author$project$FancyForms$FormState$Blurred = {$: 'Blurred'};
+var $author$project$FancyForms$Form$CustomEvent = function (a) {
+	return {$: 'CustomEvent', a: a};
+};
 var $author$project$FancyForms$Form$FormMsg = F3(
 	function (a, b, c) {
 		return {$: 'FormMsg', a: a, b: b, c: c};
@@ -6077,6 +6080,9 @@ var $author$project$FancyForms$Form$FormMsg = F3(
 var $author$project$FancyForms$FormState$Update = function (a) {
 	return {$: 'Update', a: a};
 };
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$FancyForms$Form$customEventDecoder = A2($elm$json$Json$Decode$field, 'customEvent', $elm$json$Json$Decode$value);
 var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
 var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
 var $elm$core$Maybe$map = F2(
@@ -6190,11 +6196,17 @@ var $author$project$FancyForms$Form$mkField = F3(
 			var widgetModel = deserializeModel(formState);
 			var toMsg = function (msg) {
 				return function (v) {
-					return A3(
-						$author$project$FancyForms$Form$FormMsg,
-						fieldId,
-						$author$project$FancyForms$FormState$SingleValue,
-						$author$project$FancyForms$FormState$Update(v));
+					var _v0 = A2($elm$json$Json$Decode$decodeValue, $author$project$FancyForms$Form$customEventDecoder, v);
+					if (_v0.$ === 'Ok') {
+						var cev = _v0.a;
+						return $author$project$FancyForms$Form$CustomEvent(cev);
+					} else {
+						return A3(
+							$author$project$FancyForms$Form$FormMsg,
+							fieldId,
+							$author$project$FancyForms$FormState$SingleValue,
+							$author$project$FancyForms$FormState$Update(v));
+					}
 				}(
 					widget.encodeMsg(msg));
 			};
@@ -6374,7 +6386,6 @@ var $author$project$FancyForms$Widgets$Int$Model = F2(
 	});
 var $elm$json$Json$Decode$andThen = _Json_andThen;
 var $elm$json$Json$Decode$fail = _Json_fail;
-var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Decode$oneOf = _Json_oneOf;
 var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$FancyForms$Widgets$Int$decoderMsg = $elm$json$Json$Decode$oneOf(
@@ -6717,10 +6728,6 @@ var $author$project$Examples$Validation$myForm = A3(
 								})
 						};
 					})))));
-var $author$project$FancyForms$Form$CustomEvent = function (a) {
-	return {$: 'CustomEvent', a: a};
-};
-var $elm$json$Json$Decode$value = _Json_decodeValue;
 var $author$project$FancyForms$Form$decoderCustomFormMsg = A2(
 	$elm$json$Json$Decode$map,
 	$author$project$FancyForms$Form$CustomEvent,
@@ -7501,12 +7508,18 @@ var $author$project$FancyForms$Form$mkListField = F5(
 					return A2(
 						$elm$html$Html$map,
 						function (msg) {
-							return A3(
-								$author$project$FancyForms$Form$FormMsg,
-								fieldId,
-								$author$project$FancyForms$FormState$ArrayElement(i),
-								$author$project$FancyForms$FormState$Update(
-									widget.encodeMsg(msg)));
+							var encoded = widget.encodeMsg(msg);
+							var _v0 = A2($elm$json$Json$Decode$decodeValue, $author$project$FancyForms$Form$customEventDecoder, encoded);
+							if (_v0.$ === 'Ok') {
+								var cev = _v0.a;
+								return $author$project$FancyForms$Form$CustomEvent(cev);
+							} else {
+								return A3(
+									$author$project$FancyForms$Form$FormMsg,
+									fieldId,
+									$author$project$FancyForms$FormState$ArrayElement(i),
+									$author$project$FancyForms$FormState$Update(encoded));
+							}
 						},
 						html);
 				});
